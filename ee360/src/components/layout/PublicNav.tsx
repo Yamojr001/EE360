@@ -23,7 +23,7 @@ export default function PublicNav() {
           <div className="w-8 h-8 gradient-primary rounded-xl flex items-center justify-center shadow-sm">
             <span className="text-white font-extrabold text-[11px]">360</span>
           </div>
-          <span className="font-bold text-base">EE360</span>
+          <span className="font-bold text-base">EE FARM 360</span>
         </Link>
 
         {/* Desktop links */}
