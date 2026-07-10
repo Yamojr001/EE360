@@ -125,10 +125,7 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <p className="mt-6 text-center text-xs text-muted-foreground">
-            Demo: <code className="bg-muted px-1 rounded">admin@ee360.farm</code>{' '}
-            / <code className="bg-muted px-1 rounded">password</code>
-          </p>
+         
         </div>
       </div>
     </div>
