@@ -1,17 +1,19 @@
 {
     "name": "ee360/farm-api",
     "description": "EE360 Farm Management API – Laravel 11",
-    "keywords": ["laravel", "farm", "api"],
+    "keywords": [
+        "laravel",
+        "farm",
+        "api"
+    ],
     "license": "MIT",
     "require": {
         "php": "^8.2",
         "laravel/framework": "^11.0",
-        "laravel/sanctum": "^4.0",
-        "fruitcake/laravel-cors": "^3.0"
+        "laravel/sanctum": "^4.0"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
-        "laravel/pint": "^1.13",
         "laravel/sail": "^1.26",
         "mockery/mockery": "^1.6",
         "nunomaduro/collision": "^8.1",
