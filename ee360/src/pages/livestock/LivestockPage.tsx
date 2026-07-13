@@ -147,7 +147,7 @@ export default function LivestockPage() {
         {ANIMAL_TYPES.filter(t => t !== 'all').map(t => (
           <Card key={t} className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setTab(t)}>
             <CardContent className="p-4 text-center">
-              <div className="text-2xl mb-1">{TYPE_EMOJI[t]}</div>
+              {/* <div className="text-2xl mb-1">{TYPE_EMOJI[t]}</div> */}
               <div className="text-xl font-bold">{counts[t]}</div>
               <div className="text-xs text-muted-foreground capitalize">{t}s</div>
             </CardContent>
