@@ -94,11 +94,11 @@ export default function ExpensesPage() {
     return matchCat && matchSearch;
   });
 
-  const total = filtered.reduce((s, e) => s + e.amount, 0);
+  const total = filtered.reduce((s, e) => s + Number(e.amount), 0);
 
   // Pie chart data
   const pieData = CATEGORIES.map((c, i) => ({
-    name: c, value: expenses.filter(e => e.category === c).reduce((s, e) => s + e.amount, 0), fill: CAT_COLORS[i],
+    name: c, value: expenses.filter(e => e.category === c).reduce((s, e) => s + Number(e.amount), 0), fill: CAT_COLORS[i],
   })).filter(d => d.value > 0);
 
   return (
@@ -121,7 +121,7 @@ export default function ExpensesPage() {
             </CardContent></Card>
             <Card><CardContent className="p-4">
               <p className="text-xs text-muted-foreground mb-1">This Month</p>
-              <p className="text-2xl font-bold">{formatCurrency(expenses.filter(e => new Date(e.date).getMonth() === new Date().getMonth()).reduce((s, e) => s + e.amount, 0))}</p>
+              <p className="text-2xl font-bold">{formatCurrency(expenses.filter(e => new Date(e.date).getMonth() === new Date().getMonth()).reduce((s, e) => s + Number(e.amount), 0))}</p>
             </CardContent></Card>
             <Card><CardContent className="p-4">
               <p className="text-xs text-muted-foreground mb-1">Entries</p>

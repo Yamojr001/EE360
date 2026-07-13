@@ -81,7 +81,7 @@ export default function WorkersPage() {
 
   const filtered = workers.filter(w => !search || w.name.toLowerCase().includes(search.toLowerCase()) || w.role.toLowerCase().includes(search.toLowerCase()));
   const active = workers.filter(w => w.status === 'active').length;
-  const totalSalary = workers.filter(w => w.status === 'active').reduce((s, w) => s + w.salary, 0);
+  const totalSalary = workers.filter(w => w.status === 'active').reduce((s, w) => s + Number(w.salary), 0);
 
   return (
     <div className="space-y-6">

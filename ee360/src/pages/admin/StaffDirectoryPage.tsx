@@ -72,7 +72,7 @@ export default function StaffDirectoryPage() {
 
   const farmCount  = workers.filter(w => w.sector === 'farm'  && w.status === 'active').length;
   const waterCount = workers.filter(w => w.sector === 'water' && w.status === 'active').length;
-  const totalPayroll = workers.filter(w => w.status === 'active').reduce((a, w) => a + w.salary, 0);
+  const totalPayroll = workers.filter(w => w.status === 'active').reduce((a, w) => a + Number(w.salary), 0);
 
   return (
     <div className="space-y-6">

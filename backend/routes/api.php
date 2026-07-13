@@ -27,6 +27,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Dashboard
     Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
+    Route::get('/dashboard/farm-summary', [DashboardController::class, 'farmSummary']);
+    Route::get('/dashboard/super-summary', [DashboardController::class, 'superSummary']);
 
     // Livestock (CRUD)
     Route::apiResource('livestock', AnimalController::class);

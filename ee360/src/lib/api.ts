@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-// Set VITE_API_URL to your Laravel backend URL in production.
-const BASE_URL = 'http://127.0.0.1:8000'
+const BASE_URL = 'http://127.0.0.1:8000/api'
 
 export const api = axios.create({
   baseURL: BASE_URL,

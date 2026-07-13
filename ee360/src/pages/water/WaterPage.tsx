@@ -74,9 +74,9 @@ export default function WaterPage() {
   const delProd = useMutation({ mutationFn: (id: number) => api.delete(`/water/production/${id}`), onSuccess: () => qc.invalidateQueries({ queryKey: ['water-production'] }) });
   const delSale = useMutation({ mutationFn: (id: number) => api.delete(`/water/sales/${id}`), onSuccess: () => qc.invalidateQueries({ queryKey: ['water-sales'] }) });
 
-  const totalBags = production.reduce((s, p) => s + p.bags_produced, 0);
-  const totalRevenue = waterSales.reduce((s, s2) => s + s2.total_amount, 0);
-  const totalCost = production.reduce((s, p) => s + p.cost, 0);
+  const totalBags = production.reduce((s, p) => s + Number(p.bags_produced), 0);
+  const totalRevenue = waterSales.reduce((s, s2) => s + Number(s2.total_amount), 0);
+  const totalCost = production.reduce((s, p) => s + Number(p.cost), 0);
 
   const chartData = production.slice(-7).map(p => ({ date: formatDate(p.date), bags: p.bags_produced }));
 

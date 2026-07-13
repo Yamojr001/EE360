@@ -10,12 +10,30 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        User::firstOrCreate(
+        User::updateOrCreate(
             ['email' => 'admin@ee360.farm'],
             [
                 'name'     => 'Farm Administrator',
                 'password' => Hash::make('password'),
-                'role'     => 'admin',
+                'role'     => 'super_admin',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'farm@ee360.farm'],
+            [
+                'name'     => 'Farm Manager',
+                'password' => Hash::make('password'),
+                'role'     => 'farm_manager',
+            ]
+        );
+
+        User::updateOrCreate(
+            ['email' => 'water@ee360.farm'],
+            [
+                'name'     => 'Water Manager',
+                'password' => Hash::make('password'),
+                'role'     => 'water_manager',
             ]
         );
     }

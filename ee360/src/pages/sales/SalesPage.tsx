@@ -109,8 +109,8 @@ export default function SalesPage() {
     return matchCat && matchSearch;
   });
 
-  const total = filtered.reduce((sum, s) => sum + s.total_amount, 0);
-  const thisMonth = sales.filter(s => new Date(s.date).getMonth() === new Date().getMonth()).reduce((sum, s) => sum + s.total_amount, 0);
+  const total = filtered.reduce((sum, s) => sum + Number(s.total_amount), 0);
+  const thisMonth = sales.filter(s => new Date(s.date).getMonth() === new Date().getMonth()).reduce((sum, s) => sum + Number(s.total_amount), 0);
 
   return (
     <div className="space-y-6">
