@@ -24,10 +24,7 @@ const STATUS_COLOR: Record<string, string> = {
   deceased: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
 };
 
-const TYPE_EMOJI: Record<string, string> = {
-  chicken: '🐔', goat: '🐐', sheep: '🐑', ram: '🐏',
-  rabbit: '🐇', fish: '🐟', parrot: '🦜',
-};
+
 
 interface Animal {
   id: number; tag_id: string; type: string; breed: string;
@@ -47,7 +44,7 @@ function AnimalForm({ initial, onSave, onClose }: { initial?: Partial<Animal>; o
           <Select value={form.type} onValueChange={v => set('type', v)}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              {ANIMAL_TYPES.filter(t => t !== 'all').map(t => <SelectItem key={t} value={t}>{TYPE_EMOJI[t]} {capitalize(t)}</SelectItem>)}
+              {ANIMAL_TYPES.filter(t => t !== 'all').map(t => <SelectItem key={t} value={t}>{capitalize(t)}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -147,7 +144,7 @@ export default function LivestockPage() {
         {ANIMAL_TYPES.filter(t => t !== 'all').map(t => (
           <Card key={t} className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => setTab(t)}>
             <CardContent className="p-4 text-center">
-              {/* <div className="text-2xl mb-1">{TYPE_EMOJI[t]}</div> */}
+
               <div className="text-xl font-bold">{counts[t]}</div>
               <div className="text-xs text-muted-foreground capitalize">{t}s</div>
             </CardContent>
@@ -160,7 +157,7 @@ export default function LivestockPage() {
           <TabsList className="flex-wrap h-auto gap-1">
             {ANIMAL_TYPES.map(t => (
               <TabsTrigger key={t} value={t} className="gap-1">
-                {t !== 'all' && TYPE_EMOJI[t]} {capitalize(t)}
+                {capitalize(t)}
                 <span className="text-xs opacity-60 ml-0.5">({counts[t]})</span>
               </TabsTrigger>
             ))}
@@ -190,7 +187,7 @@ export default function LivestockPage() {
                     <CardContent className="p-5">
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center gap-2">
-                          <span className="text-2xl">{TYPE_EMOJI[a.type] ?? '🐾'}</span>
+
                           <div>
                             <p className="font-semibold text-sm">{a.tag_id || capitalize(a.type)}</p>
                             <p className="text-xs text-muted-foreground">{a.breed}</p>

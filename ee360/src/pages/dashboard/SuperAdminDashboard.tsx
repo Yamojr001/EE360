@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import { formatCurrency } from '@/lib/utils';
@@ -7,6 +8,9 @@ import {
 } from 'recharts';
 import { TrendingUp, TrendingDown, Users, Bird, Droplets, Layers, ArrowUpRight, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import FarmDashboard from './FarmDashboard';
+import WaterDashboard from './WaterDashboard';
 
 const COLORS = ['oklch(0.52 0.18 175)', 'oklch(0.58 0.18 220)', 'oklch(0.62 0.18 140)', 'oklch(0.55 0.18 290)'];
 
@@ -29,9 +33,12 @@ function KpiCard({ label, value, icon, change, positive, color }: any) {
 }
 
 export default function SuperAdminDashboard() {
+  const [fromDate, setFromDate] = useState(() => new Date().toISOString().split('T')[0]);
+  const [toDate, setToDate] = useState(() => new Date().toISOString().split('T')[0]);
+
   const { data, isLoading } = useQuery({
-    queryKey: ['super-summary'],
-    queryFn: () => api.get('/dashboard/super-summary').then(r => r.data),
+    queryKey: ['super-summary', fromDate, toDate],
+    queryFn: () => api.get('/dashboard/super-summary', { params: { from: fromDate, to: toDate } }).then(r => r.data),
     refetchInterval: 30000,
   });
 
@@ -47,17 +54,34 @@ export default function SuperAdminDashboard() {
   const d = data ?? {};
 
   return (
-    <div className="space-y-6">
+    <Tabs defaultValue="both" className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-2">
-        <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center">
-          <Layers className="w-5 h-5 text-white" />
+      <div className="flex items-center justify-between mb-2 flex-wrap gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center">
+            <Layers className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-extrabold text-foreground">Command Centre</h1>
+            <p className="text-sm text-muted-foreground">All sectors · Real-time overview</p>
+          </div>
         </div>
-        <div>
-          <h1 className="text-2xl font-extrabold text-foreground">Command Centre</h1>
-          <p className="text-sm text-muted-foreground">All sectors · Real-time overview</p>
+        <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-1.5">
+            <span className="text-sm text-muted-foreground font-medium">From:</span>
+            <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="bg-transparent text-sm font-medium outline-none text-foreground" />
+            <span className="text-sm text-muted-foreground font-medium ml-1">To:</span>
+            <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="bg-transparent text-sm font-medium outline-none text-foreground" />
+          </div>
+          <TabsList>
+            <TabsTrigger value="both">Combined</TabsTrigger>
+            <TabsTrigger value="farm">Farm Only</TabsTrigger>
+            <TabsTrigger value="water">Water Only</TabsTrigger>
+          </TabsList>
         </div>
       </div>
+
+      <TabsContent value="both" className="space-y-6 mt-0">
 
       {/* KPI Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -172,6 +196,15 @@ export default function SuperAdminDashboard() {
           ))}
         </div>
       </div>
-    </div>
+      </TabsContent>
+
+      <TabsContent value="farm" className="mt-0">
+        <FarmDashboard />
+      </TabsContent>
+
+      <TabsContent value="water" className="mt-0">
+        <WaterDashboard />
+      </TabsContent>
+    </Tabs>
   );
 }

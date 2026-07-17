@@ -20,10 +20,10 @@ const CAT_COLOR: Record<string, string> = {
   feed: 'bg-purple-100 text-purple-800', other: 'bg-gray-100 text-gray-800',
 };
 
-interface Sale { id: number; date: string; category: string; item: string; quantity: number; unit: string; unit_price: number; total_amount: number; buyer: string; notes: string; }
+interface Sale { id: number; date: string; category: string; item: string; quantity: number; unit: string; unit_price: number; total_amount: number; buyer: string; notes: string; payment_method: string; payment_status: string; }
 
 function SaleForm({ onSave, onClose }: { onSave: (d: any) => void; onClose: () => void }) {
-  const [form, setForm] = useState({ date: new Date().toISOString().split('T')[0], category: 'livestock', item: '', quantity: 1, unit: 'unit', unit_price: 0, total_amount: 0, buyer: '', notes: '' });
+  const [form, setForm] = useState({ date: new Date().toISOString().split('T')[0], category: 'livestock', item: '', quantity: 1, unit: 'unit', unit_price: 0, total_amount: 0, buyer: '', notes: '', payment_method: 'Cash', payment_status: 'Paid' });
   const set = (k: string, v: any) => setForm(p => {
     const next = { ...p, [k]: v };
     if (k === 'quantity' || k === 'unit_price') next.total_amount = next.quantity * next.unit_price;
@@ -68,6 +68,27 @@ function SaleForm({ onSave, onClose }: { onSave: (d: any) => void; onClose: () =
           <Label>Buyer Name</Label>
           <Input value={form.buyer} onChange={e => set('buyer', e.target.value)} placeholder="Customer name" />
         </div>
+        <div className="space-y-1.5">
+          <Label>Payment Method</Label>
+          <Select value={form.payment_method} onValueChange={v => set('payment_method', v)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Cash">Cash</SelectItem>
+              <SelectItem value="Transfer">Transfer</SelectItem>
+              <SelectItem value="POS">POS</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Payment Status</Label>
+          <Select value={form.payment_status} onValueChange={v => set('payment_status', v)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Paid">Paid</SelectItem>
+              <SelectItem value="Credit">Credit (Unpaid)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       <div className="space-y-1.5">
         <Label>Notes</Label>
@@ -111,6 +132,11 @@ export default function SalesPage() {
 
   const total = filtered.reduce((sum, s) => sum + Number(s.total_amount), 0);
   const thisMonth = sales.filter(s => new Date(s.date).getMonth() === new Date().getMonth()).reduce((sum, s) => sum + Number(s.total_amount), 0);
+  
+  const cashTotal = filtered.filter(s => s.payment_method === 'Cash').reduce((sum, s) => sum + Number(s.total_amount), 0);
+  const transferTotal = filtered.filter(s => s.payment_method === 'Transfer').reduce((sum, s) => sum + Number(s.total_amount), 0);
+  const posTotal = filtered.filter(s => s.payment_method === 'POS').reduce((sum, s) => sum + Number(s.total_amount), 0);
+  const creditTotal = filtered.filter(s => s.payment_status === 'Credit').reduce((sum, s) => sum + Number(s.total_amount), 0);
 
   return (
     <div className="space-y-6">
@@ -123,23 +149,31 @@ export default function SalesPage() {
       </div>
 
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
-            <p className="text-muted-foreground text-xs mb-1">Total Revenue (filtered)</p>
-            <p className="text-2xl font-bold text-green-600">{formatCurrency(total)}</p>
+            <p className="text-muted-foreground text-xs mb-1">Total Revenue</p>
+            <p className="text-xl font-bold text-green-600">{formatCurrency(total)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-muted-foreground text-xs mb-1">This Month</p>
-            <p className="text-2xl font-bold">{formatCurrency(thisMonth)}</p>
+            <p className="text-muted-foreground text-xs mb-1">Cash / Transfer / POS</p>
+            <p className="text-sm font-bold mt-1 text-muted-foreground">
+              {formatCurrency(cashTotal)} / {formatCurrency(transferTotal)} / {formatCurrency(posTotal)}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-muted-foreground text-xs mb-1">On Credit (Unpaid)</p>
+            <p className="text-xl font-bold text-orange-500">{formatCurrency(creditTotal)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-muted-foreground text-xs mb-1">Transactions</p>
-            <p className="text-2xl font-bold">{filtered.length}</p>
+            <p className="text-xl font-bold">{filtered.length}</p>
           </CardContent>
         </Card>
       </div>
@@ -166,7 +200,7 @@ export default function SalesPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-muted/40">
-                  {['Date', 'Category', 'Item', 'Qty', 'Unit Price', 'Total', 'Buyer', ''].map(h => (
+                  {['Date', 'Category', 'Item', 'Qty', 'Total', 'Buyer', 'Payment', 'Status', ''].map(h => (
                     <th key={h} className="text-left px-4 py-3 font-medium text-muted-foreground text-xs">{h}</th>
                   ))}
                 </tr>
@@ -187,9 +221,14 @@ export default function SalesPage() {
                     <td className="px-4 py-3"><span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${CAT_COLOR[s.category] ?? CAT_COLOR.other}`}>{s.category}</span></td>
                     <td className="px-4 py-3 font-medium">{s.item}</td>
                     <td className="px-4 py-3">{s.quantity} {s.unit}</td>
-                    <td className="px-4 py-3 text-muted-foreground">₦{s.unit_price?.toLocaleString()}</td>
                     <td className="px-4 py-3 font-semibold text-green-600">{formatCurrency(s.total_amount)}</td>
                     <td className="px-4 py-3 text-muted-foreground">{s.buyer || '—'}</td>
+                    <td className="px-4 py-3 text-xs">{s.payment_method || '—'}</td>
+                    <td className="px-4 py-3">
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.payment_status === 'Credit' ? 'bg-orange-100 text-orange-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                        {s.payment_status || 'Paid'}
+                      </span>
+                    </td>
                     <td className="px-4 py-3">
                       <button onClick={() => { if (confirm('Delete this sale?')) deleteMut.mutate(s.id); }} className="text-muted-foreground hover:text-destructive transition-colors">
                         <Trash2 className="w-4 h-4" />

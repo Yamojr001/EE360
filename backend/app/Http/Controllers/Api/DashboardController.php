@@ -9,6 +9,8 @@ use App\Models\Expense;
 use App\Models\InventoryItem;
 use App\Models\Worker;
 use App\Models\WaterSale;
+use App\Models\WaterExpense;
+use App\Models\WaterProduction;
 use Illuminate\Support\Carbon;
 
 class DashboardController extends Controller
@@ -104,18 +106,82 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function superSummary()
+    public function waterSummary()
     {
         $now       = Carbon::now();
         $thisMonth = $now->format('Y-m');
 
-        $farmRev = (float) Sale::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('total_amount');
-        $farmExp = (float) Expense::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('amount');
-        $farmNet = $farmRev - $farmExp;
+        $rev = (float) WaterSale::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('total_amount');
+        $exp = (float) WaterExpense::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('amount');
+        $prodCost = (float) WaterProduction::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('cost');
 
-        // Assuming WaterSale represents Water revenue and there are no specific Water expenses for now
-        $waterRev = (float) WaterSale::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('total_amount');
-        $waterExp = 0;
+        $totalExp = $exp + $prodCost;
+
+        $totalBagsProduced = (int) WaterProduction::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('bags_produced');
+        $totalBagsSold = (int) WaterSale::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('quantity');
+
+        $productionChart = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $m   = $now->copy()->subMonths($i)->format('Y-m');
+            $mon = $now->copy()->subMonths($i)->format('M');
+            $productionChart[] = [
+                'month'    => $mon,
+                'produced' => (int) WaterProduction::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$m])->sum('bags_produced'),
+                'sold'     => (int) WaterSale::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$m])->sum('quantity'),
+            ];
+        }
+
+        $salesByArea = WaterSale::selectRaw('distribution_area as area, SUM(total_amount) as total')
+            ->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])
+            ->whereNotNull('distribution_area')
+            ->where('distribution_area', '!=', '')
+            ->groupBy('distribution_area')
+            ->get();
+
+        $recentProduction = WaterProduction::orderByDesc('date')->limit(5)->get()->map(function ($p) {
+            return [
+                'id' => $p->id,
+                'date' => $p->date->format('Y-m-d'),
+                'bags_produced' => $p->bags_produced,
+                'liters_used' => $p->liters_used,
+                'cost' => $p->cost,
+                'notes' => $p->notes,
+            ];
+        });
+
+        return response()->json([
+            'revenue'           => $rev,
+            'expenses'          => $totalExp,
+            'netProfit'         => $rev - $totalExp,
+            'totalBagsProduced' => $totalBagsProduced,
+            'totalBagsSold'     => $totalBagsSold,
+            'productionChart'   => $productionChart,
+            'salesByArea'       => $salesByArea,
+            'recentProduction'  => $recentProduction,
+        ]);
+    }
+
+    public function superSummary(\Illuminate\Http\Request $request)
+    {
+        $now       = Carbon::now();
+        $thisMonth = $now->format('Y-m');
+
+        $from = $request->query('from');
+        $to = $request->query('to');
+
+        if ($from && $to) {
+            $farmRev = (float) Sale::whereBetween('date', [$from, $to])->sum('total_amount');
+            $farmExp = (float) Expense::whereBetween('date', [$from, $to])->sum('amount');
+            $waterRev = (float) WaterSale::whereBetween('date', [$from, $to])->sum('total_amount');
+            $waterExp = (float) WaterExpense::whereBetween('date', [$from, $to])->sum('amount');
+        } else {
+            $farmRev = (float) Sale::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('total_amount');
+            $farmExp = (float) Expense::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('amount');
+            $waterRev = (float) WaterSale::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('total_amount');
+            $waterExp = (float) WaterExpense::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('amount');
+        }
+
+        $farmNet = $farmRev - $farmExp;
         $waterNet = $waterRev - $waterExp;
 
         $totalRev = $farmRev + $waterRev;
@@ -154,7 +220,15 @@ class DashboardController extends Controller
         ];
 
         // Combine recent activity from Farm and Water
-        $recentFarm = Sale::orderByDesc('date')->limit(3)->get()->map(function ($s) {
+        $recentFarmQuery = Sale::orderByDesc('date');
+        $recentWaterQuery = WaterSale::orderByDesc('date');
+
+        if ($from && $to) {
+            $recentFarmQuery->whereBetween('date', [$from, $to]);
+            $recentWaterQuery->whereBetween('date', [$from, $to]);
+        }
+
+        $recentFarm = $recentFarmQuery->limit(3)->get()->map(function ($s) {
             return [
                 'desc'   => 'Sale: ' . $s->item,
                 'sector' => 'Farm',
@@ -163,7 +237,7 @@ class DashboardController extends Controller
             ];
         });
 
-        $recentWater = WaterSale::orderByDesc('date')->limit(3)->get()->map(function ($s) {
+        $recentWater = $recentWaterQuery->limit(3)->get()->map(function ($s) {
             return [
                 'desc'   => 'Water Sale to ' . $s->buyer,
                 'sector' => 'Water',

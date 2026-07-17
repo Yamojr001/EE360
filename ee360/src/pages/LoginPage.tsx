@@ -34,54 +34,25 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex bg-background">
       {/* Left panel */}
-      <div className="hidden lg:flex flex-col justify-between w-[45%] gradient-primary p-12 text-white">
-        <Link href="/" className="flex items-center gap-2.5 w-fit">
-          <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
-            <span className="font-extrabold text-sm">360</span>
-          </div>
-          <span className="font-bold text-xl">EE360</span>
-        </Link>
-
-        <div>
-          <blockquote className="text-3xl font-bold leading-snug mb-4">
-            "Manage every part of your farm — from animals to finances — in one powerful platform."
-          </blockquote>
-          <p className="text-white/70 text-sm">EE360 Farm Management System</p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          {[
-            { label: 'Livestock Types', value: '7+' },
-            { label: 'Reports Generated', value: '∞' },
-            { label: 'Uptime', value: '99.9%' },
-            { label: 'Built For', value: 'Nigerian Farms' },
-          ].map(s => (
-            <div key={s.label} className="bg-white/10 rounded-xl p-4">
-              <p className="text-2xl font-bold">{s.value}</p>
-              <p className="text-white/70 text-xs mt-1">{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <div 
+        className="hidden lg:block w-[45%] bg-cover bg-center"
+        style={{ backgroundImage: `url('/Gate.png')` }}
+      />
 
       {/* Right panel */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
+      <div className="flex-1 flex flex-col items-center justify-center p-8 relative">
+        <div className="absolute top-8 left-8">
           <Link
             href="/"
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-8 transition-colors"
+            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> Back to home
           </Link>
+        </div>
 
-          <div className="mb-8">
-            {/* Mobile logo */}
-            <div className="lg:hidden flex items-center gap-2.5 mb-6">
-              <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center">
-                <span className="font-extrabold text-sm text-white">360</span>
-              </div>
-              <span className="font-bold text-xl">EE360</span>
-            </div>
+        <div className="w-full max-w-md">
+          <div className="flex flex-col items-center text-center mb-8">
+            <img src="/FarmLogo.png" alt="EEFarm360 logo" className="h-32 w-auto object-contain mb-6" />
             <h2 className="text-3xl font-bold text-foreground">Sign in</h2>
             <p className="text-muted-foreground mt-1">Access your farm management dashboard</p>
           </div>

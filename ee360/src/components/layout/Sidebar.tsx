@@ -11,13 +11,13 @@ import { useAuth } from '@/contexts/auth-context';
 interface NavItem { label: string; href: string; icon: React.ReactNode; }
 
 const FARM_NAV: NavItem[] = [
-  { label: 'Farm Dashboard', href: '/dashboard',            icon: <LayoutDashboard className="w-4 h-4" /> },
-  { label: 'Livestock',      href: '/dashboard/livestock',  icon: <Bird className="w-4 h-4" /> },
-  { label: 'Farm Sales',     href: '/dashboard/sales',      icon: <ShoppingCart className="w-4 h-4" /> },
-  { label: 'Farm Expenses',  href: '/dashboard/expenses',   icon: <Wallet className="w-4 h-4" /> },
-  { label: 'Inventory',      href: '/dashboard/inventory',  icon: <Package className="w-4 h-4" /> },
-  { label: 'Farm Workers',   href: '/dashboard/workers',    icon: <Users className="w-4 h-4" /> },
-  { label: 'Reports',        href: '/dashboard/reports',    icon: <BarChart3 className="w-4 h-4" /> },
+  // { label: 'Farm Dashboard', href: '/dashboard',            icon: <LayoutDashboard className="w-4 h-4" /> },
+  // { label: 'Livestock',      href: '/dashboard/livestock',  icon: <Bird className="w-4 h-4" /> },
+  // { label: 'Farm Sales',     href: '/dashboard/sales',      icon: <ShoppingCart className="w-4 h-4" /> },
+  // { label: 'Farm Expenses',  href: '/dashboard/expenses',   icon: <Wallet className="w-4 h-4" /> },
+  // { label: 'Inventory',      href: '/dashboard/inventory',  icon: <Package className="w-4 h-4" /> },
+  // { label: 'Farm Workers',   href: '/dashboard/workers',    icon: <Users className="w-4 h-4" /> },
+  // { label: 'Reports',        href: '/dashboard/reports',    icon: <BarChart3 className="w-4 h-4" /> },
 ];
 
 const WATER_NAV: NavItem[] = [
@@ -38,10 +38,10 @@ const SUPER_ADMIN_NAV: { section: string; items: NavItem[] }[] = [
   {
     section: 'Farm Sector',
     items: [
-      { label: 'Livestock',     href: '/dashboard/livestock', icon: <Bird className="w-4 h-4" /> },
-      { label: 'Farm Sales',    href: '/dashboard/sales',     icon: <ShoppingCart className="w-4 h-4" /> },
-      { label: 'Farm Expenses', href: '/dashboard/expenses',  icon: <Wallet className="w-4 h-4" /> },
-      { label: 'Inventory',     href: '/dashboard/inventory', icon: <Package className="w-4 h-4" /> },
+      // { label: 'Livestock',     href: '/dashboard/livestock', icon: <Bird className="w-4 h-4" /> },
+      // { label: 'Farm Sales',    href: '/dashboard/sales',     icon: <ShoppingCart className="w-4 h-4" /> },
+      // { label: 'Farm Expenses', href: '/dashboard/expenses',  icon: <Wallet className="w-4 h-4" /> },
+      // { label: 'Inventory',     href: '/dashboard/inventory', icon: <Package className="w-4 h-4" /> },
     ],
   },
   {
@@ -111,18 +111,16 @@ export default function Sidebar() {
       <div className="h-14 flex items-center justify-between px-3 border-b border-sidebar-border">
         {!collapsed && (
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 gradient-primary rounded-lg flex items-center justify-center shadow-sm">
-              <span className="text-white font-bold text-[10px]">360</span>
-            </div>
+            <img src="/FarmLogo.png" alt="EEFarm360 Logo" className="h-8 w-auto object-contain" />
             <div>
-              <p className="font-bold text-sidebar-foreground text-sm leading-none">EE360</p>
+              <p className="font-bold text-sidebar-foreground text-sm leading-none">EEFarm360</p>
               <p className="text-[10px] text-muted-foreground leading-none mt-0.5">Farm System</p>
             </div>
           </div>
         )}
         {collapsed && (
-          <div className="w-7 h-7 gradient-primary rounded-lg flex items-center justify-center mx-auto">
-            <span className="text-white font-bold text-[10px]">360</span>
+          <div className="mx-auto flex items-center justify-center">
+            <img src="/FarmLogo.png" alt="EEFarm360 Logo" className="h-8 w-auto object-contain" />
           </div>
         )}
         <button

@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\InventoryController;
 use App\Http\Controllers\Api\WorkerController;
 use App\Http\Controllers\Api\WaterProductionController;
 use App\Http\Controllers\Api\WaterSaleController;
+use App\Http\Controllers\Api\WaterExpenseController;
 use App\Http\Controllers\Api\ReportController;
 
 /*
@@ -28,6 +29,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Dashboard
     Route::get('/dashboard/summary', [DashboardController::class, 'summary']);
     Route::get('/dashboard/farm-summary', [DashboardController::class, 'farmSummary']);
+    Route::get('/dashboard/water-summary', [DashboardController::class, 'waterSummary']);
     Route::get('/dashboard/super-summary', [DashboardController::class, 'superSummary']);
 
     // Livestock (CRUD)
@@ -53,6 +55,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/water/sales',           [WaterSaleController::class, 'index']);
     Route::post('/water/sales',          [WaterSaleController::class, 'store']);
     Route::delete('/water/sales/{id}',   [WaterSaleController::class, 'destroy']);
+
+    Route::get('/water/expenses',        [WaterExpenseController::class, 'index']);
+    Route::post('/water/expenses',       [WaterExpenseController::class, 'store']);
+    Route::delete('/water/expenses/{id}', [WaterExpenseController::class, 'destroy']);
 
     // Reports
     Route::get('/reports/summary', [ReportController::class, 'summary']);
