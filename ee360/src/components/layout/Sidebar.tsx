@@ -13,6 +13,7 @@ interface NavItem { label: string; href: string; icon: React.ReactNode; }
 const FARM_NAV: NavItem[] = [
   { label: 'Farm Dashboard', href: '/dashboard',            icon: <LayoutDashboard className="w-4 h-4" /> },
   { label: 'Livestock',      href: '/dashboard/livestock',  icon: <Bird className="w-4 h-4" /> },
+  { label: 'Daily Production',href: '/dashboard/production', icon: <Layers className="w-4 h-4" /> },
   { label: 'Farm Sales',     href: '/dashboard/sales',      icon: <ShoppingCart className="w-4 h-4" /> },
   { label: 'Farm Expenses',  href: '/dashboard/expenses',   icon: <Wallet className="w-4 h-4" /> },
   { label: 'Inventory',      href: '/dashboard/inventory',  icon: <Package className="w-4 h-4" /> },
@@ -44,6 +45,7 @@ const SUPER_ADMIN_NAV: { section: string; items: NavItem[] }[] = [
     section: 'Farm Sector',
     items: [
       { label: 'Livestock',     href: '/dashboard/livestock', icon: <Bird className="w-4 h-4" /> },
+      { label: 'Daily Production',href: '/dashboard/production', icon: <Layers className="w-4 h-4" /> },
       { label: 'Farm Sales',    href: '/dashboard/sales',     icon: <ShoppingCart className="w-4 h-4" /> },
       { label: 'Farm Expenses', href: '/dashboard/expenses',  icon: <Wallet className="w-4 h-4" /> },
       { label: 'Inventory',     href: '/dashboard/inventory', icon: <Package className="w-4 h-4" /> },

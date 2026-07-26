@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\WaterSaleController;
 use App\Http\Controllers\Api\WaterExpenseController;
 use App\Http\Controllers\Api\VendorController;
 use App\Http\Controllers\Api\AnimalCategoryController;
+use App\Http\Controllers\Api\FarmProductionController;
 use App\Http\Controllers\Api\ReportController;
 
 /*
@@ -60,6 +61,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/water/production',      [WaterProductionController::class, 'index']);
     Route::post('/water/production',     [WaterProductionController::class, 'store']);
     Route::delete('/water/production/{id}', [WaterProductionController::class, 'destroy']);
+
+    Route::get('/animal-categories',       [AnimalCategoryController::class, 'index']);
+    Route::post('/animal-categories',      [AnimalCategoryController::class, 'store']);
+    Route::delete('/animal-categories/{id}', [AnimalCategoryController::class, 'destroy']);
+
+    Route::get('/farm-production',       [FarmProductionController::class, 'index']);
+    Route::post('/farm-production',      [FarmProductionController::class, 'store']);
+    Route::put('/farm-production/{id}',  [FarmProductionController::class, 'update']);
+    Route::delete('/farm-production/{id}', [FarmProductionController::class, 'destroy']);
 
     Route::get('/water/sales',           [WaterSaleController::class, 'index']);
     Route::post('/water/sales',          [WaterSaleController::class, 'store']);
