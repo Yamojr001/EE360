@@ -12,6 +12,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->statefulApi();
+        $middleware->api(append: [
+            \App\Http\Middleware\LogUserActivity::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

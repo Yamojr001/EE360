@@ -28,6 +28,7 @@ import FarmProductionPage from '@/pages/livestock/FarmProductionPage';
 import GalleryManagePage  from '@/pages/admin/GalleryManagePage';
 import StaffDirectoryPage from '@/pages/admin/StaffDirectoryPage';
 import ContentManagePage  from '@/pages/admin/ContentManagePage';
+import ActivityLogsPage   from '@/pages/admin/ActivityLogsPage';
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
   const { isAuthenticated, isLoading, isSuperAdmin } = useAuth();
@@ -161,6 +162,14 @@ export default function App() {
           <ProtectedRoute adminOnly>
             <DashboardLayout>
               <ContentManagePage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        </Route>
+
+        <Route path="/dashboard/admin/logs">
+          <ProtectedRoute adminOnly>
+            <DashboardLayout>
+              <ActivityLogsPage />
             </DashboardLayout>
           </ProtectedRoute>
         </Route>

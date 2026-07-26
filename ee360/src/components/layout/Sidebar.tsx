@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Bird, ShoppingCart, Wallet, Package,
   Droplets, Users, BarChart3, ChevronLeft, ChevronRight, LogOut,
-  Images, BookOpen, UserCog, Layers, FlaskConical, Store,
+  Images, BookOpen, UserCog, Layers, FlaskConical, Store, Clock,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 
@@ -37,6 +37,7 @@ const SUPER_ADMIN_NAV: { section: string; items: NavItem[] }[] = [
     section: 'Overview',
     items: [
       { label: 'Command Centre', href: '/dashboard', icon: <Layers className="w-4 h-4" /> },
+      { label: 'Activity Logs',  href: '/dashboard/admin/logs', icon: <Clock className="w-4 h-4" /> },
       { label: 'Daily Ledger',   href: '/dashboard/ledger', icon: <BookOpen className="w-4 h-4" /> },
       { label: 'Full Reports',   href: '/dashboard/reports', icon: <BarChart3 className="w-4 h-4" /> },
     ],
