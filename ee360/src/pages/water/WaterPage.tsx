@@ -16,6 +16,7 @@ import { formatCurrency, formatDate } from '@/lib/utils';
 import { printReceipt } from '@/lib/printReceipt';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useAuth } from '@/contexts/auth-context';
+import { CustomerCombobox } from '@/components/ui/customer-combobox';
 
 interface Production { id: number; date: string; bags_produced: number; bags_wasted?: number; waste_reason?: string; liters_used: number; cost: number; notes: string; deleted_at?: string; deleter?: { name: string }; }
 interface WaterSale { id: number; date: string; quantity: number; unit_price: number; total_amount: number; buyer: string; distribution_area: string; payment_method?: string; payment_status?: string; }
@@ -119,8 +120,8 @@ function ProductionForm({ onSave, onClose, inventoryItems = [] }: { onSave: (d: 
   );
 }
 
-function SaleForm({ onSave, onClose }: { onSave: (d: any) => void; onClose: () => void }) {
-  const [form, setForm] = useState<any>({ date: new Date().toISOString().split('T')[0], quantity: '', unit_price: '', total_amount: 0, buyer: '', distribution_area: '', payment_method: 'Cash', payment_status: 'Paid' });
+function SaleForm({ onSave, onClose, sectorId }: { onSave: (d: any) => void; onClose: () => void; sectorId?: number; }) {
+  const [form, setForm] = useState<any>({ date: new Date().toISOString().split('T')[0], quantity: '', unit_price: '', total_amount: 0, buyer: '', customer_id: '', distribution_area: '', payment_method: 'Cash', payment_status: 'Paid' });
   const set = (k: string, v: any) => setForm((p: any) => {
     const n = { ...p, [k]: v };
     if (k === 'quantity' || k === 'unit_price') {
@@ -137,8 +138,18 @@ function SaleForm({ onSave, onClose }: { onSave: (d: any) => void; onClose: () =
         <div className="space-y-1.5"><Label>Bags Sold</Label><Input type="number" min={0} value={form.quantity} onChange={e => set('quantity', e.target.value === '' ? '' : +e.target.value)} placeholder="0" required /></div>
         <div className="space-y-1.5"><Label>Price/Bag (₦)</Label><Input type="number" min={0} value={form.unit_price} onChange={e => set('unit_price', e.target.value === '' ? '' : +e.target.value)} placeholder="0" required /></div>
         <div className="space-y-1.5"><Label>Total (₦)</Label><Input type="number" value={form.total_amount || ''} onChange={e => set('total_amount', e.target.value === '' ? '' : +e.target.value)} className="font-semibold bg-muted" placeholder="0" readOnly required /></div>
-        <div className="space-y-1.5"><Label>Buyer</Label><Input value={form.buyer} onChange={e => set('buyer', e.target.value)} placeholder="Customer name" /></div>
-        <div className="space-y-1.5 col-span-2"><Label>Distribution Area</Label><Input value={form.distribution_area} onChange={e => set('distribution_area', e.target.value)} placeholder="e.g. Market A, Zone 3" /></div>
+        <div className="space-y-1.5">
+          <Label>Buyer</Label>
+          <CustomerCombobox 
+            value={form.buyer} 
+            onChange={(name, id) => {
+              set('buyer', name);
+              if (id) set('customer_id', id);
+            }} 
+            sectorId={sectorId} 
+          />
+        </div>
+        <div className="space-y-1.5"><Label>Distribution Area</Label><Input value={form.distribution_area} onChange={e => set('distribution_area', e.target.value)} placeholder="e.g. Market A, Zone 3" /></div>
         <div className="space-y-1.5">
           <Label>Payment Method</Label>
           <Select value={form.payment_method} onValueChange={v => set('payment_method', v)}>
@@ -497,8 +508,9 @@ export default function WaterPage() {
         </DialogContent>
       </Dialog>
       <Dialog open={saleOpen} onOpenChange={setSaleOpen}>
-        <DialogContent className="max-w-md"><DialogHeader><DialogTitle>Record Water Sale</DialogTitle></DialogHeader>
-          <SaleForm onSave={d => addSale.mutate(d)} onClose={() => setSaleOpen(false)} />
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Record Water Sale</DialogTitle></DialogHeader>
+          <SaleForm onSave={d => addSale.mutate(d)} onClose={() => setSaleOpen(false)} sectorId={sectorId} />
         </DialogContent>
       </Dialog>
       <Dialog open={expOpen} onOpenChange={setExpOpen}>

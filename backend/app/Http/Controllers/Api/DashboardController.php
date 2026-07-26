@@ -11,6 +11,7 @@ use App\Models\Worker;
 use App\Models\WaterSale;
 use App\Models\WaterExpense;
 use App\Models\WaterProduction;
+use App\Models\Customer;
 use Illuminate\Support\Carbon;
 
 class DashboardController extends Controller
@@ -248,6 +249,17 @@ class DashboardController extends Controller
 
         $recentActivity = collect($recentFarm)->merge($recentWater)->sortByDesc('date')->take(5)->values();
 
+        $topCustomers = Customer::withSum('sales', 'total_amount')
+            ->withSum('waterSales', 'total_amount')
+            ->get()
+            ->map(function ($c) {
+                $c->total_spent = ($c->sales_sum_total_amount ?? 0) + ($c->water_sales_sum_total_amount ?? 0);
+                return $c;
+            })
+            ->sortByDesc('total_spent')
+            ->take(5)
+            ->values();
+
         return response()->json([
             'totalRevenue'    => $totalRev,
             'totalExpenses'   => $totalExp,
@@ -256,6 +268,7 @@ class DashboardController extends Controller
             'sectorBreakdown' => $sectorBreakdown,
             'monthlyChart'    => $monthlyChart,
             'recentActivity'  => $recentActivity,
+            'topCustomers'    => $topCustomers,
         ]);
     }
 }

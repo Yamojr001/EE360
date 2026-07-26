@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\WaterExpenseController;
 use App\Http\Controllers\Api\VendorController;
 use App\Http\Controllers\Api\AnimalCategoryController;
 use App\Http\Controllers\Api\FarmProductionController;
+use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\ActivityLogController;
 use App\Http\Controllers\Api\ReportController;
 
@@ -71,6 +72,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/farm-production',      [FarmProductionController::class, 'store']);
     Route::put('/farm-production/{id}',  [FarmProductionController::class, 'update']);
     Route::delete('/farm-production/{id}', [FarmProductionController::class, 'destroy']);
+
+    Route::get('/customers',       [CustomerController::class, 'index']);
+    Route::post('/customers',      [CustomerController::class, 'store']);
+    Route::put('/customers/{id}',  [CustomerController::class, 'update']);
+    Route::delete('/customers/{id}', [CustomerController::class, 'destroy']);
 
     Route::get('/water/sales',           [WaterSaleController::class, 'index']);
     Route::post('/water/sales',          [WaterSaleController::class, 'store']);

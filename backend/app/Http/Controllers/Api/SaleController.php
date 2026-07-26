@@ -28,6 +28,7 @@ class SaleController extends Controller
             'unit_price'   => 'numeric|min:0',
             'total_amount' => 'required|numeric|min:0',
             'buyer'        => 'nullable|string|max:100',
+            'customer_id'  => 'nullable|integer',
             'notes'        => 'nullable|string',
             'payment_method' => 'nullable|string',
             'payment_status' => 'nullable|string',

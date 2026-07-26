@@ -6,7 +6,7 @@ import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
 } from 'recharts';
-import { TrendingUp, TrendingDown, Users, Bird, Droplets, Layers, ArrowUpRight, Clock } from 'lucide-react';
+import { TrendingUp, TrendingDown, Users, Bird, Droplets, Layers, ArrowUpRight, Clock, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import FarmDashboard from './FarmDashboard';
@@ -173,27 +173,60 @@ export default function SuperAdminDashboard() {
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <div className="bg-card border border-border rounded-2xl p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <Clock className="w-4 h-4 text-muted-foreground" />
-          <h3 className="font-bold text-foreground">Recent Activity</h3>
-          <span className="ml-auto text-xs text-muted-foreground">Across all sectors</span>
+      {/* Bottom row */}
+      <div className="grid lg:grid-cols-2 gap-5">
+        {/* Recent Activity */}
+        <div className="bg-card border border-border rounded-2xl p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Clock className="w-4 h-4 text-muted-foreground" />
+            <h3 className="font-bold text-foreground">Recent Activity</h3>
+            <span className="ml-auto text-xs text-muted-foreground">Across all sectors</span>
+          </div>
+          <div className="space-y-2">
+            {(d.recentActivity ?? []).map((a: any, i: number) => (
+              <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/40 transition-colors">
+                <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0',
+                  a.sector === 'Farm' ? 'bg-blue-500' : 'bg-sky-500')}>
+                  {a.sector === 'Farm' ? <Bird className="w-4 h-4" /> : <Droplets className="w-4 h-4" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-foreground truncate">{a.desc}</p>
+                  <p className="text-xs text-muted-foreground">{a.sector} · {a.date}</p>
+                </div>
+                <span className="text-sm font-semibold text-primary shrink-0">{formatCurrency(a.amount)}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="space-y-2">
-          {(d.recentActivity ?? []).map((a: any, i: number) => (
-            <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/40 transition-colors">
-              <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0',
-                a.sector === 'Farm' ? 'bg-blue-500' : 'bg-sky-500')}>
-                {a.sector === 'Farm' ? <Bird className="w-4 h-4" /> : <Droplets className="w-4 h-4" />}
+
+        {/* Top Customers */}
+        <div className="bg-card border border-border rounded-2xl p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Star className="w-4 h-4 text-yellow-500" />
+            <h3 className="font-bold text-foreground">Top Customers</h3>
+            <span className="ml-auto text-xs text-muted-foreground">Highest total spent</span>
+          </div>
+          <div className="space-y-2">
+            {(d.topCustomers ?? []).map((c: any) => (
+              <div key={c.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/40 transition-colors">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center">
+                    {c.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-foreground">{c.name}</p>
+                    {c.phone && <p className="text-xs text-muted-foreground">{c.phone}</p>}
+                  </div>
+                </div>
+                <span className="text-sm font-semibold text-primary">{formatCurrency(c.total_spent)}</span>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{a.desc}</p>
-                <p className="text-xs text-muted-foreground">{a.sector} · {a.date}</p>
+            ))}
+            {(!d.topCustomers || d.topCustomers.length === 0) && (
+              <div className="text-center text-sm text-muted-foreground py-4">
+                No regular customers found.
               </div>
-              <span className="text-sm font-semibold text-primary shrink-0">{formatCurrency(a.amount)}</span>
-            </div>
-          ))}
+            )}
+          </div>
         </div>
       </div>
       </TabsContent>

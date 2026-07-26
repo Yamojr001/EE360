@@ -13,6 +13,7 @@ import api from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { printReceipt } from '@/lib/printReceipt';
 import { useAuth } from '@/contexts/auth-context';
+import { CustomerCombobox } from '@/components/ui/customer-combobox';
 
 const CAT_COLOR: Record<string, string> = {
   livestock: 'bg-blue-100 text-blue-800', eggs: 'bg-yellow-100 text-yellow-800',
@@ -23,8 +24,8 @@ const CAT_COLOR: Record<string, string> = {
 interface Sale { id: number; date: string; category: string; item: string; quantity: number; unit: string; unit_price: number; total_amount: number; buyer: string; notes: string; payment_method: string; payment_status: string; }
 interface AnimalCategory { id: number; name: string; type: string; }
 
-function SaleForm({ categories, onSave, onClose }: { categories: string[]; onSave: (d: any) => void; onClose: () => void }) {
-  const [form, setForm] = useState<any>({ date: new Date().toISOString().split('T')[0], category: categories[0] || 'livestock', item: '', quantity: '', unit: 'unit', unit_price: '', total_amount: 0, buyer: '', notes: '', payment_method: 'Cash', payment_status: 'Paid' });
+function SaleForm({ categories, sectorId, onSave, onClose }: { categories: string[]; sectorId?: number; onSave: (d: any) => void; onClose: () => void }) {
+  const [form, setForm] = useState<any>({ date: new Date().toISOString().split('T')[0], category: categories[0] || 'livestock', item: '', quantity: '', unit: 'unit', unit_price: '', total_amount: 0, buyer: '', customer_id: '', notes: '', payment_method: 'Cash', payment_status: 'Paid' });
   const set = (k: string, v: any) => setForm((p: any) => {
     const next = { ...p, [k]: v };
     if (k === 'quantity' || k === 'unit_price') {
@@ -73,7 +74,14 @@ function SaleForm({ categories, onSave, onClose }: { categories: string[]; onSav
         </div>
         <div className="col-span-2 space-y-1.5">
           <Label>Buyer Name</Label>
-          <Input value={form.buyer} onChange={e => set('buyer', e.target.value)} placeholder="Customer name" />
+          <CustomerCombobox 
+            value={form.buyer} 
+            onChange={(name, id) => {
+              set('buyer', name);
+              if (id) set('customer_id', id);
+            }} 
+            sectorId={sectorId} 
+          />
         </div>
         <div className="space-y-1.5">
           <Label>Payment Method</Label>
@@ -162,6 +170,13 @@ export default function SalesPage() {
         </div>
         <Button onClick={() => setOpen(true)}><Plus className="w-4 h-4 mr-2" /> Record New Sale</Button>
       </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Record New Sale</DialogTitle></DialogHeader>
+          <SaleForm categories={categories} sectorId={sectorId} onSave={d => createMut.mutate(d)} onClose={() => setOpen(false)} />
+        </DialogContent>
+      </Dialog>
 
       {/* Summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -261,13 +276,6 @@ export default function SalesPage() {
           </div>
         </CardContent>
       </Card>
-
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader><DialogTitle>Record New Sale</DialogTitle></DialogHeader>
-          <SaleForm categories={categories} onSave={d => createMut.mutate(d)} onClose={() => setOpen(false)} />
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }

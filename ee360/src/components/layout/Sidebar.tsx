@@ -20,6 +20,7 @@ const FARM_NAV: NavItem[] = [
   { label: 'Daily Ledger',   href: '/dashboard/ledger',     icon: <BookOpen className="w-4 h-4" /> },
   { label: 'Farm Workers',   href: '/dashboard/workers',    icon: <Users className="w-4 h-4" /> },
   { label: 'Vendors',        href: '/dashboard/vendors',    icon: <Store className="w-4 h-4" /> },
+  { label: 'Customers',      href: '/dashboard/customers',  icon: <Users className="w-4 h-4" /> },
   { label: 'Reports',        href: '/dashboard/reports',    icon: <BarChart3 className="w-4 h-4" /> },
 ];
 
@@ -29,6 +30,7 @@ const WATER_NAV: NavItem[] = [
   { label: 'Daily Ledger',    href: '/dashboard/ledger', icon: <BookOpen className="w-4 h-4" /> },
   { label: 'Water Workers',   href: '/dashboard/workers',icon: <Users className="w-4 h-4" /> },
   { label: 'Vendors',         href: '/dashboard/vendors', icon: <Store className="w-4 h-4" /> },
+  { label: 'Customers',       href: '/dashboard/customers',icon: <Users className="w-4 h-4" /> },
   { label: 'Reports',         href: '/dashboard/reports',icon: <BarChart3 className="w-4 h-4" /> },
 ];
 
@@ -38,6 +40,7 @@ const SUPER_ADMIN_NAV: { section: string; items: NavItem[] }[] = [
     items: [
       { label: 'Command Centre', href: '/dashboard', icon: <Layers className="w-4 h-4" /> },
       { label: 'Activity Logs',  href: '/dashboard/admin/logs', icon: <Clock className="w-4 h-4" /> },
+      { label: 'Customers',      href: '/dashboard/customers',  icon: <Users className="w-4 h-4" /> },
       { label: 'Daily Ledger',   href: '/dashboard/ledger', icon: <BookOpen className="w-4 h-4" /> },
       { label: 'Full Reports',   href: '/dashboard/reports', icon: <BarChart3 className="w-4 h-4" /> },
     ],

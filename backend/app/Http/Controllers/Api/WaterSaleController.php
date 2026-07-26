@@ -25,6 +25,7 @@ class WaterSaleController extends Controller
             'unit_price'        => 'required|numeric|min:0',
             'total_amount'      => 'required|numeric|min:0',
             'buyer'             => 'nullable|string|max:100',
+            'customer_id'       => 'nullable|integer',
             'distribution_area' => 'nullable|string|max:100',
             'payment_method'    => 'nullable|string',
             'payment_status'    => 'nullable|string',
