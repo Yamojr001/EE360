@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Plus, Search, Trash2, TrendingUp, ShoppingCart, Filter } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Plus, Search, Trash2, ShoppingCart, Filter, Printer } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
@@ -12,21 +11,27 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import api from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { printReceipt } from '@/lib/printReceipt';
+import { useAuth } from '@/contexts/auth-context';
 
-const CATEGORIES = ['livestock', 'eggs', 'crops', 'water', 'feed', 'other'];
 const CAT_COLOR: Record<string, string> = {
-  livestock: 'bg-green-100 text-green-800', eggs: 'bg-yellow-100 text-yellow-800',
+  livestock: 'bg-blue-100 text-blue-800', eggs: 'bg-yellow-100 text-yellow-800',
   crops: 'bg-orange-100 text-orange-800', water: 'bg-blue-100 text-blue-800',
   feed: 'bg-purple-100 text-purple-800', other: 'bg-gray-100 text-gray-800',
 };
 
 interface Sale { id: number; date: string; category: string; item: string; quantity: number; unit: string; unit_price: number; total_amount: number; buyer: string; notes: string; payment_method: string; payment_status: string; }
+interface AnimalCategory { id: number; name: string; type: string; }
 
-function SaleForm({ onSave, onClose }: { onSave: (d: any) => void; onClose: () => void }) {
-  const [form, setForm] = useState({ date: new Date().toISOString().split('T')[0], category: 'livestock', item: '', quantity: 1, unit: 'unit', unit_price: 0, total_amount: 0, buyer: '', notes: '', payment_method: 'Cash', payment_status: 'Paid' });
-  const set = (k: string, v: any) => setForm(p => {
+function SaleForm({ categories, onSave, onClose }: { categories: string[]; onSave: (d: any) => void; onClose: () => void }) {
+  const [form, setForm] = useState<any>({ date: new Date().toISOString().split('T')[0], category: categories[0] || 'livestock', item: '', quantity: '', unit: 'unit', unit_price: '', total_amount: 0, buyer: '', notes: '', payment_method: 'Cash', payment_status: 'Paid' });
+  const set = (k: string, v: any) => setForm((p: any) => {
     const next = { ...p, [k]: v };
-    if (k === 'quantity' || k === 'unit_price') next.total_amount = next.quantity * next.unit_price;
+    if (k === 'quantity' || k === 'unit_price') {
+      const q = Number(next.quantity) || 0;
+      const u = Number(next.unit_price) || 0;
+      next.total_amount = q * u;
+    }
     return next;
   });
 
@@ -40,8 +45,10 @@ function SaleForm({ onSave, onClose }: { onSave: (d: any) => void; onClose: () =
         <div className="space-y-1.5">
           <Label>Category *</Label>
           <Select value={form.category} onValueChange={v => set('category', v)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>{CATEGORIES.map(c => <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>)}</SelectContent>
+            <SelectTrigger><SelectValue placeholder="Select Category" /></SelectTrigger>
+            <SelectContent>
+              {categories.map(c => <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>)}
+            </SelectContent>
           </Select>
         </div>
         <div className="col-span-2 space-y-1.5">
@@ -50,7 +57,7 @@ function SaleForm({ onSave, onClose }: { onSave: (d: any) => void; onClose: () =
         </div>
         <div className="space-y-1.5">
           <Label>Quantity</Label>
-          <Input type="number" min={1} value={form.quantity} onChange={e => set('quantity', +e.target.value)} />
+          <Input type="number" min={1} value={form.quantity} onChange={e => set('quantity', e.target.value === '' ? '' : +e.target.value)} placeholder="1" />
         </div>
         <div className="space-y-1.5">
           <Label>Unit</Label>
@@ -58,11 +65,11 @@ function SaleForm({ onSave, onClose }: { onSave: (d: any) => void; onClose: () =
         </div>
         <div className="space-y-1.5">
           <Label>Unit Price (₦)</Label>
-          <Input type="number" min={0} value={form.unit_price} onChange={e => set('unit_price', +e.target.value)} />
+          <Input type="number" min={0} value={form.unit_price} onChange={e => set('unit_price', e.target.value === '' ? '' : +e.target.value)} placeholder="0" />
         </div>
         <div className="space-y-1.5">
           <Label>Total Amount (₦)</Label>
-          <Input type="number" min={0} value={form.total_amount} onChange={e => set('total_amount', +e.target.value)} className="font-semibold" />
+          <Input type="number" min={0} value={form.total_amount || ''} onChange={e => set('total_amount', e.target.value === '' ? '' : +e.target.value)} className="font-semibold bg-muted" readOnly placeholder="0" />
         </div>
         <div className="col-span-2 space-y-1.5">
           <Label>Buyer Name</Label>
@@ -96,7 +103,7 @@ function SaleForm({ onSave, onClose }: { onSave: (d: any) => void; onClose: () =
       </div>
       <div className="flex gap-3 pt-2">
         <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancel</Button>
-        <Button type="submit" className="flex-1">Record Sale</Button>
+        <Button type="submit" className="flex-1">Record New Sale</Button>
       </div>
     </form>
   );
@@ -108,13 +115,21 @@ export default function SalesPage() {
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
 
+  const { user } = useAuth();
+  const sectorId = user?.role === 'water_manager' ? 2 : user?.role === 'farm_manager' ? 1 : undefined;
+
+  const { data: catData = [] } = useQuery<AnimalCategory[]>({
+    queryKey: ['animal-categories', sectorId],
+    queryFn: () => api.get('/animal-categories', { params: { sector_id: sectorId } }).then(r => r.data),
+  });
+
   const { data: sales = [], isLoading } = useQuery<Sale[]>({
-    queryKey: ['sales'],
-    queryFn: () => api.get('/sales').then(r => r.data),
+    queryKey: ['sales', sectorId],
+    queryFn: () => api.get('/sales', { params: { sector_id: sectorId } }).then(r => r.data),
   });
 
   const createMut = useMutation({
-    mutationFn: (d: any) => api.post('/sales', d),
+    mutationFn: (d: any) => api.post('/sales', { ...d, sector_id: sectorId }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['sales'] }); toast.success('Sale recorded!'); setOpen(false); },
     onError: () => toast.error('Failed to record sale'),
   });
@@ -124,6 +139,8 @@ export default function SalesPage() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['sales'] }); toast.success('Sale deleted'); },
   });
 
+  const categories = Array.from(new Set(['livestock', 'crops', 'feed', 'other', ...catData.map(c => c.name)]));
+
   const filtered = sales.filter(s => {
     const matchCat = catFilter === 'all' || s.category === catFilter;
     const matchSearch = !search || s.item.toLowerCase().includes(search.toLowerCase()) || s.buyer.toLowerCase().includes(search.toLowerCase());
@@ -131,8 +148,6 @@ export default function SalesPage() {
   });
 
   const total = filtered.reduce((sum, s) => sum + Number(s.total_amount), 0);
-  const thisMonth = sales.filter(s => new Date(s.date).getMonth() === new Date().getMonth()).reduce((sum, s) => sum + Number(s.total_amount), 0);
-  
   const cashTotal = filtered.filter(s => s.payment_method === 'Cash').reduce((sum, s) => sum + Number(s.total_amount), 0);
   const transferTotal = filtered.filter(s => s.payment_method === 'Transfer').reduce((sum, s) => sum + Number(s.total_amount), 0);
   const posTotal = filtered.filter(s => s.payment_method === 'POS').reduce((sum, s) => sum + Number(s.total_amount), 0);
@@ -145,7 +160,7 @@ export default function SalesPage() {
           <h2 className="text-2xl font-bold">Sales</h2>
           <p className="text-muted-foreground text-sm">{sales.length} transactions on record</p>
         </div>
-        <Button onClick={() => setOpen(true)}><Plus className="w-4 h-4 mr-2" /> Record Sale</Button>
+        <Button onClick={() => setOpen(true)}><Plus className="w-4 h-4 mr-2" /> Record New Sale</Button>
       </div>
 
       {/* Summary */}
@@ -153,7 +168,7 @@ export default function SalesPage() {
         <Card>
           <CardContent className="p-4">
             <p className="text-muted-foreground text-xs mb-1">Total Revenue</p>
-            <p className="text-xl font-bold text-green-600">{formatCurrency(total)}</p>
+            <p className="text-xl font-bold text-blue-600">{formatCurrency(total)}</p>
           </CardContent>
         </Card>
         <Card>
@@ -188,7 +203,7 @@ export default function SalesPage() {
           <SelectTrigger className="w-40"><Filter className="w-3.5 h-3.5 mr-1.5" /><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            {CATEGORIES.map(c => <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>)}
+            {categories.map(c => <SelectItem key={c} value={c} className="capitalize">{c}</SelectItem>)}
           </SelectContent>
         </Select>
       </div>
@@ -208,10 +223,10 @@ export default function SalesPage() {
               <tbody>
                 {isLoading ? [...Array(5)].map((_, i) => (
                   <tr key={i} className="border-b border-border">
-                    {[...Array(8)].map((_, j) => <td key={j} className="px-4 py-3"><div className="h-4 bg-muted animate-pulse rounded" /></td>)}
+                    {[...Array(9)].map((_, j) => <td key={j} className="px-4 py-3"><div className="h-4 bg-muted animate-pulse rounded" /></td>)}
                   </tr>
                 )) : filtered.length === 0 ? (
-                  <tr><td colSpan={8} className="text-center py-12 text-muted-foreground">
+                  <tr><td colSpan={9} className="text-center py-12 text-muted-foreground">
                     <ShoppingCart className="w-10 h-10 mx-auto mb-2 opacity-30" />
                     No sales found
                   </td></tr>
@@ -221,18 +236,23 @@ export default function SalesPage() {
                     <td className="px-4 py-3"><span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${CAT_COLOR[s.category] ?? CAT_COLOR.other}`}>{s.category}</span></td>
                     <td className="px-4 py-3 font-medium">{s.item}</td>
                     <td className="px-4 py-3">{s.quantity} {s.unit}</td>
-                    <td className="px-4 py-3 font-semibold text-green-600">{formatCurrency(s.total_amount)}</td>
+                    <td className="px-4 py-3 font-semibold text-blue-600">{formatCurrency(s.total_amount)}</td>
                     <td className="px-4 py-3 text-muted-foreground">{s.buyer || '—'}</td>
                     <td className="px-4 py-3 text-xs">{s.payment_method || '—'}</td>
                     <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.payment_status === 'Credit' ? 'bg-orange-100 text-orange-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.payment_status === 'Credit' ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'}`}>
                         {s.payment_status || 'Paid'}
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      <button onClick={() => { if (confirm('Delete this sale?')) deleteMut.mutate(s.id); }} className="text-muted-foreground hover:text-destructive transition-colors">
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-2">
+                        <button onClick={() => printReceipt(s, 'farm')} className="text-muted-foreground hover:text-primary transition-colors" title="Print Receipt">
+                          <Printer className="w-4 h-4" />
+                        </button>
+                        <button onClick={() => { if (confirm('Delete this sale?')) deleteMut.mutate(s.id); }} className="text-muted-foreground hover:text-destructive transition-colors" title="Delete Sale">
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -245,7 +265,7 @@ export default function SalesPage() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>Record New Sale</DialogTitle></DialogHeader>
-          <SaleForm onSave={d => createMut.mutate(d)} onClose={() => setOpen(false)} />
+          <SaleForm categories={categories} onSave={d => createMut.mutate(d)} onClose={() => setOpen(false)} />
         </DialogContent>
       </Dialog>
     </div>

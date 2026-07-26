@@ -15,8 +15,8 @@ import { useAuth } from '@/contexts/auth-context';
 const CATEGORIES = ['livestock', 'water', 'workers', 'general'];
 
 const GRADIENT: Record<string, string> = {
-  livestock: 'from-emerald-600 to-teal-700',
-  water:     'from-cyan-600 to-blue-700',
+  livestock: 'from-blue-600 to-blue-700',
+  water:     'from-sky-600 to-blue-700',
   workers:   'from-amber-500 to-orange-600',
   general:   'from-violet-600 to-purple-700',
 };
@@ -121,8 +121,8 @@ export default function GalleryManagePage() {
                 <div className="flex items-center gap-1.5 mb-1.5">
                   <span className={cn(
                     'text-[10px] font-semibold px-2 py-0.5 rounded-full capitalize',
-                    item.category === 'livestock' ? 'bg-emerald-100 text-emerald-700' :
-                    item.category === 'water'     ? 'bg-cyan-100 text-cyan-700'     :
+                    item.category === 'livestock' ? 'bg-blue-100 text-blue-700' :
+                    item.category === 'water'     ? 'bg-sky-100 text-sky-700'     :
                     item.category === 'workers'   ? 'bg-amber-100 text-amber-700'   :
                                                     'bg-violet-100 text-violet-700',
                   )}>

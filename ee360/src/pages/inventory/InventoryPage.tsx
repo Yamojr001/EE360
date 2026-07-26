@@ -15,11 +15,12 @@ import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import api from '@/lib/api';
 import { formatCurrency, cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/auth-context';
 
 const CATEGORIES = ['feed', 'medicine', 'equipment', 'packaging', 'chemicals', 'other'];
 
 const CATEGORY_COLORS: Record<string, string> = {
-  feed:       'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300',
+  feed:       'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
   medicine:   'bg-blue-100    text-blue-700    dark:bg-blue-950    dark:text-blue-300',
   equipment:  'bg-violet-100  text-violet-700  dark:bg-violet-950  dark:text-violet-300',
   packaging:  'bg-amber-100   text-amber-700   dark:bg-amber-950   dark:text-amber-300',
@@ -38,10 +39,12 @@ function ItemForm({ initial, onSave, onClose }: {
   initial?: Partial<Item>; onSave: (d: any) => void; onClose: () => void;
 }) {
   const [form, setForm] = useState({
-    name: '', category: 'feed', quantity: 0, unit: 'bags',
+    name: '', category: 'feed', quantity: 0, unit: 'bags', units_per_package: 0,
     unit_cost: 0, min_stock_level: 10, supplier: '', notes: '', ...initial,
   });
   const set = (k: string, v: any) => setForm(p => ({ ...p, [k]: v }));
+
+  const isRolls = form.unit.toLowerCase() === 'rolls' || form.unit.toLowerCase() === 'roll';
 
   return (
     <form onSubmit={e => { e.preventDefault(); onSave(form); }} className="space-y-4">
@@ -59,8 +62,24 @@ function ItemForm({ initial, onSave, onClose }: {
         </div>
         <div className="space-y-1.5">
           <Label>Unit</Label>
-          <Input value={form.unit} onChange={e => set('unit', e.target.value)} placeholder="bags, litres, packs…" />
+          <Select value={form.unit} onValueChange={v => set('unit', v)}>
+            <SelectTrigger><SelectValue placeholder="Select unit" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="rolls">Rolls</SelectItem>
+              <SelectItem value="bags">Bags</SelectItem>
+              <SelectItem value="kg">Kg</SelectItem>
+              <SelectItem value="liters">Liters</SelectItem>
+              <SelectItem value="pieces">Pieces</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
+        
+        {isRolls && (
+          <div className="space-y-1.5 col-span-2"><Label>Units per Roll (e.g. sachets per roll)</Label><Input type="number" min={1} value={form.units_per_package} onChange={e => set('units_per_package', +e.target.value)} /></div>
+        )}
+        {form.unit.toLowerCase() === 'bags' && (
+          <div className="space-y-1.5 col-span-2"><Label>Weight per Bag (e.g. grams)</Label><Input type="number" min={1} value={form.units_per_package} onChange={e => set('units_per_package', +e.target.value)} /></div>
+        )}
         <div className="space-y-1.5">
           <Label>Quantity in Stock</Label>
           <Input type="number" min={0} value={form.quantity || ''} onChange={e => set('quantity', +e.target.value)} />
@@ -227,16 +246,16 @@ function EmailAlertDialog({
             <div className="space-y-5">
               <div className={cn(
                 'rounded-2xl p-6 text-center',
-                result.sent ? 'bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900'
+                result.sent ? 'bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900'
                             : 'bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900',
               )}>
                 {result.sent ? (
                   <>
-                    <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
-                    <h3 className="text-lg font-bold text-emerald-800 dark:text-emerald-200">Email Sent!</h3>
-                    <p className="text-sm text-emerald-700 dark:text-emerald-300 mt-1">Alert delivered to <strong>{to}</strong></p>
+                    <CheckCircle2 className="w-12 h-12 text-blue-500 mx-auto mb-3" />
+                    <h3 className="text-lg font-bold text-blue-800 dark:text-blue-200">Email Sent!</h3>
+                    <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">Alert delivered to <strong>{to}</strong></p>
                     {result.messageId && (
-                      <p className="text-xs text-emerald-600/70 mt-2 font-mono">ID: {result.messageId}</p>
+                      <p className="text-xs text-blue-600/70 mt-2 font-mono">ID: {result.messageId}</p>
                     )}
                   </>
                 ) : (
@@ -306,14 +325,20 @@ export default function InventoryPage() {
   const [alertOpen, setAlertOpen] = useState(false);
   const [search, setSearch]       = useState('');
   const [catFilter, setCatFilter] = useState('all');
+  const { user } = useAuth();
+  
+  const sectorId = user?.role === 'water_manager' ? 2 : user?.role === 'farm_manager' ? 1 : undefined;
 
   const { data: items = [], isLoading } = useQuery<Item[]>({
-    queryKey: ['inventory'],
-    queryFn: () => api.get('/inventory').then(r => r.data),
+    queryKey: ['inventory', sectorId],
+    queryFn: () => api.get('/inventory', { params: { sector_id: sectorId } }).then(r => r.data),
   });
 
   const saveMut = useMutation({
-    mutationFn: (d: any) => editing ? api.put(`/inventory/${editing.id}`, d) : api.post('/inventory', d),
+    mutationFn: (d: any) => {
+      const payload = { ...d, sector_id: sectorId };
+      return editing ? api.put(`/inventory/${editing.id}`, payload) : api.post('/inventory', payload);
+    },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['inventory'] }); toast.success('Item saved'); setOpen(false); setEditing(null); },
     onError: () => toast.error('Failed to save item'),
   });

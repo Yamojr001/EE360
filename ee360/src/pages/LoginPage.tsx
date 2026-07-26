@@ -32,25 +32,30 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
-      {/* Left panel */}
+    <div className="min-h-screen flex relative">
+      {/* Full background */}
       <div 
-        className="hidden lg:block w-[45%] bg-cover bg-center"
+        className="absolute inset-0 bg-cover bg-center"
         style={{ backgroundImage: `url('/Gate.png')` }}
-      />
+      >
+        <div className="absolute inset-0 bg-black/50 lg:bg-black/20" />
+      </div>
+
+      {/* Left panel spacer (Desktop) */}
+      <div className="hidden lg:block w-[45%] relative z-10" />
 
       {/* Right panel */}
-      <div className="flex-1 flex flex-col items-center justify-center p-8 relative">
-        <div className="absolute top-8 left-8">
+      <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-8 relative z-10 lg:bg-background/70 lg:backdrop-blur-xl border-l border-border/50">
+        <div className="absolute top-8 left-4 sm:left-8 z-20">
           <Link
             href="/"
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            className="inline-flex items-center gap-1 text-sm text-white/90 lg:text-muted-foreground hoverm:text-white lg:hover:text-foreground transition-colors"
           >
             <ArrowLeft className="w-4 h-4" /> Back to home
           </Link>
         </div>
 
-        <div className="w-full max-w-md">
+        <div className="w-full max-w-md bg-background/60 lg:bg-transparent p-8 lg:p-0 rounded-2xl shadow-xl lg:shadow-none border border-border/50 lg:border-none backdrop-blur-md lg:backdrop-blur-none">
           <div className="flex flex-col items-center text-center mb-8">
             <img src="/FarmLogo.png" alt="EEFarm360 logo" className="h-32 w-auto object-contain mb-6" />
             <h2 className="text-3xl font-bold text-foreground">Sign in</h2>
@@ -64,7 +69,7 @@ export default function LoginPage() {
             </Alert>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5 bg">
             <div className="space-y-1.5">
               <Label htmlFor="email">Email address</Label>
               <Input

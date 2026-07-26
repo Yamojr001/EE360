@@ -23,7 +23,7 @@ function KpiCard({ label, value, icon, change, positive, color }: any) {
       </div>
       <p className="text-2xl font-extrabold text-foreground">{value}</p>
       {change != null && (
-        <div className={cn('flex items-center gap-1 text-xs font-medium', positive ? 'text-emerald-600' : 'text-red-500')}>
+        <div className={cn('flex items-center gap-1 text-xs font-medium', positive ? 'text-blue-600' : 'text-red-500')}>
           {positive ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
           {change}% vs last month
         </div>
@@ -96,13 +96,13 @@ export default function SuperAdminDashboard() {
         {(d.sectorBreakdown ?? []).map((s: any) => (
           <div key={s.sector} className={cn(
             'border rounded-2xl p-5',
-            s.sector === 'Farm' ? 'bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-900'
-                               : 'bg-cyan-50 dark:bg-cyan-950/20 border-cyan-200 dark:border-cyan-900',
+            s.sector === 'Farm' ? 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900'
+                               : 'bg-sky-50 dark:bg-sky-950/20 border-sky-200 dark:border-sky-900',
           )}>
             <div className="flex items-center gap-2 mb-4">
-              {s.sector === 'Farm' ? <Bird className="w-5 h-5 text-emerald-600" /> : <Droplets className="w-5 h-5 text-cyan-600" />}
+              {s.sector === 'Farm' ? <Bird className="w-5 h-5 text-blue-600" /> : <Droplets className="w-5 h-5 text-sky-600" />}
               <h3 className="font-bold text-foreground">{s.sector} Sector</h3>
-              <span className={cn('ml-auto text-xs font-semibold px-2 py-0.5 rounded-full', s.sector === 'Farm' ? 'bg-emerald-100 text-emerald-700' : 'bg-cyan-100 text-cyan-700')}>
+              <span className={cn('ml-auto text-xs font-semibold px-2 py-0.5 rounded-full', s.sector === 'Farm' ? 'bg-blue-100 text-blue-700' : 'bg-sky-100 text-sky-700')}>
                 {s.workers} active workers
               </span>
             </div>
@@ -184,7 +184,7 @@ export default function SuperAdminDashboard() {
           {(d.recentActivity ?? []).map((a: any, i: number) => (
             <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/40 transition-colors">
               <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0',
-                a.sector === 'Farm' ? 'bg-emerald-500' : 'bg-cyan-500')}>
+                a.sector === 'Farm' ? 'bg-blue-500' : 'bg-sky-500')}>
                 {a.sector === 'Farm' ? <Bird className="w-4 h-4" /> : <Droplets className="w-4 h-4" />}
               </div>
               <div className="flex-1 min-w-0">

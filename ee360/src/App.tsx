@@ -18,7 +18,9 @@ import SalesPage       from '@/pages/sales/SalesPage';
 import ExpensesPage    from '@/pages/expenses/ExpensesPage';
 import InventoryPage   from '@/pages/inventory/InventoryPage';
 import WorkersPage     from '@/pages/workers/WorkersPage';
+import VendorsPage     from '@/pages/vendors/VendorsPage';
 import ReportsPage     from '@/pages/reports/ReportsPage';
+import LedgerPage      from '@/pages/dashboard/LedgerPage';
 import WaterPage       from '@/pages/water/WaterPage';
 
 // Admin-only pages
@@ -35,6 +37,8 @@ function ProtectedRoute({ children, adminOnly = false }: { children: React.React
 }
 
 export default function App() {
+  const { isSuperAdmin, isFarmManager } = useAuth();
+
   return (
     <>
       <Switch>
@@ -94,10 +98,27 @@ export default function App() {
           </ProtectedRoute>
         </Route>
 
+        <Route path="/dashboard/vendors">
+          <ProtectedRoute>
+            <DashboardLayout>
+              <VendorsPage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        </Route>
+
         <Route path="/dashboard/reports">
           <ProtectedRoute>
             <DashboardLayout>
               <ReportsPage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        </Route>
+
+        {/* Ledger */}
+        <Route path="/dashboard/ledger">
+          <ProtectedRoute>
+            <DashboardLayout>
+              <LedgerPage />
             </DashboardLayout>
           </ProtectedRoute>
         </Route>

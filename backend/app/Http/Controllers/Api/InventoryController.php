@@ -8,9 +8,13 @@ use Illuminate\Http\Request;
 
 class InventoryController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return InventoryItem::orderBy('category')->orderBy('name')->get();
+        $query = InventoryItem::orderBy('category')->orderBy('name');
+        if ($request->has('sector_id')) {
+            $query->where('sector_id', $request->sector_id);
+        }
+        return $query->get();
     }
 
     public function store(Request $request)
@@ -20,10 +24,12 @@ class InventoryController extends Controller
             'category'        => 'required|string',
             'quantity'        => 'required|numeric|min:0',
             'unit'            => 'nullable|string|max:30',
+            'units_per_package' => 'nullable|integer|min:1',
             'unit_cost'       => 'numeric|min:0',
             'min_stock_level' => 'numeric|min:0',
             'supplier'        => 'nullable|string|max:100',
             'notes'           => 'nullable|string',
+            'sector_id'       => 'nullable|integer',
         ]);
 
         return response()->json(InventoryItem::create($data), 201);
@@ -36,10 +42,12 @@ class InventoryController extends Controller
             'category'        => 'string',
             'quantity'        => 'numeric|min:0',
             'unit'            => 'nullable|string|max:30',
+            'units_per_package' => 'nullable|integer|min:1',
             'unit_cost'       => 'numeric|min:0',
             'min_stock_level' => 'numeric|min:0',
             'supplier'        => 'nullable|string|max:100',
             'notes'           => 'nullable|string',
+            'sector_id'       => 'nullable|integer',
         ]);
 
         $inventory->update($data);

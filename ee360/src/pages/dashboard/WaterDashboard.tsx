@@ -12,7 +12,7 @@ function KpiCard({ label, value, icon, sub }: any) {
     <div className="bg-card border border-border rounded-2xl p-5">
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm text-muted-foreground">{label}</span>
-        <div className="w-8 h-8 bg-cyan-500/15 text-cyan-600 dark:text-cyan-400 rounded-lg flex items-center justify-center">{icon}</div>
+        <div className="w-8 h-8 bg-sky-500/15 text-sky-600 dark:text-sky-400 rounded-lg flex items-center justify-center">{icon}</div>
       </div>
       <p className="text-2xl font-extrabold text-foreground">{value}</p>
       {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
@@ -42,7 +42,7 @@ export default function WaterDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center">
+        <div className="w-10 h-10 bg-sky-500 rounded-xl flex items-center justify-center">
           <Droplets className="w-5 h-5 text-white" />
         </div>
         <div>
@@ -112,7 +112,7 @@ export default function WaterDashboard() {
                   <td className="py-3 pr-4 text-foreground font-medium">{p.date}</td>
                   <td className="py-3 pr-4">
                     <span className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 bg-cyan-500 rounded-full" />
+                      <span className="w-2 h-2 bg-sky-500 rounded-full" />
                       {p.bags_produced.toLocaleString()}
                     </span>
                   </td>

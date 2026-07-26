@@ -8,9 +8,13 @@ use Illuminate\Http\Request;
 
 class WaterExpenseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(WaterExpense::orderByDesc('date')->get());
+        $query = WaterExpense::query();
+        if ($request->has('sector_id')) {
+            $query->where('sector_id', $request->sector_id);
+        }
+        return response()->json($query->orderByDesc('date')->get());
     }
 
     public function store(Request $request)
@@ -21,6 +25,7 @@ class WaterExpenseController extends Controller
             'amount' => 'required|numeric|min:0',
             'vendor' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
+            'sector_id' => 'nullable|integer',
         ]);
 
         $expense = WaterExpense::create($validated);

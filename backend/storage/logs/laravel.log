@@ -793,3 +793,23 @@
 #41 /home/yamojr/devyamo/EE360/backend/vendor/laravel/framework/src/Illuminate/Foundation/resources/server.php(23): require_once('...')
 #42 {main}
 "} 
+[2026-07-23 11:27:07] local.ERROR: Command "tinker" is not defined. {"exception":"[object] (Symfony\\Component\\Console\\Exception\\CommandNotFoundException(code: 0): Command \"tinker\" is not defined. at /home/yamojr/devyamo/EE360/backend/vendor/symfony/console/Application.php:759)
+[stacktrace]
+#0 /home/yamojr/devyamo/EE360/backend/vendor/symfony/console/Application.php(298): Symfony\\Component\\Console\\Application->find()
+#1 /home/yamojr/devyamo/EE360/backend/vendor/symfony/console/Application.php(195): Symfony\\Component\\Console\\Application->doRun()
+#2 /home/yamojr/devyamo/EE360/backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(198): Symfony\\Component\\Console\\Application->run()
+#3 /home/yamojr/devyamo/EE360/backend/artisan(15): Illuminate\\Foundation\\Console\\Kernel->handle()
+#4 {main}
+"} 
+[2026-07-23 11:33:48] local.ERROR: Class "App\Models\User" not found {"exception":"[object] (Error(code: 0): Class \"App\\Models\\User\" not found at /home/yamojr/devyamo/EE360/backend/test_query3.php:6)
+[stacktrace]
+#0 {main}
+"} 
+[2026-07-23 23:39:45] local.ERROR: Command "tinker" is not defined. {"exception":"[object] (Symfony\\Component\\Console\\Exception\\CommandNotFoundException(code: 0): Command \"tinker\" is not defined. at /home/yamojr/devyamo/EE360/backend/vendor/symfony/console/Application.php:759)
+[stacktrace]
+#0 /home/yamojr/devyamo/EE360/backend/vendor/symfony/console/Application.php(298): Symfony\\Component\\Console\\Application->find()
+#1 /home/yamojr/devyamo/EE360/backend/vendor/symfony/console/Application.php(195): Symfony\\Component\\Console\\Application->doRun()
+#2 /home/yamojr/devyamo/EE360/backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(198): Symfony\\Component\\Console\\Application->run()
+#3 /home/yamojr/devyamo/EE360/backend/artisan(15): Illuminate\\Foundation\\Console\\Kernel->handle()
+#4 {main}
+"} 

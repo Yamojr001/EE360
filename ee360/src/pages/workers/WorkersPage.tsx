@@ -12,10 +12,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
 import api from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { useAuth } from '@/contexts/auth-context';
 
 const ROLES = ['farm manager', 'animal caretaker', 'crop worker', 'water operator', 'driver', 'security', 'cleaner', 'other'];
 const STATUS_COLOR: Record<string, string> = {
-  active: 'bg-green-100 text-green-800', inactive: 'bg-gray-100 text-gray-600', on_leave: 'bg-yellow-100 text-yellow-800',
+  active: 'bg-blue-100 text-blue-800', inactive: 'bg-gray-100 text-gray-600', on_leave: 'bg-yellow-100 text-yellow-800',
 };
 
 interface Worker { id: number; name: string; role: string; phone: string; salary: number; hire_date: string; status: string; address: string; notes: string; }
@@ -62,14 +63,20 @@ export default function WorkersPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Worker | null>(null);
   const [search, setSearch] = useState('');
+  const { user } = useAuth();
+  
+  const sectorId = user?.role === 'water_manager' ? 2 : user?.role === 'farm_manager' ? 1 : undefined;
 
   const { data: workers = [], isLoading } = useQuery<Worker[]>({
-    queryKey: ['workers'],
-    queryFn: () => api.get('/workers').then(r => r.data),
+    queryKey: ['workers', sectorId],
+    queryFn: () => api.get('/workers', { params: { sector_id: sectorId } }).then(r => r.data),
   });
 
   const saveMut = useMutation({
-    mutationFn: (d: any) => editing ? api.put(`/workers/${editing.id}`, d) : api.post('/workers', d),
+    mutationFn: (d: any) => {
+      const payload = { ...d, sector_id: sectorId };
+      return editing ? api.put(`/workers/${editing.id}`, payload) : api.post('/workers', payload);
+    },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['workers'] }); toast.success('Worker saved'); setOpen(false); setEditing(null); },
     onError: () => toast.error('Failed to save worker'),
   });
@@ -95,7 +102,7 @@ export default function WorkersPage() {
 
       <div className="grid grid-cols-3 gap-4">
         <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground mb-1">Total Workers</p><p className="text-2xl font-bold">{workers.length}</p></CardContent></Card>
-        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground mb-1">Active</p><p className="text-2xl font-bold text-green-600">{active}</p></CardContent></Card>
+        <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground mb-1">Active</p><p className="text-2xl font-bold text-blue-600">{active}</p></CardContent></Card>
         <Card><CardContent className="p-4"><p className="text-xs text-muted-foreground mb-1">Monthly Payroll</p><p className="text-2xl font-bold text-destructive">{formatCurrency(totalSalary)}</p></CardContent></Card>
       </div>
 

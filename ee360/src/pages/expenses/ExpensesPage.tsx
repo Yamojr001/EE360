@@ -12,21 +12,22 @@ import { toast } from 'sonner';
 import api from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/utils';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { useAuth } from '@/contexts/auth-context';
 
 const CATEGORIES = ['feed', 'medicine', 'equipment', 'labour', 'transport', 'utilities', 'maintenance', 'other'];
 const CAT_COLORS = ['oklch(0.45 0.165 175)', 'oklch(0.55 0.14 200)', 'oklch(0.65 0.18 165)', 'oklch(0.62 0.22 25)', 'oklch(0.65 0.15 95)', 'oklch(0.35 0.14 25)', 'oklch(0.5 0.12 200)', 'oklch(0.7 0.05 200)'];
 const CAT_BG: Record<string, string> = {
-  feed: 'bg-green-100 text-green-800', medicine: 'bg-blue-100 text-blue-800',
+  feed: 'bg-blue-100 text-blue-800', medicine: 'bg-blue-100 text-blue-800',
   equipment: 'bg-purple-100 text-purple-800', labour: 'bg-yellow-100 text-yellow-800',
-  transport: 'bg-orange-100 text-orange-800', utilities: 'bg-teal-100 text-teal-800',
+  transport: 'bg-orange-100 text-orange-800', utilities: 'bg-blue-100 text-blue-800',
   maintenance: 'bg-red-100 text-red-800', other: 'bg-gray-100 text-gray-800',
 };
 
 interface Expense { id: number; date: string; category: string; description: string; amount: number; vendor: string; notes: string; }
 
 function ExpenseForm({ onSave, onClose }: { onSave: (d: any) => void; onClose: () => void }) {
-  const [form, setForm] = useState({ date: new Date().toISOString().split('T')[0], category: 'feed', description: '', amount: 0, vendor: '', notes: '' });
-  const set = (k: string, v: any) => setForm(p => ({ ...p, [k]: v }));
+  const [form, setForm] = useState<any>({ date: new Date().toISOString().split('T')[0], category: 'feed', description: '', amount: '', vendor: '', notes: '' });
+  const set = (k: string, v: any) => setForm((p: any) => ({ ...p, [k]: v }));
   return (
     <form onSubmit={e => { e.preventDefault(); onSave(form); }} className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
@@ -47,7 +48,7 @@ function ExpenseForm({ onSave, onClose }: { onSave: (d: any) => void; onClose: (
         </div>
         <div className="space-y-1.5">
           <Label>Amount (₦) *</Label>
-          <Input type="number" min={0} value={form.amount} onChange={e => set('amount', +e.target.value)} required />
+          <Input type="number" min={0} value={form.amount} onChange={e => set('amount', e.target.value === '' ? '' : +e.target.value)} placeholder="0" required />
         </div>
         <div className="space-y-1.5">
           <Label>Vendor / Supplier</Label>
@@ -71,14 +72,16 @@ export default function ExpensesPage() {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
+  const { user } = useAuth();
+  const sectorId = user?.role === 'water_manager' ? 2 : user?.role === 'farm_manager' ? 1 : undefined;
 
   const { data: expenses = [], isLoading } = useQuery<Expense[]>({
-    queryKey: ['expenses'],
-    queryFn: () => api.get('/expenses').then(r => r.data),
+    queryKey: ['expenses', sectorId],
+    queryFn: () => api.get('/expenses', { params: { sector_id: sectorId } }).then(r => r.data),
   });
 
   const createMut = useMutation({
-    mutationFn: (d: any) => api.post('/expenses', d),
+    mutationFn: (d: any) => api.post('/expenses', { ...d, sector_id: sectorId }),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['expenses'] }); toast.success('Expense added'); setOpen(false); },
     onError: () => toast.error('Failed to add expense'),
   });

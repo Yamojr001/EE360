@@ -8,9 +8,13 @@ use Illuminate\Http\Request;
 
 class WaterSaleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return WaterSale::orderByDesc('date')->get();
+        $query = WaterSale::query();
+        if ($request->has('sector_id')) {
+            $query->where('sector_id', $request->sector_id);
+        }
+        return $query->orderByDesc('date')->get();
     }
 
     public function store(Request $request)
@@ -22,6 +26,9 @@ class WaterSaleController extends Controller
             'total_amount'      => 'required|numeric|min:0',
             'buyer'             => 'nullable|string|max:100',
             'distribution_area' => 'nullable|string|max:100',
+            'payment_method'    => 'nullable|string',
+            'payment_status'    => 'nullable|string',
+            'sector_id'         => 'nullable|integer',
         ]);
 
         return response()->json(WaterSale::create($data), 201);

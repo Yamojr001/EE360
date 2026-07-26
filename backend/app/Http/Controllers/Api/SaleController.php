@@ -8,9 +8,13 @@ use Illuminate\Http\Request;
 
 class SaleController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Sale::orderByDesc('date')->get();
+        $query = Sale::query();
+        if ($request->has('sector_id')) {
+            $query->where('sector_id', $request->sector_id);
+        }
+        return $query->orderByDesc('date')->get();
     }
 
     public function store(Request $request)
@@ -25,6 +29,9 @@ class SaleController extends Controller
             'total_amount' => 'required|numeric|min:0',
             'buyer'        => 'nullable|string|max:100',
             'notes'        => 'nullable|string',
+            'payment_method' => 'nullable|string',
+            'payment_status' => 'nullable|string',
+            'sector_id'    => 'nullable|integer',
         ]);
 
         return response()->json(Sale::create($data), 201);

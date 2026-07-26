@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\WorkerController;
 use App\Http\Controllers\Api\WaterProductionController;
 use App\Http\Controllers\Api\WaterSaleController;
 use App\Http\Controllers\Api\WaterExpenseController;
+use App\Http\Controllers\Api\VendorController;
+use App\Http\Controllers\Api\AnimalCategoryController;
 use App\Http\Controllers\Api\ReportController;
 
 /*
@@ -34,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Livestock (CRUD)
     Route::apiResource('livestock', AnimalController::class);
+    Route::apiResource('animal-categories', AnimalCategoryController::class);
 
     // Sales (CRUD)
     Route::apiResource('sales', SaleController::class);
@@ -41,8 +44,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // Expenses (CRUD)
     Route::apiResource('expenses', ExpenseController::class);
 
+    // Ledger Route
+    Route::get('/ledger', [App\Http\Controllers\Api\LedgerController::class, 'index']);
+
     // Inventory (CRUD)
     Route::apiResource('inventory', InventoryController::class);
+
+    // Vendors (CRUD)
+    Route::apiResource('vendors', VendorController::class);
 
     // Workers (CRUD)
     Route::apiResource('workers', WorkerController::class);

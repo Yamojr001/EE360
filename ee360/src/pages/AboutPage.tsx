@@ -83,15 +83,15 @@ export default function AboutPage() {
               {
                 icon: <Bird className="w-8 h-8" />,
                 title: 'Main Farm Operations',
-                color: 'bg-emerald-50 dark:bg-emerald-950/30 border-emerald-200 dark:border-emerald-800',
-                iconBg: 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400',
+                color: 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800',
+                iconBg: 'bg-blue-500/20 text-blue-700 dark:text-blue-400',
                 items: ['Poultry (broiler & layer chickens)', 'Catfish pond management', 'Goat & sheep breeding', 'Ram fattening for festive markets', 'Rabbit rearing', 'Crop & produce sales'],
               },
               {
                 icon: <Droplets className="w-8 h-8" />,
                 title: 'Water Production Business',
-                color: 'bg-cyan-50 dark:bg-cyan-950/30 border-cyan-200 dark:border-cyan-800',
-                iconBg: 'bg-cyan-500/20 text-cyan-700 dark:text-cyan-400',
+                color: 'bg-sky-50 dark:bg-sky-950/30 border-sky-200 dark:border-sky-800',
+                iconBg: 'bg-sky-500/20 text-sky-700 dark:text-sky-400',
                 items: ['Daily sachet water production', 'Quality-controlled packaging', 'Distribution across multiple zones', 'Bulk sales to hotels & markets', 'Raw water sourcing management', 'Staff scheduling & payroll'],
               },
             ].map(s => (

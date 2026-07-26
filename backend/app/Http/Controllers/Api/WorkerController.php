@@ -8,9 +8,13 @@ use Illuminate\Http\Request;
 
 class WorkerController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Worker::orderBy('name')->get();
+        $query = Worker::orderBy('name');
+        if ($request->has('sector_id')) {
+            $query->where('sector_id', $request->sector_id);
+        }
+        return $query->get();
     }
 
     public function store(Request $request)
@@ -24,7 +28,10 @@ class WorkerController extends Controller
             'status'    => 'required|in:active,inactive,on_leave',
             'address'   => 'nullable|string|max:200',
             'notes'     => 'nullable|string',
+            'sector_id' => 'nullable|integer',
         ]);
+        
+        $data['manager_id'] = request()->user()->id;
 
         return response()->json(Worker::create($data), 201);
     }
@@ -40,6 +47,7 @@ class WorkerController extends Controller
             'status'    => 'in:active,inactive,on_leave',
             'address'   => 'nullable|string|max:200',
             'notes'     => 'nullable|string',
+            'sector_id' => 'nullable|integer',
         ]);
 
         $worker->update($data);

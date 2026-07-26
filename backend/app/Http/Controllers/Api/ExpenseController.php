@@ -8,9 +8,13 @@ use Illuminate\Http\Request;
 
 class ExpenseController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Expense::orderByDesc('date')->get();
+        $query = Expense::query();
+        if ($request->has('sector_id')) {
+            $query->where('sector_id', $request->sector_id);
+        }
+        return $query->orderByDesc('date')->get();
     }
 
     public function store(Request $request)
@@ -22,6 +26,7 @@ class ExpenseController extends Controller
             'amount'      => 'required|numeric|min:0',
             'vendor'      => 'nullable|string|max:100',
             'notes'       => 'nullable|string',
+            'sector_id'   => 'nullable|integer',
         ]);
 
         return response()->json(Expense::create($data), 201);

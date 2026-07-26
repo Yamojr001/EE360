@@ -13,15 +13,15 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  livestock: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300',
-  water:     'bg-cyan-100 text-cyan-700 dark:bg-cyan-950 dark:text-cyan-300',
+  livestock: 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300',
+  water:     'bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300',
   workers:   'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300',
   general:   'bg-violet-100 text-violet-700 dark:bg-violet-950 dark:text-violet-300',
 };
 
 const GRADIENT_BG: Record<string, string> = {
-  livestock: 'from-emerald-600 to-teal-700',
-  water:     'from-cyan-600 to-blue-700',
+  livestock: 'from-blue-600 to-blue-700',
+  water:     'from-sky-600 to-blue-700',
   workers:   'from-amber-500 to-orange-600',
   general:   'from-violet-600 to-purple-700',
 };

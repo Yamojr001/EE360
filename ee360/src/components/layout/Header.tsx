@@ -2,7 +2,7 @@ import { useLocation } from 'wouter';
 import { Bell, Sun, Moon } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useState, useEffect } from 'react';
+import { useTheme } from 'next-themes';
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard':                   'Overview',
@@ -25,11 +25,7 @@ function getTitle(path: string) {
 export default function Header() {
   const [pathname] = useLocation();
   const { user } = useAuth();
-  const [dark, setDark] = useState(false);
-
-  useEffect(() => {
-    document.documentElement.classList.toggle('dark', dark);
-  }, [dark]);
+  const { resolvedTheme, setTheme } = useTheme();
 
   const initials = user ? user.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase() : '?';
 
@@ -44,10 +40,10 @@ export default function Header() {
 
       <div className="flex items-center gap-2">
         <button
-          onClick={() => setDark(!dark)}
+          onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
           className="p-2 rounded-lg hover:bg-muted text-muted-foreground transition-colors"
         >
-          {dark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          {resolvedTheme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
         </button>
 
         <button className="relative p-2 rounded-lg hover:bg-muted text-muted-foreground transition-colors">
