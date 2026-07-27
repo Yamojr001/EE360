@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Bird, ShoppingCart, Wallet, Package,
   Droplets, Users, BarChart3, ChevronLeft, ChevronRight, LogOut,
-  Images, BookOpen, UserCog, Layers, FlaskConical, Store, Clock,
+  Images, BookOpen, UserCog, Layers, FlaskConical, Store, Clock, Egg,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 
@@ -13,6 +13,7 @@ interface NavItem { label: string; href: string; icon: React.ReactNode; }
 const FARM_NAV: NavItem[] = [
   { label: 'Farm Dashboard', href: '/dashboard',            icon: <LayoutDashboard className="w-4 h-4" /> },
   { label: 'Livestock',      href: '/dashboard/livestock',  icon: <Bird className="w-4 h-4" /> },
+  { label: 'Hatchery',       href: '/dashboard/hatchery',   icon: <Egg className="w-4 h-4" /> },
   { label: 'Daily Production',href: '/dashboard/production', icon: <Layers className="w-4 h-4" /> },
   { label: 'Farm Sales',     href: '/dashboard/sales',      icon: <ShoppingCart className="w-4 h-4" /> },
   { label: 'Farm Expenses',  href: '/dashboard/expenses',   icon: <Wallet className="w-4 h-4" /> },
@@ -49,6 +50,7 @@ const SUPER_ADMIN_NAV: { section: string; items: NavItem[] }[] = [
     section: 'Farm Sector',
     items: [
       { label: 'Livestock',     href: '/dashboard/livestock', icon: <Bird className="w-4 h-4" /> },
+      { label: 'Hatchery',      href: '/dashboard/hatchery',  icon: <Egg className="w-4 h-4" /> },
       { label: 'Daily Production',href: '/dashboard/production', icon: <Layers className="w-4 h-4" /> },
       { label: 'Farm Sales',    href: '/dashboard/sales',     icon: <ShoppingCart className="w-4 h-4" /> },
       { label: 'Farm Expenses', href: '/dashboard/expenses',  icon: <Wallet className="w-4 h-4" /> },

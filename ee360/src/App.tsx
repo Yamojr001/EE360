@@ -23,6 +23,7 @@ import ReportsPage     from '@/pages/reports/ReportsPage';
 import LedgerPage      from '@/pages/dashboard/LedgerPage';
 import WaterPage       from '@/pages/water/WaterPage';
 import FarmProductionPage from '@/pages/livestock/FarmProductionPage';
+import HatcheryPage    from '@/pages/livestock/HatcheryPage';
 import CustomersPage   from '@/pages/dashboard/CustomersPage';
 
 // Admin-only pages
@@ -65,6 +66,14 @@ export default function App() {
           <ProtectedRoute>
             <DashboardLayout>
               <LivestockPage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        </Route>
+
+        <Route path="/dashboard/hatchery">
+          <ProtectedRoute>
+            <DashboardLayout>
+              <HatcheryPage />
             </DashboardLayout>
           </ProtectedRoute>
         </Route>

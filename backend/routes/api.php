@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\AnimalController;
+use App\Http\Controllers\Api\HatcheryRecordController;
 use App\Http\Controllers\Api\SaleController;
 use App\Http\Controllers\Api\ExpenseController;
 use App\Http\Controllers\Api\InventoryController;
@@ -38,8 +39,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/super-summary', [DashboardController::class, 'superSummary']);
 
     // Livestock (CRUD)
-    Route::apiResource('livestock', AnimalController::class);
     Route::apiResource('animal-categories', AnimalCategoryController::class);
+    Route::apiResource('livestock', AnimalController::class);
+    Route::apiResource('hatchery', HatcheryRecordController::class);
 
     // Sales (CRUD)
     Route::apiResource('sales', SaleController::class);
