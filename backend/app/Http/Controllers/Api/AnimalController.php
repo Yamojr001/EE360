@@ -8,9 +8,13 @@ use Illuminate\Http\Request;
 
 class AnimalController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Animal::orderBy('type')->orderBy('tag_id')->get();
+        $query = Animal::query();
+        if ($request->has('sector_id')) {
+            $query->where('sector_id', $request->sector_id);
+        }
+        return $query->orderBy('type')->orderBy('tag_id')->get();
     }
 
     public function store(Request $request)
@@ -25,6 +29,7 @@ class AnimalController extends Controller
             'purchase_price' => 'numeric|min:0',
             'current_value'  => 'numeric|min:0',
             'notes'          => 'nullable|string',
+            'sector_id'      => 'nullable|integer',
         ]);
 
         return response()->json(Animal::create($data), 201);

@@ -17,9 +17,12 @@ class LedgerController extends Controller
     public function index(Request $request)
     {
         $activities = collect();
+        $sectorId = $request->query('sector_id');
 
         // 1. Water Productions
-        WaterProduction::all()->each(function($item) use (&$activities) {
+        $wpQuery = WaterProduction::query();
+        if ($sectorId) $wpQuery->where('sector_id', $sectorId);
+        $wpQuery->get()->each(function($item) use (&$activities) {
             $activities->push([
                 'id' => 'wp_'.$item->id,
                 'date' => $item->date->format('Y-m-d'),
@@ -33,7 +36,9 @@ class LedgerController extends Controller
         });
 
         // 2. Water Sales
-        WaterSale::all()->each(function($item) use (&$activities) {
+        $wsQuery = WaterSale::query();
+        if ($sectorId) $wsQuery->where('sector_id', $sectorId);
+        $wsQuery->get()->each(function($item) use (&$activities) {
             $activities->push([
                 'id' => 'ws_'.$item->id,
                 'date' => $item->date,
@@ -47,7 +52,9 @@ class LedgerController extends Controller
         });
 
         // 3. Farm Sales (Eggs, Animals)
-        Sale::all()->each(function($item) use (&$activities) {
+        $fsQuery = Sale::query();
+        if ($sectorId) $fsQuery->where('sector_id', $sectorId);
+        $fsQuery->get()->each(function($item) use (&$activities) {
             $activities->push([
                 'id' => 'fs_'.$item->id,
                 'date' => $item->date,
@@ -61,7 +68,9 @@ class LedgerController extends Controller
         });
 
         // 4. Animal Births / Deaths
-        Animal::all()->each(function($item) use (&$activities) {
+        $anQuery = Animal::query();
+        if ($sectorId) $anQuery->where('sector_id', $sectorId);
+        $anQuery->get()->each(function($item) use (&$activities) {
             $date = $item->created_at->format('Y-m-d');
             $status = $item->status; // active, sold, dead
             
@@ -78,7 +87,9 @@ class LedgerController extends Controller
         });
 
         // 5. Farm Expenses
-        Expense::all()->each(function($item) use (&$activities) {
+        $feQuery = Expense::query();
+        if ($sectorId) $feQuery->where('sector_id', $sectorId);
+        $feQuery->get()->each(function($item) use (&$activities) {
             $activities->push([
                 'id' => 'fe_'.$item->id,
                 'date' => $item->date,
@@ -92,7 +103,9 @@ class LedgerController extends Controller
         });
 
         // 6. Water Expenses
-        WaterExpense::all()->each(function($item) use (&$activities) {
+        $weQuery = WaterExpense::query();
+        if ($sectorId) $weQuery->where('sector_id', $sectorId);
+        $weQuery->get()->each(function($item) use (&$activities) {
             $activities->push([
                 'id' => 'we_'.$item->id,
                 'date' => $item->date,
@@ -106,10 +119,15 @@ class LedgerController extends Controller
         });
 
         // Inventory Transactions
-        DB::table('inventory_transactions')
+        $invQuery = DB::table('inventory_transactions')
           ->join('inventory_items', 'inventory_transactions.inventory_item_id', '=', 'inventory_items.id')
-          ->select('inventory_transactions.*', 'inventory_items.name', 'inventory_items.category', 'inventory_items.unit')
-          ->get()
+          ->select('inventory_transactions.*', 'inventory_items.name', 'inventory_items.category', 'inventory_items.unit');
+        
+        if ($sectorId) {
+            $invQuery->where('inventory_items.sector_id', $sectorId);
+        }
+
+        $invQuery->get()
           ->each(function($tx) use (&$activities) {
               $activities->push([
                   'id' => 'it_'.$tx->id,

@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { useState } from 'react';
 import api from '@/lib/api';
 import { formatCurrency, formatDate } from '@/lib/utils';
+import { useAuth } from '@/contexts/auth-context';
 import { TrendingUp, TrendingDown, RefreshCcw, Package, Droplets, Bird, BookOpen } from 'lucide-react';
 
 interface LedgerItem {
@@ -21,9 +22,12 @@ interface LedgerItem {
 export default function LedgerPage() {
   const [dateFilter, setDateFilter] = useState(new Date().toISOString().split('T')[0]);
 
+  const { user } = useAuth();
+  const sectorId = user?.role === 'water_manager' ? 2 : user?.role === 'farm_manager' ? 1 : undefined;
+
   const { data: ledger = [], isLoading } = useQuery<LedgerItem[]>({
-    queryKey: ['ledger'],
-    queryFn: () => api.get('/ledger').then(res => res.data),
+    queryKey: ['ledger', sectorId],
+    queryFn: () => api.get('/ledger', { params: { sector_id: sectorId } }).then(res => res.data),
   });
 
   const filtered = ledger.filter(item => !dateFilter || item.date === dateFilter);
