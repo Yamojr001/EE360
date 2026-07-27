@@ -15,8 +15,8 @@ class WaterSale extends Model
     protected $table = 'water_sales';
 
     protected $fillable = [
-        'date', 'quantity', 'unit_price', 'total_amount',
-        'buyer', 'distribution_area',
+        'date', 'product_type', 'unit', 'quantity', 'unit_price', 'total_amount',
+        'buyer', 'customer_id', 'distribution_area', 'payment_method', 'payment_status', 'sector_id'
     ];
 
     protected $casts = [

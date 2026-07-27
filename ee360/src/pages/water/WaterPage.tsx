@@ -18,13 +18,13 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { useAuth } from '@/contexts/auth-context';
 import { CustomerCombobox } from '@/components/ui/customer-combobox';
 
-interface Production { id: number; date: string; bags_produced: number; bags_wasted?: number; waste_reason?: string; liters_used: number; cost: number; notes: string; deleted_at?: string; deleter?: { name: string }; }
-interface WaterSale { id: number; date: string; quantity: number; unit_price: number; total_amount: number; buyer: string; distribution_area: string; payment_method?: string; payment_status?: string; }
+interface Production { id: number; date: string; product_type?: string; unit?: string; bags_produced: number; bags_wasted?: number; waste_reason?: string; liters_used: number; cost: number; notes: string; deleted_at?: string; deleter?: { name: string }; }
+interface WaterSale { id: number; date: string; product_type?: string; unit?: string; quantity: number; unit_price: number; total_amount: number; buyer: string; distribution_area: string; payment_method?: string; payment_status?: string; }
 interface WaterExpense { id: number; date: string; description: string; amount: number; vendor: string; notes: string; }
 interface InventoryItem { id: number; name: string; category: string; quantity: number; unit: string; units_per_package?: number; unit_cost: number; min_stock_level: number; supplier: string; notes: string; }
 
 function ProductionForm({ onSave, onClose, inventoryItems = [] }: { onSave: (d: any) => void; onClose: () => void; inventoryItems?: InventoryItem[] }) {
-  const [form, setForm] = useState({ date: new Date().toISOString().split('T')[0], bags_produced: '', bags_wasted: '', waste_reason: '', liters_used: '', cost: '', notes: '' });
+  const [form, setForm] = useState({ date: new Date().toISOString().split('T')[0], product_type: 'sachet', unit: 'bags', bags_produced: '', bags_wasted: '', waste_reason: '', liters_used: '', cost: '', notes: '' });
   const [usedInv, setUsedInv] = useState<Record<number, { checked: boolean, qty: number }>>({});
   const set = (k: string, v: any) => setForm(p => ({ ...p, [k]: v }));
 
@@ -54,9 +54,31 @@ function ProductionForm({ onSave, onClose, inventoryItems = [] }: { onSave: (d: 
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5 col-span-2"><Label>Date</Label><Input type="date" value={form.date} onChange={e => set('date', e.target.value)} /></div>
-        <div className="space-y-1.5"><Label>Bags Produced</Label><Input type="number" min={0} value={form.bags_produced} onChange={e => set('bags_produced', e.target.value)} placeholder="0" required /></div>
+        <div className="space-y-1.5">
+          <Label>Product Type</Label>
+          <Select value={form.product_type} onValueChange={v => set('product_type', v)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="sachet">Sachet Water</SelectItem>
+              <SelectItem value="ice_block">Ice Block</SelectItem>
+              <SelectItem value="bottled">Bottled Water</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Unit</Label>
+          <Select value={form.unit} onValueChange={v => set('unit', v)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="bags">Bags</SelectItem>
+              <SelectItem value="pieces">Pieces</SelectItem>
+              <SelectItem value="bottles">Bottles</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5"><Label>Quantity Produced</Label><Input type="number" min={0} value={form.bags_produced} onChange={e => set('bags_produced', e.target.value)} placeholder="0" required /></div>
         <div className="space-y-1.5"><Label>Litres Used</Label><Input type="number" min={0} value={form.liters_used} onChange={e => set('liters_used', e.target.value)} placeholder="0" /></div>
-        <div className="space-y-1.5"><Label>Bags Wasted/Damaged</Label><Input type="number" min={0} value={form.bags_wasted} onChange={e => set('bags_wasted', e.target.value)} placeholder="0" /></div>
+        <div className="space-y-1.5"><Label>Quantity Wasted/Damaged</Label><Input type="number" min={0} value={form.bags_wasted} onChange={e => set('bags_wasted', e.target.value)} placeholder="0" /></div>
         <div className="space-y-1.5"><Label>Production Cost (₦)</Label><Input type="number" min={0} value={form.cost} onChange={e => set('cost', e.target.value)} placeholder="0" /></div>
         {Number(form.bags_wasted) > 0 && (
           <div className="space-y-1.5 col-span-2"><Label>Waste Reason</Label><Input value={form.waste_reason} onChange={e => set('waste_reason', e.target.value)} placeholder="e.g. Machine fault, leakages" required /></div>
@@ -121,7 +143,7 @@ function ProductionForm({ onSave, onClose, inventoryItems = [] }: { onSave: (d: 
 }
 
 function SaleForm({ onSave, onClose, sectorId }: { onSave: (d: any) => void; onClose: () => void; sectorId?: number; }) {
-  const [form, setForm] = useState<any>({ date: new Date().toISOString().split('T')[0], quantity: '', unit_price: '', total_amount: 0, buyer: '', customer_id: '', distribution_area: '', payment_method: 'Cash', payment_status: 'Paid' });
+  const [form, setForm] = useState<any>({ date: new Date().toISOString().split('T')[0], product_type: 'sachet', unit: 'bags', quantity: '', unit_price: '', total_amount: 0, buyer: '', customer_id: '', distribution_area: '', payment_method: 'Cash', payment_status: 'Paid' });
   const set = (k: string, v: any) => setForm((p: any) => {
     const n = { ...p, [k]: v };
     if (k === 'quantity' || k === 'unit_price') {
@@ -135,8 +157,30 @@ function SaleForm({ onSave, onClose, sectorId }: { onSave: (d: any) => void; onC
     <form onSubmit={e => { e.preventDefault(); onSave(form); }} className="space-y-4">
       <div className="grid grid-cols-2 gap-3">
         <div className="space-y-1.5 col-span-2"><Label>Date</Label><Input type="date" value={form.date} onChange={e => set('date', e.target.value)} required /></div>
-        <div className="space-y-1.5"><Label>Bags Sold</Label><Input type="number" min={0} value={form.quantity} onChange={e => set('quantity', e.target.value === '' ? '' : +e.target.value)} placeholder="0" required /></div>
-        <div className="space-y-1.5"><Label>Price/Bag (₦)</Label><Input type="number" min={0} value={form.unit_price} onChange={e => set('unit_price', e.target.value === '' ? '' : +e.target.value)} placeholder="0" required /></div>
+        <div className="space-y-1.5">
+          <Label>Product Type</Label>
+          <Select value={form.product_type} onValueChange={v => set('product_type', v)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="sachet">Sachet Water</SelectItem>
+              <SelectItem value="ice_block">Ice Block</SelectItem>
+              <SelectItem value="bottled">Bottled Water</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5">
+          <Label>Unit</Label>
+          <Select value={form.unit} onValueChange={v => set('unit', v)}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="bags">Bags</SelectItem>
+              <SelectItem value="pieces">Pieces</SelectItem>
+              <SelectItem value="bottles">Bottles</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-1.5"><Label>Quantity Sold</Label><Input type="number" min={0} value={form.quantity} onChange={e => set('quantity', e.target.value === '' ? '' : +e.target.value)} placeholder="0" required /></div>
+        <div className="space-y-1.5"><Label>Price per Unit (₦)</Label><Input type="number" min={0} value={form.unit_price} onChange={e => set('unit_price', e.target.value === '' ? '' : +e.target.value)} placeholder="0" required /></div>
         <div className="space-y-1.5"><Label>Total (₦)</Label><Input type="number" value={form.total_amount || ''} onChange={e => set('total_amount', e.target.value === '' ? '' : +e.target.value)} className="font-semibold bg-muted" placeholder="0" readOnly required /></div>
         <div className="space-y-1.5">
           <Label>Buyer</Label>
@@ -373,13 +417,17 @@ export default function WaterPage() {
             <CardContent className="p-0">
               <table className="w-full text-sm">
                 <thead><tr className="border-b border-border bg-muted/40">
-                  {['Date', 'Total Produced', 'Waste', 'Net valid', 'Cost', 'Notes/Reason', ''].map(h => <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">{h}</th>)}
+                  {['Date', 'Product', 'Total Produced', 'Waste', 'Net valid', 'Cost', 'Notes/Reason', ''].map(h => <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">{h}</th>)}
                 </tr></thead>
                 <tbody>
-                  {production.length === 0 ? <tr><td colSpan={7} className="text-center py-10 text-muted-foreground"><Droplets className="w-10 h-10 mx-auto mb-2 opacity-30" />No production logged yet</td></tr>
+                  {production.length === 0 ? <tr><td colSpan={8} className="text-center py-10 text-muted-foreground"><Droplets className="w-10 h-10 mx-auto mb-2 opacity-30" />No production logged yet</td></tr>
                     : production.map(p => (
                       <tr key={p.id} className="border-b border-border hover:bg-muted/30">
                         <td className="px-4 py-3 text-xs text-muted-foreground">{formatDate(p.date)}</td>
+                        <td className="px-4 py-3">
+                          <span className="font-medium capitalize">{p.product_type?.replace('_', ' ')}</span>
+                          <span className="text-xs text-muted-foreground block capitalize">{p.unit}</span>
+                        </td>
                         <td className="px-4 py-3 font-semibold text-muted-foreground">
                           {p.bags_produced}
                           {p.deleted_at && <span className="ml-2 text-xs font-bold bg-destructive/10 text-destructive px-1.5 py-0.5 rounded">Deleted by {p.deleter?.name || 'Admin'}</span>}
@@ -409,13 +457,17 @@ export default function WaterPage() {
             <CardContent className="p-0">
               <table className="w-full text-sm">
                 <thead><tr className="border-b border-border bg-muted/40">
-                  {['Date', 'Bags', 'Price/Bag', 'Total', 'Buyer', 'Area', 'Payment', 'Status', ''].map(h => <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">{h}</th>)}
+                  {['Date', 'Product', 'Quantity', 'Price/Unit', 'Total', 'Buyer', 'Area', 'Payment', 'Status', ''].map(h => <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">{h}</th>)}
                 </tr></thead>
                 <tbody>
-                  {waterSales.length === 0 ? <tr><td colSpan={9} className="text-center py-10 text-muted-foreground">No sales yet</td></tr>
+                  {waterSales.length === 0 ? <tr><td colSpan={10} className="text-center py-10 text-muted-foreground">No sales yet</td></tr>
                     : waterSales.map(s => (
                       <tr key={s.id} className="border-b border-border hover:bg-muted/30">
                         <td className="px-4 py-3 text-xs text-muted-foreground">{formatDate(s.date)}</td>
+                        <td className="px-4 py-3">
+                          <span className="font-medium capitalize">{s.product_type?.replace('_', ' ')}</span>
+                          <span className="text-xs text-muted-foreground block capitalize">{s.unit}</span>
+                        </td>
                         <td className="px-4 py-3 font-semibold">{s.quantity}</td>
                         <td className="px-4 py-3">₦{s.unit_price}</td>
                         <td className="px-4 py-3 font-semibold text-blue-600">{formatCurrency(s.total_amount)}</td>

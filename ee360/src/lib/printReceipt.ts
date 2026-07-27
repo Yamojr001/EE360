@@ -2,7 +2,10 @@ export function printReceipt(sale: any, type: 'farm' | 'water') {
   const printWindow = window.open('', '_blank');
   if (!printWindow) return;
 
-  const itemName = type === 'farm' ? sale.item : 'Sachet Water (Bags)';
+  const isWater = type === 'water';
+  const itemName = isWater 
+    ? `${(sale.product_type || 'sachet').replace('_', ' ').toUpperCase()} (${sale.unit || 'bags'})`
+    : sale.item;
   const unitPrice = sale.unit_price || 0;
   
   printWindow.document.write(`

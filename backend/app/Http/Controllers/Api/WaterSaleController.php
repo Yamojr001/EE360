@@ -21,6 +21,8 @@ class WaterSaleController extends Controller
     {
         $data = $request->validate([
             'date'              => 'required|date',
+            'product_type'      => 'nullable|string|max:50',
+            'unit'              => 'nullable|string|max:50',
             'quantity'          => 'required|integer|min:0',
             'unit_price'        => 'required|numeric|min:0',
             'total_amount'      => 'required|numeric|min:0',

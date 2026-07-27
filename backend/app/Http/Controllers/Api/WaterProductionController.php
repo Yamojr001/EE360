@@ -21,6 +21,8 @@ class WaterProductionController extends Controller
     {
         $data = $request->validate([
             'date'          => 'required|date',
+            'product_type'  => 'nullable|string|max:50',
+            'unit'          => 'nullable|string|max:50',
             'bags_produced' => 'required|integer|min:0',
             'liters_used'   => 'numeric|min:0',
             'cost'          => 'numeric|min:0',

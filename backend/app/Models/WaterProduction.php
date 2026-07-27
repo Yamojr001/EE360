@@ -16,7 +16,7 @@ class WaterProduction extends Model
     protected $table = 'water_productions';
 
     protected $fillable = [
-        'date', 'bags_produced', 'liters_used', 'cost', 'notes', 'deleted_by'
+        'date', 'product_type', 'unit', 'bags_produced', 'bags_wasted', 'waste_reason', 'liters_used', 'cost', 'notes', 'deleted_by', 'sector_id'
     ];
 
     protected $casts = [
