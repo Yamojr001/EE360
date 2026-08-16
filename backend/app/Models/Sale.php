@@ -14,7 +14,7 @@ class Sale extends Model
 
     protected $fillable = [
         'date', 'category', 'item', 'quantity', 'unit',
-        'unit_price', 'total_amount', 'buyer', 'notes',
+        'unit_price', 'total_amount', 'amount_paid', 'payment_status', 'buyer', 'notes',
     ];
 
     protected $casts = [
@@ -22,6 +22,7 @@ class Sale extends Model
         'quantity'     => 'decimal:2',
         'unit_price'   => 'decimal:2',
         'total_amount' => 'decimal:2',
+        'amount_paid'  => 'decimal:2',
     ];
 
     protected static function booted()

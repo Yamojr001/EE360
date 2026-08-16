@@ -15,7 +15,7 @@ class WaterSale extends Model
     protected $table = 'water_sales';
 
     protected $fillable = [
-        'date', 'product_type', 'unit', 'quantity', 'unit_price', 'total_amount',
+        'date', 'product_type', 'unit', 'quantity', 'unit_price', 'total_amount', 'amount_paid',
         'buyer', 'customer_id', 'distribution_area', 'payment_method', 'payment_status', 'sector_id'
     ];
 
@@ -24,6 +24,7 @@ class WaterSale extends Model
         'quantity'     => 'integer',
         'unit_price'   => 'decimal:2',
         'total_amount' => 'decimal:2',
+        'amount_paid'  => 'decimal:2',
     ];
 
     protected static function booted()

@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Bird, ShoppingCart, Wallet, Package,
   Droplets, Users, BarChart3, ChevronLeft, ChevronRight, LogOut,
-  Images, BookOpen, UserCog, Layers, FlaskConical, Store, Clock, Egg,
+  Images, BookOpen, UserCog, Layers, FlaskConical, Store, Clock, Egg, AlertTriangle,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 
@@ -19,6 +19,7 @@ const FARM_NAV: NavItem[] = [
   { label: 'Farm Expenses',  href: '/dashboard/expenses',   icon: <Wallet className="w-4 h-4" /> },
   { label: 'Inventory',      href: '/dashboard/inventory',  icon: <Package className="w-4 h-4" /> },
   { label: 'Daily Ledger',   href: '/dashboard/ledger',     icon: <BookOpen className="w-4 h-4" /> },
+  { label: 'Report Problem', href: '/dashboard/incidents',  icon: <AlertTriangle className="w-4 h-4 text-amber-500" /> },
   { label: 'Farm Workers',   href: '/dashboard/workers',    icon: <Users className="w-4 h-4" /> },
   { label: 'Vendors',        href: '/dashboard/vendors',    icon: <Store className="w-4 h-4" /> },
   { label: 'Customers',      href: '/dashboard/customers',  icon: <Users className="w-4 h-4" /> },
@@ -29,6 +30,7 @@ const WATER_NAV: NavItem[] = [
   { label: 'Water Dashboard', href: '/dashboard',        icon: <LayoutDashboard className="w-4 h-4" /> },
   { label: 'Water Business',  href: '/dashboard/water',  icon: <Droplets className="w-4 h-4" /> },
   { label: 'Daily Ledger',    href: '/dashboard/ledger', icon: <BookOpen className="w-4 h-4" /> },
+  { label: 'Report Problem',  href: '/dashboard/incidents', icon: <AlertTriangle className="w-4 h-4 text-amber-500" /> },
   { label: 'Water Workers',   href: '/dashboard/workers',icon: <Users className="w-4 h-4" /> },
   { label: 'Vendors',         href: '/dashboard/vendors', icon: <Store className="w-4 h-4" /> },
   { label: 'Customers',       href: '/dashboard/customers',icon: <Users className="w-4 h-4" /> },
@@ -40,6 +42,7 @@ const SUPER_ADMIN_NAV: { section: string; items: NavItem[] }[] = [
     section: 'Overview',
     items: [
       { label: 'Command Centre', href: '/dashboard', icon: <Layers className="w-4 h-4" /> },
+      { label: 'Report Problem', href: '/dashboard/incidents', icon: <AlertTriangle className="w-4 h-4 text-amber-500" /> },
       { label: 'Activity Logs',  href: '/dashboard/admin/logs', icon: <Clock className="w-4 h-4" /> },
       { label: 'Customers',      href: '/dashboard/customers',  icon: <Users className="w-4 h-4" /> },
       { label: 'Daily Ledger',   href: '/dashboard/ledger', icon: <BookOpen className="w-4 h-4" /> },

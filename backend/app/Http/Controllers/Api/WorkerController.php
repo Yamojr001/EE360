@@ -11,7 +11,7 @@ class WorkerController extends Controller
     public function index(Request $request)
     {
         $query = Worker::orderBy('name');
-        if ($request->has('sector_id')) {
+        if ($request->filled('sector_id')) {
             $query->where('sector_id', $request->sector_id);
         }
         return $query->get();
@@ -29,9 +29,14 @@ class WorkerController extends Controller
             'address'   => 'nullable|string|max:200',
             'notes'     => 'nullable|string',
             'sector_id' => 'nullable|integer',
+            'photo'     => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
         
         $data['manager_id'] = request()->user()->id;
+
+        if ($request->hasFile('photo')) {
+            $data['photo'] = $request->file('photo')->store('worker-photos', 'public');
+        }
 
         return response()->json(Worker::create($data), 201);
     }
@@ -48,7 +53,15 @@ class WorkerController extends Controller
             'address'   => 'nullable|string|max:200',
             'notes'     => 'nullable|string',
             'sector_id' => 'nullable|integer',
+            'photo'     => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
+
+        if ($request->hasFile('photo')) {
+            if ($worker->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($worker->photo)) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($worker->photo);
+            }
+            $data['photo'] = $request->file('photo')->store('worker-photos', 'public');
+        }
 
         $worker->update($data);
         return $worker;

@@ -72,6 +72,7 @@ function CategoryManageDialog({ open, onClose, sectorId }: { open: boolean; onCl
                 <SelectContent>
                   <SelectItem value="animal">Animal</SelectItem>
                   <SelectItem value="product">Product</SelectItem>
+                  <SelectItem value="plant">Plant / Crop</SelectItem>
                 </SelectContent>
               </Select>
             </div>

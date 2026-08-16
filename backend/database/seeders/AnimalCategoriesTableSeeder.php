@@ -16,8 +16,13 @@ class AnimalCategoriesTableSeeder extends Seeder
             ['name' => 'Chicken', 'type' => 'animal', 'sector_id' => 1],
             ['name' => 'Goat', 'type' => 'animal', 'sector_id' => 1],
             ['name' => 'Sheep', 'type' => 'animal', 'sector_id' => 1],
+            ['name' => 'Cattle', 'type' => 'animal', 'sector_id' => 1],
             ['name' => 'Eggs', 'type' => 'product', 'sector_id' => 1],
             ['name' => 'Milk', 'type' => 'product', 'sector_id' => 1],
+            ['name' => 'Fruit Production', 'type' => 'product', 'sector_id' => 1],
+            ['name' => 'Small Plantation', 'type' => 'plant', 'sector_id' => 1],
+            ['name' => 'Crops & Vegetables', 'type' => 'product', 'sector_id' => 1],
+            ['name' => 'Seedlings & Nursery', 'type' => 'plant', 'sector_id' => 1],
         ];
 
         foreach ($categories as $cat) {

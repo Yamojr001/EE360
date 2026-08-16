@@ -143,13 +143,18 @@ function ProductionForm({ onSave, onClose, inventoryItems = [] }: { onSave: (d: 
 }
 
 function SaleForm({ onSave, onClose, sectorId }: { onSave: (d: any) => void; onClose: () => void; sectorId?: number; }) {
-  const [form, setForm] = useState<any>({ date: new Date().toISOString().split('T')[0], product_type: 'sachet', unit: 'bags', quantity: '', unit_price: '', total_amount: 0, buyer: '', customer_id: '', distribution_area: '', payment_method: 'Cash', payment_status: 'Paid' });
+  const [form, setForm] = useState<any>({ date: new Date().toISOString().split('T')[0], product_type: 'sachet', unit: 'bags', quantity: '', unit_price: '', total_amount: 0, amount_paid: 0, buyer: '', customer_id: '', distribution_area: '', payment_method: 'Cash', payment_status: 'paid' });
   const set = (k: string, v: any) => setForm((p: any) => {
     const n = { ...p, [k]: v };
     if (k === 'quantity' || k === 'unit_price') {
       const q = Number(n.quantity) || 0;
       const u = Number(n.unit_price) || 0;
       n.total_amount = q * u;
+      if (n.payment_status === 'paid') n.amount_paid = n.total_amount;
+    }
+    if (k === 'payment_method' && (v === 'Drawing' || v === 'Draw')) {
+      n.amount_paid = 0;
+      n.payment_status = 'paid';
     }
     return n;
   });
@@ -193,7 +198,7 @@ function SaleForm({ onSave, onClose, sectorId }: { onSave: (d: any) => void; onC
             sectorId={sectorId} 
           />
         </div>
-        <div className="space-y-1.5"><Label>Distribution Area</Label><Input value={form.distribution_area} onChange={e => set('distribution_area', e.target.value)} placeholder="e.g. Market A, Zone 3" /></div>
+        <div className="space-y-1.5 col-span-2"><Label>Distribution Area</Label><Input value={form.distribution_area} onChange={e => set('distribution_area', e.target.value)} placeholder="e.g. Market A, Zone 3" /></div>
         <div className="space-y-1.5">
           <Label>Payment Method</Label>
           <Select value={form.payment_method} onValueChange={v => set('payment_method', v)}>
@@ -202,18 +207,19 @@ function SaleForm({ onSave, onClose, sectorId }: { onSave: (d: any) => void; onC
               <SelectItem value="Cash">Cash</SelectItem>
               <SelectItem value="Transfer">Transfer</SelectItem>
               <SelectItem value="POS">POS</SelectItem>
+              <SelectItem value="Drawing">Drawing (Owner taking)</SelectItem>
             </SelectContent>
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label>Payment Status</Label>
-          <Select value={form.payment_status} onValueChange={v => set('payment_status', v)}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Paid">Paid</SelectItem>
-              <SelectItem value="Credit">Credit (Unpaid)</SelectItem>
-            </SelectContent>
-          </Select>
+          <Label>Amount Paid (₦)</Label>
+          <Input 
+            type="number" min={0} 
+            value={form.amount_paid} 
+            onChange={e => set('amount_paid', e.target.value === '' ? '' : +e.target.value)} 
+            disabled={form.payment_method === 'Drawing' || form.payment_method === 'Draw'}
+            placeholder="0" 
+          />
         </div>
       </div>
       <div className="flex gap-3 pt-2">
@@ -289,6 +295,38 @@ function InventoryForm({ onSave, onClose }: { onSave: (d: any) => void; onClose:
   );
 }
 
+function PaymentForm({ sale, onSave, onClose }: { sale: any; onSave: (d: any) => void; onClose: () => void }) {
+  const [paid, setPaid] = useState<number | ''>(sale.amount_paid || 0);
+  
+  return (
+    <form onSubmit={e => { e.preventDefault(); onSave({ amount_paid: paid }); }} className="space-y-4">
+      <div className="space-y-3">
+        <div className="flex justify-between items-center text-sm border-b pb-2">
+          <span className="text-muted-foreground">Total Amount:</span>
+          <span className="font-bold">{formatCurrency(sale.total_amount)}</span>
+        </div>
+        <div className="flex justify-between items-center text-sm border-b pb-2">
+          <span className="text-muted-foreground">Previously Paid:</span>
+          <span className="font-bold text-blue-600">{formatCurrency(sale.amount_paid || 0)}</span>
+        </div>
+        <div className="flex justify-between items-center text-sm pb-2">
+          <span className="text-muted-foreground">Remaining Balance:</span>
+          <span className="font-bold text-destructive">{formatCurrency(sale.total_amount - (Number(sale.amount_paid) || 0))}</span>
+        </div>
+      </div>
+      <div className="space-y-1.5 pt-2">
+        <Label>Update Total Amount Paid (₦)</Label>
+        <Input type="number" min={0} value={paid} onChange={e => setPaid(e.target.value === '' ? '' : +e.target.value)} required />
+        <p className="text-xs text-muted-foreground">Enter the new total cumulative amount paid so far.</p>
+      </div>
+      <div className="flex gap-3 pt-2">
+        <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancel</Button>
+        <Button type="submit" className="flex-1">Save Payment</Button>
+      </div>
+    </form>
+  );
+}
+
 export default function WaterPage() {
   const qc = useQueryClient();
   const { user } = useAuth();
@@ -315,6 +353,12 @@ export default function WaterPage() {
   const addExp = useMutation({ mutationFn: (d: any) => api.post('/water/expenses', { ...d, sector_id: sectorId }), onSuccess: () => { qc.invalidateQueries({ queryKey: ['water-expenses'] }); toast.success('Expense recorded'); setExpOpen(false); } });
   const addInv = useMutation({ mutationFn: (d: any) => api.post('/inventory', { ...d, sector_id: sectorId }), onSuccess: () => { qc.invalidateQueries({ queryKey: ['inventory'] }); toast.success('Inventory added'); setInvOpen(false); } });
 
+  const updatePaymentMut = useMutation({
+    mutationFn: (d: any) => api.put(`/water-sales/${paymentSale?.id}`, d),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['water-sales'] }); toast.success('Payment updated!'); setPaymentSale(null); },
+    onError: () => toast.error('Failed to update payment'),
+  });
+
   const delProd = useMutation({ mutationFn: (id: number) => api.delete(`/water/production/${id}`), onSuccess: () => qc.invalidateQueries({ queryKey: ['water-production'] }) });
   const delSale = useMutation({ mutationFn: (id: number) => api.delete(`/water/sales/${id}`), onSuccess: () => qc.invalidateQueries({ queryKey: ['water-sales'] }) });
   const delExp = useMutation({ mutationFn: (id: number) => api.delete(`/water/expenses/${id}`), onSuccess: () => qc.invalidateQueries({ queryKey: ['water-expenses'] }) });
@@ -325,7 +369,10 @@ export default function WaterPage() {
   const totalWasted = activeProduction.reduce((s, p) => s + Number(p.bags_wasted || 0), 0);
   const netBags = totalProduced - totalWasted;
   
-  const totalRevenue = waterSales.reduce((s, s2) => s + Number(s2.total_amount), 0);
+  const totalSales = waterSales.filter(s => s.payment_method !== 'Drawing' && s.payment_method !== 'Draw').reduce((s, x) => s + Number(x.total_amount), 0);
+  const paidSales = waterSales.filter(s => s.payment_method !== 'Drawing' && s.payment_method !== 'Draw').reduce((s, x) => s + Number(x.amount_paid || x.total_amount), 0);
+  const outstandingSales = waterSales.filter(s => s.payment_method !== 'Drawing' && s.payment_method !== 'Draw' && s.payment_status === 'partial').reduce((s, x) => s + (Number(x.total_amount) - Number(x.amount_paid || 0)), 0);
+
   const prodCost = activeProduction.reduce((s, p) => s + Number(p.cost), 0);
   const expCost = waterExpenses.reduce((s, e) => s + Number(e.amount), 0);
   const totalCost = prodCost + expCost;
@@ -356,14 +403,20 @@ export default function WaterPage() {
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <Card>
           <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground mb-1">Gross Production</p>
-            <p className="text-xl font-bold">{totalProduced.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground mb-1">Expected Revenue</p>
+            <p className="text-xl font-bold text-blue-600">{formatCurrency(totalSales)}</p>
           </CardContent>
         </Card>
-        <Card className="border-red-200 bg-red-50 dark:bg-red-950/20">
+        <Card>
           <CardContent className="p-4">
-            <p className="text-xs text-red-600 mb-1 flex items-center gap-1"><AlertTriangle className="w-3 h-3"/> Total Waste</p>
-            <p className="text-xl font-bold text-red-700">{totalWasted.toLocaleString()}</p>
+            <p className="text-xs text-muted-foreground mb-1">Total Paid In</p>
+            <p className="text-xl font-bold text-green-600">{formatCurrency(paidSales)}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground mb-1">Outstanding Balance</p>
+            <p className="text-xl font-bold text-orange-500">{formatCurrency(outstandingSales)}</p>
           </CardContent>
         </Card>
         <Card className="border-blue-200 bg-blue-50 dark:bg-blue-950/20">
@@ -374,14 +427,8 @@ export default function WaterPage() {
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground mb-1">Total Revenue</p>
-            <p className="text-xl font-bold text-green-600">{formatCurrency(totalRevenue)}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground mb-1">Net Profit</p>
-            <p className="text-xl font-bold">{formatCurrency(totalRevenue - totalCost)}</p>
+            <p className="text-xs text-muted-foreground mb-1">Net Profit (Paid - Costs)</p>
+            <p className="text-xl font-bold">{formatCurrency(paidSales - totalCost)}</p>
           </CardContent>
         </Card>
       </div>
@@ -457,30 +504,37 @@ export default function WaterPage() {
             <CardContent className="p-0">
               <table className="w-full text-sm">
                 <thead><tr className="border-b border-border bg-muted/40">
-                  {['Date', 'Product', 'Quantity', 'Price/Unit', 'Total', 'Buyer', 'Area', 'Payment', 'Status', ''].map(h => <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">{h}</th>)}
+                  {['Date', 'Product', 'Quantity', 'Total', 'Paid', 'Buyer', 'Method', 'Status', ''].map(h => <th key={h} className="text-left px-4 py-3 text-xs font-medium text-muted-foreground">{h}</th>)}
                 </tr></thead>
                 <tbody>
                   {waterSales.length === 0 ? <tr><td colSpan={10} className="text-center py-10 text-muted-foreground">No sales yet</td></tr>
-                    : waterSales.map(s => (
-                      <tr key={s.id} className="border-b border-border hover:bg-muted/30">
+                    : waterSales.map(s => {
+                      const isPartial = s.payment_status === 'partial';
+                      const isDraw = s.payment_method === 'Drawing' || s.payment_method === 'Draw';
+                      return (
+                      <tr key={s.id} className={`border-b border-border hover:bg-muted/30 ${isPartial ? 'bg-orange-50/50' : ''}`}>
                         <td className="px-4 py-3 text-xs text-muted-foreground">{formatDate(s.date)}</td>
                         <td className="px-4 py-3">
                           <span className="font-medium capitalize">{s.product_type?.replace('_', ' ')}</span>
                           <span className="text-xs text-muted-foreground block capitalize">{s.unit}</span>
                         </td>
                         <td className="px-4 py-3 font-semibold">{s.quantity}</td>
-                        <td className="px-4 py-3">₦{s.unit_price}</td>
                         <td className="px-4 py-3 font-semibold text-blue-600">{formatCurrency(s.total_amount)}</td>
+                        <td className="px-4 py-3 font-semibold text-green-600">{formatCurrency(s.amount_paid || s.total_amount)}</td>
                         <td className="px-4 py-3">{s.buyer || '—'}</td>
-                        <td className="px-4 py-3 text-muted-foreground text-xs">{s.distribution_area || '—'}</td>
-                        <td className="px-4 py-3 text-xs">{s.payment_method || '—'}</td>
+                        <td className="px-4 py-3 text-xs font-medium">{s.payment_method || '—'}</td>
                         <td className="px-4 py-3">
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${s.payment_status === 'Credit' ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800'}`}>
-                            {s.payment_status || 'Paid'}
+                          <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded-full ${isDraw ? 'bg-purple-100 text-purple-800' : isPartial ? 'bg-orange-100 text-orange-800' : 'bg-green-100 text-green-800'}`}>
+                            {isDraw ? 'DRAWING' : isPartial ? 'PARTIAL' : 'PAID'}
                           </span>
                         </td>
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2">
+                            {isPartial && !isDraw && (
+                              <button onClick={() => setPaymentSale(s)} className="text-xs font-semibold text-orange-600 hover:text-orange-800 whitespace-nowrap">
+                                Log Pay
+                              </button>
+                            )}
                             <button onClick={() => printReceipt(s, 'water')} className="text-muted-foreground hover:text-primary" title="Print Receipt">
                               <Printer className="w-4 h-4" />
                             </button>
@@ -490,7 +544,7 @@ export default function WaterPage() {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    )})}
                 </tbody>
               </table>
             </CardContent>

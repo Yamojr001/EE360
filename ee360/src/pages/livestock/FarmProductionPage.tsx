@@ -68,6 +68,10 @@ function ProductionForm({ initial, categories, onSave, onClose }: { initial?: Pa
               <SelectItem value="pieces">Pieces</SelectItem>
               <SelectItem value="crates">Crates</SelectItem>
               <SelectItem value="trays">Trays</SelectItem>
+              <SelectItem value="baskets">Baskets</SelectItem>
+              <SelectItem value="bags">Bags</SelectItem>
+              <SelectItem value="bunches">Bunches</SelectItem>
+              <SelectItem value="buckets">Buckets</SelectItem>
               <SelectItem value="liters">Liters</SelectItem>
               <SelectItem value="kg">Kg</SelectItem>
             </SelectContent>
@@ -100,7 +104,7 @@ export default function FarmProductionPage() {
     queryFn: () => api.get('/animal-categories', { params: { sector_id: sectorId } }).then(r => r.data),
   });
   
-  const productCategories = categories.filter(c => c.type === 'product');
+  const productCategories = categories.filter(c => c.type === 'product' || c.type === 'plant' || c.type === 'crop');
 
   const { data: productions = [], isLoading } = useQuery<FarmProduction[]>({
     queryKey: ['farm-production', sectorId],

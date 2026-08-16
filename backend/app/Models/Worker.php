@@ -13,7 +13,7 @@ class Worker extends Model
     use HasFactory;
 
     protected $fillable = [
-        'manager_id', 'name', 'role', 'phone', 'salary', 'hire_date',
+        'staff_id', 'manager_id', 'name', 'photo', 'role', 'phone', 'salary', 'hire_date',
         'status', 'address', 'notes',
     ];
 
@@ -35,6 +35,15 @@ class Worker extends Model
             $user = request()->user('sanctum') ?? auth()->user();
             if ($user && !in_array($user->role, ['admin', 'super_admin'])) {
                 $builder->where('manager_id', $user->id);
+            }
+        });
+
+        static::creating(function ($model) {
+            if (empty($model->staff_id)) {
+                $year = date('y');
+                $lastWorker = static::orderBy('id', 'desc')->first();
+                $nextId = $lastWorker ? $lastWorker->id + 1 : 1;
+                $model->staff_id = sprintf("EE360-%s-%04d", $year, $nextId);
             }
         });
     }

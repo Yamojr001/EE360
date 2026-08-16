@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\FarmProductionController;
 use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\ActivityLogController;
 use App\Http\Controllers\Api\ReportController;
+use App\Http\Controllers\Api\IncidentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -89,6 +90,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/water/expenses/{id}', [WaterExpenseController::class, 'destroy']);
 
     // Reports & Logs
+    Route::apiResource('incidents', IncidentController::class);
     Route::get('/reports/summary', [ReportController::class, 'summary']);
     Route::get('/activity-logs', [ActivityLogController::class, 'index']);
 });

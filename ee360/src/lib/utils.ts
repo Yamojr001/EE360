@@ -21,3 +21,10 @@ export function formatDate(date: string | Date) {
 export function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1);
 }
+
+export function getImageUrl(path: string | undefined | null) {
+  if (!path) return '';
+  if (path.startsWith('http')) return path;
+  // If no scheme, append to backend URL. In production, adjust if frontend serves it differently.
+  return `https://api.eefarm360.com/storage/${path}`;
+}

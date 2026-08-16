@@ -26,6 +26,7 @@ class WaterSaleController extends Controller
             'quantity'          => 'required|integer|min:0',
             'unit_price'        => 'required|numeric|min:0',
             'total_amount'      => 'required|numeric|min:0',
+            'amount_paid'       => 'nullable|numeric|min:0',
             'buyer'             => 'nullable|string|max:100',
             'customer_id'       => 'nullable|integer',
             'distribution_area' => 'nullable|string|max:100',
@@ -34,7 +35,29 @@ class WaterSaleController extends Controller
             'sector_id'         => 'nullable|integer',
         ]);
 
+        if (isset($data['amount_paid'])) {
+            $data['payment_status'] = $data['amount_paid'] >= $data['total_amount'] ? 'paid' : 'partial';
+        }
+
         return response()->json(WaterSale::create($data), 201);
+    }
+
+    public function update(Request $request, WaterSale $waterSale)
+    {
+        $data = $request->validate([
+            'amount_paid'  => 'required|numeric|min:0',
+            'payment_status' => 'nullable|string',
+        ]);
+
+        $amount_paid = $data['amount_paid'];
+        $status = $amount_paid >= $waterSale->total_amount ? 'paid' : 'partial';
+
+        $waterSale->update([
+            'amount_paid' => $amount_paid,
+            'payment_status' => $status
+        ]);
+
+        return response()->json($waterSale);
     }
 
     public function destroy($id)

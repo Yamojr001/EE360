@@ -27,6 +27,7 @@ class SaleController extends Controller
             'unit'         => 'nullable|string|max:30',
             'unit_price'   => 'numeric|min:0',
             'total_amount' => 'required|numeric|min:0',
+            'amount_paid'  => 'nullable|numeric|min:0',
             'buyer'        => 'nullable|string|max:100',
             'customer_id'  => 'nullable|integer',
             'notes'        => 'nullable|string',
@@ -35,7 +36,29 @@ class SaleController extends Controller
             'sector_id'    => 'nullable|integer',
         ]);
 
+        if (isset($data['amount_paid'])) {
+            $data['payment_status'] = $data['amount_paid'] >= $data['total_amount'] ? 'paid' : 'partial';
+        }
+
         return response()->json(Sale::create($data), 201);
+    }
+
+    public function update(Request $request, Sale $sale)
+    {
+        $data = $request->validate([
+            'amount_paid'  => 'required|numeric|min:0',
+            'payment_status' => 'nullable|string',
+        ]);
+
+        $amount_paid = $data['amount_paid'];
+        $status = $amount_paid >= $sale->total_amount ? 'paid' : 'partial';
+
+        $sale->update([
+            'amount_paid' => $amount_paid,
+            'payment_status' => $status
+        ]);
+
+        return response()->json($sale);
     }
 
     public function destroy(Sale $sale)
