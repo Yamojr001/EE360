@@ -205,9 +205,8 @@ function SaleForm({ onSave, onClose, sectorId }: { onSave: (d: any) => void; onC
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="Cash">Cash</SelectItem>
-              <SelectItem value="Transfer">Transfer</SelectItem>
               <SelectItem value="POS">POS</SelectItem>
-              <SelectItem value="Drawing">Drawing (Owner taking)</SelectItem>
+              <SelectItem value="Drawing">Drawing</SelectItem>
             </SelectContent>
           </Select>
         </div>

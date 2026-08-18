@@ -94,7 +94,10 @@ const whyUs = [
 export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeSlide, setActiveSlide] = useState(0);
-  const galleryImages = useMemo(() => Array.from({ length: 32 }, (_, i) => ({ src: `/${i + 1}.jpeg`, alt: `EEFarm360 farm scene ${i + 1}` })), []);
+  const galleryImages = useMemo(() => {
+    const validIds = [1, 2, 3, 4, 5, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 32];
+    return validIds.map(id => ({ src: `/${id}.jpeg`, alt: `EEFarm360 photo ${id}` }));
+  }, []);
   const activeImage = galleryImages[activeSlide] || galleryImages[0];
 
   useEffect(() => {
@@ -120,7 +123,8 @@ export default function LandingPage() {
             <li><a href="#stock" onClick={() => setMenuOpen(false)}>Services</a></li>
             <li><a href="#yateem" onClick={() => setMenuOpen(false)}>Yateem Water</a></li>
             <li><a href="#why" onClick={() => setMenuOpen(false)}>Why Us</a></li>
-            <li><a href="#contact" className="btn btn-outline-light" onClick={() => setMenuOpen(false)}>Get in Touch</a></li>
+            <li><a href="/apply" style={{ color: '#10b981', fontWeight: 'bold' }} onClick={() => setMenuOpen(false)}>Apply (SIWES/NYSC)</a></li>
+            <li><a href="#contact" className="btn btn-outline-light" onClick={() => setMenuOpen(false)}>Customer Care</a></li>
           </ul>
           <button 
             className={`burger ${menuOpen ? 'active' : ''}`} 
@@ -139,10 +143,11 @@ export default function LandingPage() {
           <div className="wrap hero-grid">
             <div>
               <p style={{ color: '#fff', fontSize: '18px', fontStyle: 'italic', marginBottom: '16px', opacity: 0.9 }}>Growing Value, Feeding the Future</p>
-              <h1>Welcome to Excellent Entreprenuership Farm and Ranch Ltd.</h1>
+              <h1>Welcome to Excellent Entrepreneurship Farm and Ranch Ltd.</h1>
               <p className="lead">EEFarm360 raises catfish and poultry, rabbit, pig, pigeon and livestock, manages farms on behalf of other landowners, and bottles its own Yateem Table Water all from one site in Sharifai Community.</p>
-              <div className="hero-cta">
+              <div className="hero-cta" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
                 <a href="#stock" className="btn btn-gold">View Our Services</a>
+                <a href="/apply" className="btn" style={{ background: '#10b981', color: '#fff', fontWeight: 'bold' }}>Apply for SIWES / NYSC</a>
               </div>
             </div>
           </div>
@@ -195,7 +200,7 @@ export default function LandingPage() {
             <div className="section-head">
               <span className="label">Farm Gallery</span>
               <h2>Photos from around our farm</h2>
-              <p>Browse photos of our ponds, pens, processing areas and staff at work. Click any image to view full size.</p>
+              <p>Browse photos of our ponds, pens, processing areas and staff at work.</p>
             </div>
             <div className="gallery-grid">
               <div className="gallery-item featured">
@@ -221,7 +226,6 @@ export default function LandingPage() {
                       />
                     ))}
                   </div>
-                  <div className="gallery-caption">{activeImage?.alt}</div>
                 </div>
               </div>
             </div>
@@ -261,6 +265,48 @@ export default function LandingPage() {
                   <p>{item.text}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Customer Care Section */}
+        <section className="contact" id="contact" style={{ padding: '80px 0', background: '#064e3b', color: '#fff' }}>
+          <div className="wrap">
+            <div className="section-head text-center" style={{ color: '#fff', marginBottom: '40px' }}>
+              <span className="label" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff' }}>Customer Care & Support</span>
+              <h2 style={{ color: '#fff', marginTop: '12px' }}>We are always here to help you</h2>
+              <p style={{ color: 'rgba(255,255,255,0.8)', maxWidth: '600px', margin: '12px auto 0' }}>
+                Whether you want to place a wholesale fish or water order, make an inquiry about our farm management services, or apply for SIWES/Internship/NYSC, our customer care team is available.
+              </p>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginTop: '30px' }}>
+              <div style={{ background: 'rgba(255,255,255,0.08)', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.15)' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '12px', color: '#f59e0b' }}>📞 Phone Support</h3>
+                <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.9)', marginBottom: '6px' }}><strong>Line 1:</strong> 07061444050</p>
+                <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.9)' }}><strong>Line 2:</strong> 09077640697</p>
+                <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginTop: '12px' }}>Available Mon – Sat (8:00 AM – 6:00 PM)</p>
+              </div>
+
+              <div style={{ background: 'rgba(255,255,255,0.08)', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.15)' }}>
+                <h3 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '12px', color: '#f59e0b' }}>✉️ Email & Location</h3>
+                <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.9)', marginBottom: '8px' }}><strong>Email:</strong> eefarmandranch@gmail.com</p>
+                <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.85)', lineHeight: '1.5' }}>
+                  <strong>Address:</strong> Madobi Road, Sharifai Community, Dutse, Jigawa State, Nigeria
+                </p>
+              </div>
+
+              <div style={{ background: 'rgba(255,255,255,0.08)', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', flexDirection: 'column', justifyBetween: 'space-between' }}>
+                <div>
+                  <h3 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '12px', color: '#f59e0b' }}>🎓 Industrial Training</h3>
+                  <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.85)', marginBottom: '16px' }}>
+                    Applying for SIWES attachment, graduate internship, or NYSC posting? Submit your application directly online.
+                  </p>
+                </div>
+                <a href="/apply" style={{ display: 'inline-block', background: '#10b981', color: '#fff', padding: '12px 20px', borderRadius: '8px', fontWeight: 'bold', textAlign: 'center', textDecoration: 'none' }}>
+                  Open Application Portal
+                </a>
+              </div>
             </div>
           </div>
         </section>

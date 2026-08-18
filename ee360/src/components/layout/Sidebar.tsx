@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Bird, ShoppingCart, Wallet, Package,
   Droplets, Users, BarChart3, ChevronLeft, ChevronRight, LogOut,
-  Images, BookOpen, UserCog, Layers, FlaskConical, Store, Clock, Egg, AlertTriangle,
+  Images, BookOpen, UserCog, Layers, FlaskConical, Store, Clock, Egg, AlertTriangle, GraduationCap,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 
@@ -42,6 +42,7 @@ const SUPER_ADMIN_NAV: { section: string; items: NavItem[] }[] = [
     section: 'Overview',
     items: [
       { label: 'Command Centre', href: '/dashboard', icon: <Layers className="w-4 h-4" /> },
+      { label: 'Applications',   href: '/dashboard/admin/applications', icon: <GraduationCap className="w-4 h-4 text-emerald-500" /> },
       { label: 'Report Problem', href: '/dashboard/incidents', icon: <AlertTriangle className="w-4 h-4 text-amber-500" /> },
       { label: 'Activity Logs',  href: '/dashboard/admin/logs', icon: <Clock className="w-4 h-4" /> },
       { label: 'Customers',      href: '/dashboard/customers',  icon: <Users className="w-4 h-4" /> },
@@ -75,10 +76,9 @@ const SUPER_ADMIN_NAV: { section: string; items: NavItem[] }[] = [
     ],
   },
   {
-    section: 'Content',
+    section: 'Media & Gallery',
     items: [
       { label: 'Gallery Manager', href: '/dashboard/admin/gallery',  icon: <Images className="w-4 h-4" /> },
-      { label: 'About Content',   href: '/dashboard/admin/content',  icon: <BookOpen className="w-4 h-4" /> },
     ],
   },
 ];

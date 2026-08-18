@@ -50,7 +50,7 @@ function VendorForm({ initial, onSave, onClose }: { initial?: Partial<Vendor>; o
 
 export default function VendorsPage() {
   const qc = useQueryClient();
-  const { user } = useAuth();
+  const { user, isSuperAdmin } = useAuth();
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Vendor | null>(null);
   const [search, setSearch] = useState('');
@@ -84,10 +84,17 @@ export default function VendorsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Vendors & Suppliers</h2>
-          <p className="text-muted-foreground text-sm">Manage business contacts and supply chains</p>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            Vendors & Suppliers
+            {isSuperAdmin && <span className="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200">Admin View Only</span>}
+          </h2>
+          <p className="text-muted-foreground text-sm">
+            {isSuperAdmin ? 'View supply chains and contacts across both sectors' : 'Manage business contacts and supply chains'}
+          </p>
         </div>
-        <Button onClick={() => { setEditing(null); setOpen(true); }}><Plus className="w-4 h-4 mr-2" /> Add New</Button>
+        {!isSuperAdmin && (
+          <Button onClick={() => { setEditing(null); setOpen(true); }}><Plus className="w-4 h-4 mr-2" /> Add New</Button>
+        )}
       </div>
 
       <div className="grid grid-cols-3 gap-4">
@@ -137,10 +144,12 @@ export default function VendorsPage() {
                   {v.address && <div className="flex items-start gap-2"><MapPin className="w-3.5 h-3.5 shrink-0 mt-0.5" /><span className="line-clamp-2">{v.address}</span></div>}
                 </div>
 
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1" onClick={() => { setEditing(v); setOpen(true); }}><Edit2 className="w-3 h-3 mr-1" /> Edit</Button>
-                  <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10" onClick={() => { if (confirm('Delete this record?')) deleteMut.mutate(v.id); }}><Trash2 className="w-3 h-3" /></Button>
-                </div>
+                {!isSuperAdmin && (
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => { setEditing(v); setOpen(true); }}><Edit2 className="w-3 h-3 mr-1" /> Edit</Button>
+                    <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10" onClick={() => { if (confirm('Delete this record?')) deleteMut.mutate(v.id); }}><Trash2 className="w-3 h-3" /></Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}

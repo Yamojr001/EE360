@@ -7,6 +7,7 @@ import LandingPage    from '@/pages/LandingPage';
 import AboutPage      from '@/pages/AboutPage';
 import GalleryPage    from '@/pages/GalleryPage';
 import ContactPage    from '@/pages/ContactPage';
+import ApplyPage      from '@/pages/ApplyPage';
 import LoginPage      from '@/pages/LoginPage';
 import NotFound       from '@/pages/not-found';
 
@@ -30,7 +31,7 @@ import IncidentsPage   from '@/pages/incidents/IncidentsPage';
 // Admin-only pages
 import GalleryManagePage  from '@/pages/admin/GalleryManagePage';
 import StaffDirectoryPage from '@/pages/admin/StaffDirectoryPage';
-import ContentManagePage  from '@/pages/admin/ContentManagePage';
+import ApplicationsPage   from '@/pages/admin/ApplicationsPage';
 import ActivityLogsPage   from '@/pages/admin/ActivityLogsPage';
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
@@ -52,6 +53,7 @@ export default function App() {
         <Route path="/about"   component={AboutPage}   />
         <Route path="/gallery" component={GalleryPage} />
         <Route path="/contact" component={ContactPage} />
+        <Route path="/apply"   component={ApplyPage}   />
         <Route path="/login"   component={LoginPage}   />
 
         {/* ── Protected dashboard ── */}
@@ -169,6 +171,14 @@ export default function App() {
         </Route>
 
         {/* ── Admin-only ── */}
+        <Route path="/dashboard/admin/applications">
+          <ProtectedRoute adminOnly>
+            <DashboardLayout>
+              <ApplicationsPage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        </Route>
+
         <Route path="/dashboard/admin/gallery">
           <ProtectedRoute adminOnly>
             <DashboardLayout>
@@ -181,14 +191,6 @@ export default function App() {
           <ProtectedRoute adminOnly>
             <DashboardLayout>
               <StaffDirectoryPage />
-            </DashboardLayout>
-          </ProtectedRoute>
-        </Route>
-
-        <Route path="/dashboard/admin/content">
-          <ProtectedRoute adminOnly>
-            <DashboardLayout>
-              <ContentManagePage />
             </DashboardLayout>
           </ProtectedRoute>
         </Route>

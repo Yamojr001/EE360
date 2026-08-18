@@ -66,7 +66,13 @@ export default function SuperAdminDashboard() {
             <p className="text-sm text-muted-foreground">All sectors · Real-time overview</p>
           </div>
         </div>
-        <div className="flex items-center gap-4 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
+          <a
+            href="/dashboard/admin/applications"
+            className="inline-flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition-colors shadow-sm"
+          >
+            🎓 Manage Applications Portal
+          </a>
           <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-1.5">
             <span className="text-sm text-muted-foreground font-medium">From:</span>
             <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="bg-transparent text-sm font-medium outline-none text-foreground" />

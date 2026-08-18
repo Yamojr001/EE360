@@ -69,7 +69,21 @@ function SaleForm({ categories, sectorId, onSave, onClose }: { categories: strin
         </div>
         <div className="space-y-1.5">
           <Label>Unit</Label>
-          <Input value={form.unit} onChange={e => set('unit', e.target.value)} placeholder="e.g. kg, birds, bags" />
+          <Select value={form.unit || 'pieces'} onValueChange={v => set('unit', v)}>
+            <SelectTrigger><SelectValue placeholder="Select Unit" /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="kg">Kg</SelectItem>
+              <SelectItem value="rolls">Rolls</SelectItem>
+              <SelectItem value="bags">Bags</SelectItem>
+              <SelectItem value="pieces">Pieces</SelectItem>
+              <SelectItem value="crates">Crates</SelectItem>
+              <SelectItem value="birds">Birds</SelectItem>
+              <SelectItem value="liters">Liters</SelectItem>
+              <SelectItem value="tonnes">Tonnes</SelectItem>
+              <SelectItem value="units">Units</SelectItem>
+              <SelectItem value="other">Other</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-1.5">
           <Label>Unit Price (₦)</Label>
@@ -96,9 +110,8 @@ function SaleForm({ categories, sectorId, onSave, onClose }: { categories: strin
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="Cash">Cash</SelectItem>
-              <SelectItem value="Transfer">Transfer</SelectItem>
               <SelectItem value="POS">POS</SelectItem>
-              <SelectItem value="Drawing">Drawing (Owner taking)</SelectItem>
+              <SelectItem value="Drawing">Drawing</SelectItem>
             </SelectContent>
           </Select>
         </div>

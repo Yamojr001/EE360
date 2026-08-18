@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\CustomerController;
 use App\Http\Controllers\Api\ActivityLogController;
 use App\Http\Controllers\Api\ReportController;
 use App\Http\Controllers\Api\IncidentController;
+use App\Http\Controllers\Api\InternshipApplicationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,8 +27,10 @@ use App\Http\Controllers\Api\IncidentController;
 |--------------------------------------------------------------------------
 */
 
-// Public auth routes
+// Public auth & application routes
 Route::post('/auth/login',  [AuthController::class, 'login']);
+Route::get('/public/applications/settings', [InternshipApplicationController::class, 'getPublicSettings']);
+Route::post('/public/applications', [InternshipApplicationController::class, 'submit']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
@@ -93,4 +96,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('incidents', IncidentController::class);
     Route::get('/reports/summary', [ReportController::class, 'summary']);
     Route::get('/activity-logs', [ActivityLogController::class, 'index']);
+
+    // Admin Applications Management
+    Route::get('/applications', [InternshipApplicationController::class, 'index']);
+    Route::put('/applications/{id}', [InternshipApplicationController::class, 'update']);
+    Route::delete('/applications/{id}', [InternshipApplicationController::class, 'destroy']);
+    Route::post('/applications/settings', [InternshipApplicationController::class, 'updateSettings']);
 });
