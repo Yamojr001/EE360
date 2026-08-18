@@ -123,7 +123,7 @@ export default function LandingPage() {
             <li><a href="#stock" onClick={() => setMenuOpen(false)}>Services</a></li>
             <li><a href="#yateem" onClick={() => setMenuOpen(false)}>Yateem Water</a></li>
             <li><a href="#why" onClick={() => setMenuOpen(false)}>Why Us</a></li>
-            <li><a href="/apply" style={{ color: '#10b981', fontWeight: 'bold' }} onClick={() => setMenuOpen(false)}>Apply (SIWES/NYSC)</a></li>
+            <li><a href="/apply" onClick={() => setMenuOpen(false)}>Apply (SIWES/NYSC)</a></li>
             <li><a href="#contact" className="btn btn-outline-light" onClick={() => setMenuOpen(false)}>Customer Care</a></li>
           </ul>
           <button 
