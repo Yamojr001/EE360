@@ -5,10 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import api from '@/lib/api';
 import { Link } from 'wouter';
-import { CheckCircle2, AlertCircle, Upload, ArrowLeft, GraduationCap, Briefcase, Award } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Upload, ArrowLeft } from 'lucide-react';
 
 interface PortalSettings {
   siwes_open: boolean;
@@ -33,7 +34,7 @@ export default function ApplyPage() {
   const [passportFile, setPassportFile] = useState<File | null>(null);
   const [documentFile, setDocumentFile] = useState<File | null>(null);
 
-  const { data: settings, isLoading: loadingSettings } = useQuery<PortalSettings>({
+  const { data: settings } = useQuery<PortalSettings>({
     queryKey: ['public-application-settings'],
     queryFn: () => api.get('/public/applications/settings').then(r => r.data),
   });
@@ -58,7 +59,7 @@ export default function ApplyPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.full_name || !form.email || !form.phone) {
+    if (!form.full_name || !form.email || !form.phone || !form.application_type) {
       toast.error('Please fill in all required fields.');
       return;
     }
@@ -77,219 +78,218 @@ export default function ApplyPage() {
   const isAllClosed = !isSiwesOpen && !isInternshipOpen && !isNyscOpen;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
-      {/* Top Header */}
-      <header className="bg-emerald-950 text-white border-b border-emerald-900 py-4 px-6 sm:px-12 flex items-center justify-between">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-sans">
+      {/* Header */}
+      <header className="bg-emerald-950 text-white border-b border-emerald-900/80 py-4 px-6 sm:px-12 flex items-center justify-between shadow-sm">
         <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
           <img src="/FarmLogo.png" alt="EEFarm360 Logo" className="w-9 h-9 object-contain" />
           <span className="font-extrabold text-xl tracking-tight text-white">EEFarm360</span>
         </Link>
-        <Button variant="outline" size="sm" className="border-emerald-700 text-emerald-100 hover:bg-emerald-900" asChild>
+        <Button variant="outline" size="sm" className="border-emerald-800 text-emerald-100 hover:bg-emerald-900 bg-emerald-950/50 text-xs font-semibold" asChild>
           <Link href="/">
-            <ArrowLeft className="w-4 h-4 mr-2" /> Back to Home
+            <ArrowLeft className="w-3.5 h-3.5 mr-1.5" /> Back to Home
           </Link>
         </Button>
       </header>
 
-      {/* Main Body */}
-      <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-8 py-10">
+      {/* Main Container */}
+      <main className="flex-1 max-w-3xl w-full mx-auto p-4 sm:p-8 py-10">
+        {/* Title & Banner */}
         <div className="text-center mb-8">
-          <span className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-800 text-xs font-semibold px-3 py-1 rounded-full mb-3">
-            Career & Industrial Training Portal
+          <span className="inline-block bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300 text-xs font-bold px-3.5 py-1 rounded-full mb-3 tracking-wide uppercase">
+            Official Application Portal
           </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white">
-            Apply for SIWES, Internship or NYSC
+          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            SIWES, Internship & NYSC Application
           </h1>
-          <p className="mt-2 text-slate-600 dark:text-slate-400 max-w-2xl mx-auto text-sm sm:text-base">
-            Gain hands-on practical experience across modern agricultural management, livestock production, aquaculture, and water production at EEFarm360.
+          <p className="mt-2 text-slate-600 dark:text-slate-400 text-sm sm:text-base max-w-xl mx-auto leading-relaxed">
+            Submit your application for industrial attachment, professional internship, or NYSC primary assignment at EEFarm360.
           </p>
         </div>
 
         {submitted ? (
-          <Card className="max-w-xl mx-auto border-emerald-200 bg-white shadow-xl p-8 text-center space-y-4">
+          <Card className="border-emerald-200 bg-white dark:bg-slate-900 shadow-xl p-8 text-center space-y-5 rounded-2xl">
             <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto">
               <CheckCircle2 className="w-10 h-10" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-900">Application Received!</h2>
-            <p className="text-slate-600 text-sm leading-relaxed">
-              Thank you, <strong className="text-slate-900">{form.full_name}</strong>. Your application for <strong className="uppercase text-emerald-700">{form.application_type}</strong> has been submitted to EEFarm360 Management.
-            </p>
-            <div className="p-4 bg-slate-50 rounded-lg text-xs text-slate-500 text-left space-y-1">
+            <div className="space-y-1">
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Application Submitted!</h2>
+              <p className="text-slate-600 dark:text-slate-300 text-sm">
+                Thank you, <strong className="text-slate-900 dark:text-white">{form.full_name}</strong>. Your application for <strong className="uppercase text-emerald-700 dark:text-emerald-400">{form.application_type}</strong> has been received.
+              </p>
+            </div>
+
+            <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl text-xs text-slate-600 dark:text-slate-400 text-left space-y-1.5 border">
               <p>• <strong>Email:</strong> {form.email}</p>
               <p>• <strong>Phone:</strong> {form.phone}</p>
               <p>• <strong>Institution:</strong> {form.institution || 'N/A'}</p>
+              <p>• <strong>Course:</strong> {form.course_of_study || 'N/A'}</p>
             </div>
-            <div className="pt-4 flex gap-3 justify-center">
-              <Button onClick={() => setSubmitted(false)} variant="outline">Submit Another Application</Button>
-              <Button asChild className="bg-emerald-600 hover:bg-emerald-700 text-white">
+
+            <div className="pt-2 flex flex-col sm:flex-row gap-3 justify-center">
+              <Button onClick={() => setSubmitted(false)} variant="outline" className="text-xs">
+                Submit Another Application
+              </Button>
+              <Button asChild className="bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold">
                 <Link href="/">Return to Homepage</Link>
               </Button>
             </div>
           </Card>
         ) : isAllClosed ? (
-          <Card className="max-w-xl mx-auto p-8 text-center space-y-4 border-amber-200 bg-amber-50/50">
-            <AlertCircle className="w-12 h-12 text-amber-600 mx-auto" />
-            <h2 className="text-2xl font-bold text-amber-900">Intake Currently Closed</h2>
-            <p className="text-amber-800 text-sm">
-              Application portals for SIWES, Internship, and NYSC are currently paused by administration. Please check back later or contact customer care.
+          <Card className="p-8 text-center space-y-4 border-amber-200 bg-amber-50/50 dark:bg-amber-950/20 rounded-2xl">
+            <AlertCircle className="w-10 h-10 text-amber-600 mx-auto" />
+            <h2 className="text-2xl font-bold text-amber-900 dark:text-amber-200">Intake Currently Closed</h2>
+            <p className="text-amber-800 dark:text-amber-300 text-sm max-w-md mx-auto">
+              Application portals for SIWES, Internship, and NYSC are currently paused by administration. Please check back later.
             </p>
-            <Button asChild className="bg-emerald-700 text-white">
+            <Button asChild className="bg-emerald-800 text-white text-xs">
               <Link href="/">Back to Home</Link>
             </Button>
           </Card>
         ) : (
-          <Card className="shadow-lg border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-            <CardContent className="p-6 sm:p-8 space-y-6">
+          <Card className="shadow-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 rounded-2xl overflow-hidden">
+            <CardContent className="p-6 sm:p-10 space-y-8">
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Step 1: Select Type */}
-                <div className="space-y-3">
-                  <Label className="text-base font-bold">1. Select Application Type *</Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    {/* SIWES Option */}
-                    <button
-                      type="button"
-                      disabled={!isSiwesOpen}
-                      onClick={() => set('application_type', 'siwes')}
-                      className={`p-4 rounded-xl border text-left flex flex-col justify-between transition-all ${
-                        form.application_type === 'siwes' && isSiwesOpen
-                          ? 'border-emerald-600 bg-emerald-50/70 ring-2 ring-emerald-600'
-                          : !isSiwesOpen
-                          ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-200'
-                          : 'border-slate-200 hover:border-slate-300 bg-white'
-                      }`}
-                    >
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <GraduationCap className={`w-5 h-5 ${form.application_type === 'siwes' ? 'text-emerald-700' : 'text-slate-500'}`} />
-                          {!isSiwesOpen && <span className="text-[10px] bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded">Closed</span>}
-                        </div>
-                        <span className="font-bold text-slate-900 block">SIWES</span>
-                        <span className="text-xs text-slate-500 block mt-0.5">Industrial Attachment for Students</span>
-                      </div>
-                    </button>
-
-                    {/* Internship Option */}
-                    <button
-                      type="button"
-                      disabled={!isInternshipOpen}
-                      onClick={() => set('application_type', 'internship')}
-                      className={`p-4 rounded-xl border text-left flex flex-col justify-between transition-all ${
-                        form.application_type === 'internship' && isInternshipOpen
-                          ? 'border-emerald-600 bg-emerald-50/70 ring-2 ring-emerald-600'
-                          : !isInternshipOpen
-                          ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-200'
-                          : 'border-slate-200 hover:border-slate-300 bg-white'
-                      }`}
-                    >
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <Briefcase className={`w-5 h-5 ${form.application_type === 'internship' ? 'text-emerald-700' : 'text-slate-500'}`} />
-                          {!isInternshipOpen && <span className="text-[10px] bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded">Closed</span>}
-                        </div>
-                        <span className="font-bold text-slate-900 block">Internship</span>
-                        <span className="text-xs text-slate-500 block mt-0.5">Professional Farm Training</span>
-                      </div>
-                    </button>
-
-                    {/* NYSC Option */}
-                    <button
-                      type="button"
-                      disabled={!isNyscOpen}
-                      onClick={() => set('application_type', 'nysc')}
-                      className={`p-4 rounded-xl border text-left flex flex-col justify-between transition-all ${
-                        form.application_type === 'nysc' && isNyscOpen
-                          ? 'border-emerald-600 bg-emerald-50/70 ring-2 ring-emerald-600'
-                          : !isNyscOpen
-                          ? 'opacity-50 cursor-not-allowed bg-slate-100 border-slate-200'
-                          : 'border-slate-200 hover:border-slate-300 bg-white'
-                      }`}
-                    >
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <Award className={`w-5 h-5 ${form.application_type === 'nysc' ? 'text-emerald-700' : 'text-slate-500'}`} />
-                          {!isNyscOpen && <span className="text-[10px] bg-red-100 text-red-700 font-bold px-2 py-0.5 rounded">Closed</span>}
-                        </div>
-                        <span className="font-bold text-slate-900 block">NYSC Corp Member</span>
-                        <span className="text-xs text-slate-500 block mt-0.5">Primary Assignment Posting</span>
-                      </div>
-                    </button>
-                  </div>
+                
+                {/* 1. Category Selection Dropdown */}
+                <div className="space-y-2 pb-4 border-b border-slate-100 dark:border-slate-800">
+                  <Label className="text-sm font-bold text-slate-900 dark:text-white">
+                    Application Category *
+                  </Label>
+                  <Select
+                    value={form.application_type}
+                    onValueChange={(val) => set('application_type', val)}
+                  >
+                    <SelectTrigger className="w-full h-11 text-sm bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+                      <SelectValue placeholder="Select Application Category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="siwes" disabled={!isSiwesOpen}>
+                        SIWES (Industrial Attachment) {!isSiwesOpen && '(Closed)'}
+                      </SelectItem>
+                      <SelectItem value="internship" disabled={!isInternshipOpen}>
+                        Internship (Professional Training) {!isInternshipOpen && '(Closed)'}
+                      </SelectItem>
+                      <SelectItem value="nysc" disabled={!isNyscOpen}>
+                        NYSC Corp Member (Primary Assignment) {!isNyscOpen && '(Closed)'}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-slate-500">
+                    Select the program you are applying for at EEFarm360.
+                  </p>
                 </div>
 
-                {/* Personal & Academic Details */}
-                <div className="space-y-4 pt-2">
-                  <h3 className="text-base font-bold text-slate-900">2. Personal & Academic Details</h3>
+                {/* 2. Personal Information */}
+                <div className="space-y-4">
+                  <h3 className="text-sm font-bold tracking-wide uppercase text-emerald-800 dark:text-emerald-400">
+                    Personal Information
+                  </h3>
+                  
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                      <Label>Full Name *</Label>
+                    <div className="space-y-1.5 sm:col-span-2">
+                      <Label className="text-xs font-semibold">Full Name *</Label>
                       <Input
                         required
-                        placeholder="e.g. Ibrahim Abubakar"
+                        placeholder="Full Name (e.g. Ibrahim Abubakar)"
                         value={form.full_name}
                         onChange={e => set('full_name', e.target.value)}
+                        className="h-10 text-sm"
                       />
                     </div>
+
                     <div className="space-y-1.5">
-                      <Label>Email Address *</Label>
+                      <Label className="text-xs font-semibold">Email Address *</Label>
                       <Input
                         type="email"
                         required
-                        placeholder="ibrahim@example.com"
+                        placeholder="email@example.com"
                         value={form.email}
                         onChange={e => set('email', e.target.value)}
+                        className="h-10 text-sm"
                       />
                     </div>
+
                     <div className="space-y-1.5">
-                      <Label>Phone Number (WhatsApp) *</Label>
+                      <Label className="text-xs font-semibold">Phone Number *</Label>
                       <Input
                         required
                         placeholder="07012345678"
                         value={form.phone}
                         onChange={e => set('phone', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Institution / University</Label>
-                      <Input
-                        placeholder="e.g. Federal University Dutse"
-                        value={form.institution}
-                        onChange={e => set('institution', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Course of Study / Department</Label>
-                      <Input
-                        placeholder="e.g. Agriculture / Animal Science"
-                        value={form.course_of_study}
-                        onChange={e => set('course_of_study', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <Label>Duration / Period</Label>
-                      <Input
-                        placeholder="e.g. 6 Months, 1 Year"
-                        value={form.duration_months}
-                        onChange={e => set('duration_months', e.target.value)}
-                      />
-                    </div>
-                    <div className="space-y-1.5 sm:col-span-2">
-                      <Label>Preferred Start Date</Label>
-                      <Input
-                        type="date"
-                        value={form.start_date}
-                        onChange={e => set('start_date', e.target.value)}
+                        className="h-10 text-sm"
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Upload Documents */}
+                {/* 3. Academic & Internship Details */}
                 <div className="space-y-4 pt-2">
-                  <h3 className="text-base font-bold text-slate-900">3. Attachments & Passport</h3>
+                  <h3 className="text-sm font-bold tracking-wide uppercase text-emerald-800 dark:text-emerald-400">
+                    Academic & Duration Details
+                  </h3>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-1.5">
-                      <Label>Passport Photograph (Optional)</Label>
-                      <div className="border-2 border-dashed border-slate-200 rounded-lg p-3 text-center">
+                      <Label className="text-xs font-semibold">Institution / University</Label>
+                      <Input
+                        placeholder="e.g. Federal University Dutse"
+                        value={form.institution}
+                        onChange={e => set('institution', e.target.value)}
+                        className="h-10 text-sm"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold">Course of Study</Label>
+                      <Input
+                        placeholder="e.g. Agriculture / Animal Science"
+                        value={form.course_of_study}
+                        onChange={e => set('course_of_study', e.target.value)}
+                        className="h-10 text-sm"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold">Duration / Period</Label>
+                      <Select
+                        value={form.duration_months}
+                        onValueChange={(v) => set('duration_months', v)}
+                      >
+                        <SelectTrigger className="h-10 text-sm bg-slate-50 dark:bg-slate-800">
+                          <SelectValue placeholder="Select Duration" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="3 months">3 Months</SelectItem>
+                          <SelectItem value="6 months">6 Months</SelectItem>
+                          <SelectItem value="1 year">1 Year (NYSC)</SelectItem>
+                          <SelectItem value="Custom">Other / Flexible</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold">Preferred Start Date</Label>
+                      <Input
+                        type="date"
+                        value={form.start_date}
+                        onChange={e => set('start_date', e.target.value)}
+                        className="h-10 text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. Document Attachments */}
+                <div className="space-y-4 pt-2">
+                  <h3 className="text-sm font-bold tracking-wide uppercase text-emerald-800 dark:text-emerald-400">
+                    Attachments & Documents
+                  </h3>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold">Passport Photo (Optional)</Label>
+                      <div className="border border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-3 bg-slate-50 dark:bg-slate-800/40 text-center">
                         <input
                           type="file"
                           accept="image/*"
@@ -298,16 +298,17 @@ export default function ApplyPage() {
                           id="passport-input"
                         />
                         <label htmlFor="passport-input" className="cursor-pointer flex flex-col items-center gap-1">
-                          <Upload className="w-5 h-5 text-slate-400" />
-                          <span className="text-xs font-medium text-emerald-700">
+                          <Upload className="w-4 h-4 text-slate-400" />
+                          <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
                             {passportFile ? passportFile.name : 'Choose Image File'}
                           </span>
                         </label>
                       </div>
                     </div>
+
                     <div className="space-y-1.5">
-                      <Label>CV / Recommendation Letter (Optional)</Label>
-                      <div className="border-2 border-dashed border-slate-200 rounded-lg p-3 text-center">
+                      <Label className="text-xs font-semibold">CV / Recommendation Letter (Optional)</Label>
+                      <div className="border border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-3 bg-slate-50 dark:bg-slate-800/40 text-center">
                         <input
                           type="file"
                           accept=".pdf,.doc,.docx,.jpg,.png"
@@ -316,8 +317,8 @@ export default function ApplyPage() {
                           id="document-input"
                         />
                         <label htmlFor="document-input" className="cursor-pointer flex flex-col items-center gap-1">
-                          <Upload className="w-5 h-5 text-slate-400" />
-                          <span className="text-xs font-medium text-emerald-700">
+                          <Upload className="w-4 h-4 text-slate-400" />
+                          <span className="text-xs text-emerald-700 dark:text-emerald-400 font-medium">
                             {documentFile ? documentFile.name : 'Choose Document (PDF/Word)'}
                           </span>
                         </label>
@@ -326,24 +327,25 @@ export default function ApplyPage() {
                   </div>
                 </div>
 
-                {/* Cover Letter */}
+                {/* 5. Statement / Cover Note */}
                 <div className="space-y-1.5 pt-2">
-                  <Label>Statement of Interest / Cover Note</Label>
+                  <Label className="text-xs font-semibold">Statement of Purpose / Additional Information</Label>
                   <Textarea
-                    rows={4}
-                    placeholder="Briefly state why you wish to do your SIWES, Internship or NYSC at EEFarm360..."
+                    rows={3}
+                    placeholder="Briefly state why you wish to join EEFarm360..."
                     value={form.cover_letter}
                     onChange={e => set('cover_letter', e.target.value)}
+                    className="text-sm"
                   />
                 </div>
 
+                {/* Submit Button */}
                 <Button
                   type="submit"
-                  size="lg"
                   disabled={submitMut.isPending}
-                  className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-base py-6 shadow-md"
+                  className="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-bold text-sm h-12 rounded-xl shadow-md transition-all"
                 >
-                  {submitMut.isPending ? 'Submitting Application...' : 'Submit Application Now'}
+                  {submitMut.isPending ? 'Submitting Application...' : 'Submit Application'}
                 </Button>
               </form>
             </CardContent>
@@ -351,7 +353,7 @@ export default function ApplyPage() {
         )}
       </main>
 
-      <footer className="py-4 text-center text-xs text-slate-500 border-t border-slate-200">
+      <footer className="py-4 text-center text-xs text-slate-400 border-t border-slate-200 dark:border-slate-800">
         © 2026 Excellent Entrepreneurship Farm & Ranch Agro Ltd. All Rights Reserved.
       </footer>
     </div>
