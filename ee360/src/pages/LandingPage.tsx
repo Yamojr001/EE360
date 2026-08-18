@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
+import ChatBotWidget from '@/components/ChatBotWidget';
 import './eefarm.css';
 
 const services = [
@@ -392,6 +393,7 @@ export default function LandingPage() {
           <line x1="8" y1="16" x2="13" y2="16" />
         </svg>
       </a>
+      <ChatBotWidget />
     </div>
   );
 }

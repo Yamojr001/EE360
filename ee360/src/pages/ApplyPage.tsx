@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import api from '@/lib/api';
 import { Link } from 'wouter';
 import { CheckCircle2, AlertCircle, Upload, ArrowLeft } from 'lucide-react';
+import ChatBotWidget from '@/components/ChatBotWidget';
 
 interface PortalSettings {
   siwes_open: boolean;
@@ -80,16 +81,18 @@ export default function ApplyPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col font-sans">
       {/* Header */}
-      <header className="bg-emerald-950 text-white border-b border-emerald-900/80 py-4 px-6 sm:px-12 flex items-center justify-between shadow-sm">
-        <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
-          <img src="/FarmLogo.png" alt="EEFarm360 Logo" className="w-9 h-9 object-contain" />
-          <span className="font-extrabold text-xl tracking-tight text-white">EEFarm360</span>
-        </Link>
-        <Button variant="outline" size="sm" className="border-emerald-800 text-emerald-100 hover:bg-emerald-900 bg-emerald-950/50 text-xs font-semibold" asChild>
-          <Link href="/">
-            <ArrowLeft className="w-3.5 h-3.5 mr-1.5" /> Back to Home
+      <header className="sticky top-3 z-50 px-4 w-full max-w-4xl mx-auto">
+        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-800 rounded-full px-6 py-3 shadow-lg flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-3 hover:opacity-90 transition-opacity">
+            <img src="/FarmLogo.png" alt="EEFarm360 Logo" className="w-8 h-8 object-contain" />
+            <span className="font-extrabold text-lg tracking-tight text-emerald-900 dark:text-white">EEFarm360</span>
           </Link>
-        </Button>
+          <Button variant="ghost" size="sm" className="rounded-full text-slate-700 dark:text-slate-200 hover:bg-emerald-50 dark:hover:bg-slate-800 text-xs font-semibold" asChild>
+            <Link href="/">
+              <ArrowLeft className="w-3.5 h-3.5 mr-1.5" /> Back to Home
+            </Link>
+          </Button>
+        </div>
       </header>
 
       {/* Main Container */}
@@ -356,6 +359,7 @@ export default function ApplyPage() {
       <footer className="py-4 text-center text-xs text-slate-400 border-t border-slate-200 dark:border-slate-800">
         © 2026 Excellent Entrepreneurship Farm & Ranch Agro Ltd. All Rights Reserved.
       </footer>
+      <ChatBotWidget />
     </div>
   );
 }
