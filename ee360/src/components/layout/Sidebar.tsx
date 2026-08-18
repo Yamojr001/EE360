@@ -43,7 +43,6 @@ const SUPER_ADMIN_NAV: { section: string; items: NavItem[] }[] = [
     items: [
       { label: 'Command Centre', href: '/dashboard', icon: <Layers className="w-4 h-4" /> },
       { label: 'Applications',   href: '/dashboard/admin/applications', icon: <GraduationCap className="w-4 h-4 text-emerald-500" /> },
-      { label: 'Report Problem', href: '/dashboard/incidents', icon: <AlertTriangle className="w-4 h-4 text-amber-500" /> },
       { label: 'Activity Logs',  href: '/dashboard/admin/logs', icon: <Clock className="w-4 h-4" /> },
       { label: 'Customers',      href: '/dashboard/customers',  icon: <Users className="w-4 h-4" /> },
       { label: 'Daily Ledger',   href: '/dashboard/ledger', icon: <BookOpen className="w-4 h-4" /> },
@@ -73,12 +72,6 @@ const SUPER_ADMIN_NAV: { section: string; items: NavItem[] }[] = [
       { label: 'All Workers',      href: '/dashboard/workers',        icon: <Users className="w-4 h-4" /> },
       { label: 'All Vendors',      href: '/dashboard/vendors',        icon: <Store className="w-4 h-4" /> },
       { label: 'Staff Directory',  href: '/dashboard/admin/staff',    icon: <UserCog className="w-4 h-4" /> },
-    ],
-  },
-  {
-    section: 'Media & Gallery',
-    items: [
-      { label: 'Gallery Manager', href: '/dashboard/admin/gallery',  icon: <Images className="w-4 h-4" /> },
     ],
   },
 ];

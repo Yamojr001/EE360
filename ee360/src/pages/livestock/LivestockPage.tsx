@@ -162,7 +162,7 @@ function AnimalForm({ initial, categories, onSave, onClose }: { initial?: Partia
 
 export default function LivestockPage() {
   const qc = useQueryClient();
-  const { user } = useAuth();
+  const { user, isSuperAdmin } = useAuth();
   const sectorId = user?.role === 'water_manager' ? 2 : user?.role === 'farm_manager' ? 1 : undefined;
 
   const [tab, setTab] = useState('all');
@@ -214,17 +214,22 @@ export default function LivestockPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Livestock</h2>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            Livestock
+            {isSuperAdmin && <span className="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200">Admin View Only</span>}
+          </h2>
           <p className="text-muted-foreground text-sm">{animals.length} animals on record</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setManageOpen(true)}>
-            <Settings2 className="w-4 h-4 mr-2" /> Categories
-          </Button>
-          <Button onClick={() => { setEditing(null); setOpen(true); }}>
-            <Plus className="w-4 h-4 mr-2" /> Add Animal
-          </Button>
-        </div>
+        {!isSuperAdmin && (
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setManageOpen(true)}>
+              <Settings2 className="w-4 h-4 mr-2" /> Categories
+            </Button>
+            <Button onClick={() => { setEditing(null); setOpen(true); }}>
+              <Plus className="w-4 h-4 mr-2" /> Add Animal
+            </Button>
+          </div>
+        )}
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
@@ -276,14 +281,16 @@ export default function LivestockPage() {
                         <span>Cost: <strong className="text-foreground">₦{a.purchase_price?.toLocaleString()}</strong></span>
                       </div>
                       {a.notes && <p className="text-xs text-muted-foreground italic mb-3 line-clamp-2">{a.notes}</p>}
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm" className="flex-1" onClick={() => { setEditing(a); setOpen(true); }}>
-                          <Edit2 className="w-3 h-3 mr-1" /> Edit
-                        </Button>
-                        <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10" onClick={() => { if (confirm('Remove this animal?')) deleteMut.mutate(a.id); }}>
-                          <Trash2 className="w-3 h-3" />
-                        </Button>
-                      </div>
+                      {!isSuperAdmin && (
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" className="flex-1" onClick={() => { setEditing(a); setOpen(true); }}>
+                            <Edit2 className="w-3 h-3 mr-1" /> Edit
+                          </Button>
+                          <Button variant="outline" size="sm" className="text-destructive hover:bg-destructive/10" onClick={() => { if (confirm('Remove this animal?')) deleteMut.mutate(a.id); }}>
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
                 ))}
