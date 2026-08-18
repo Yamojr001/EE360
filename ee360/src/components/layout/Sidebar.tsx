@@ -43,6 +43,7 @@ const SUPER_ADMIN_NAV: { section: string; items: NavItem[] }[] = [
     items: [
       { label: 'Command Centre', href: '/dashboard', icon: <Layers className="w-4 h-4" /> },
       { label: 'Applications',   href: '/dashboard/admin/applications', icon: <GraduationCap className="w-4 h-4 text-emerald-500" /> },
+      { label: 'Reported Problems', href: '/dashboard/incidents', icon: <AlertTriangle className="w-4 h-4 text-amber-500" /> },
       { label: 'Activity Logs',  href: '/dashboard/admin/logs', icon: <Clock className="w-4 h-4" /> },
       { label: 'Customers',      href: '/dashboard/customers',  icon: <Users className="w-4 h-4" /> },
       { label: 'Daily Ledger',   href: '/dashboard/ledger', icon: <BookOpen className="w-4 h-4" /> },

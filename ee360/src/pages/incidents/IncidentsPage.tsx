@@ -4,13 +4,14 @@ import {
   AlertTriangle, Plus, Search, Trash2, Filter, Image as ImageIcon, 
   CheckCircle2, Clock, AlertCircle, Eye, ShieldAlert, FileText, Check
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import api from '@/lib/api';
 import { formatDate } from '@/lib/utils';
@@ -34,15 +35,30 @@ export interface Incident {
   sector?: { id: number; name: string };
 }
 
-const CATEGORIES = [
-  'Equipment Failure',
+const FARM_CATEGORIES = [
   'Animal Health & Mortality',
-  'Plumbing & Water Leak',
-  'Security & Loss',
-  'Weather & Disaster',
-  'Operational Issue',
+  'Feed & Crop Damage',
+  'Hatchery & Incubator Issue',
+  'Equipment & Machinery Breakdown',
+  'Facility & Pen Infrastructure',
+  'Staffing & Operations',
+  'Security & Theft',
   'Other'
 ];
+
+const WATER_CATEGORIES = [
+  'Water Purification & Filtration',
+  'Bottling & Packaging Line',
+  'Water Quality & Sanitation',
+  'Delivery & Distribution Vehicle',
+  'Equipment & Generator Breakdown',
+  'Facility Infrastructure',
+  'Staffing & Operations',
+  'Security & Theft',
+  'Other'
+];
+
+const ALL_CATEGORIES = Array.from(new Set([...FARM_CATEGORIES, ...WATER_CATEGORIES]));
 
 const SEVERITY_COLORS: Record<string, string> = {
   low: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
@@ -58,9 +74,11 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 function ProblemReportForm({ sectorId, onSave, onClose }: { sectorId?: number; onSave: (fd: FormData) => void; onClose: () => void }) {
+  const categories = sectorId === 2 ? WATER_CATEGORIES : sectorId === 1 ? FARM_CATEGORIES : ALL_CATEGORIES;
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [category, setCategory] = useState(CATEGORIES[0]);
+  const [category, setCategory] = useState(categories[0]);
   const [severity, setSeverity] = useState<'low' | 'medium' | 'high' | 'critical'>('medium');
   const [reportedDate, setReportedDate] = useState(new Date().toISOString().split('T')[0]);
   const [sector, setSector] = useState<string>(sectorId ? String(sectorId) : '1');
@@ -88,7 +106,9 @@ function ProblemReportForm({ sectorId, onSave, onClose }: { sectorId?: number; o
     fd.append('category', category);
     fd.append('severity', severity);
     fd.append('reported_date', reportedDate);
-    if (sector) fd.append('sector_id', sector);
+    // Sector id is automatically set from prop if available
+    const finalSector = sectorId ? String(sectorId) : sector;
+    if (finalSector) fd.append('sector_id', finalSector);
     if (imageFile) fd.append('image', imageFile);
 
     onSave(fd);
@@ -101,7 +121,7 @@ function ProblemReportForm({ sectorId, onSave, onClose }: { sectorId?: number; o
         <Input 
           value={title} 
           onChange={e => setTitle(e.target.value)} 
-          placeholder="e.g. Generator breakdown during water production" 
+          placeholder={sectorId === 2 ? "e.g. Purification pump filter leak" : "e.g. Incubator temperature fluctuation"} 
           required 
         />
       </div>
@@ -112,7 +132,7 @@ function ProblemReportForm({ sectorId, onSave, onClose }: { sectorId?: number; o
           <Select value={category} onValueChange={setCategory}>
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
-              {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              {categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
             </SelectContent>
           </Select>
         </div>
@@ -131,7 +151,7 @@ function ProblemReportForm({ sectorId, onSave, onClose }: { sectorId?: number; o
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className={`grid ${!sectorId ? 'grid-cols-2' : 'grid-cols-1'} gap-3`}>
         <div className="space-y-1.5">
           <Label>Event Date *</Label>
           <Input 
@@ -142,16 +162,19 @@ function ProblemReportForm({ sectorId, onSave, onClose }: { sectorId?: number; o
           />
         </div>
 
-        <div className="space-y-1.5">
-          <Label>Sector</Label>
-          <Select value={sector} onValueChange={setSector}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="1">Farm Sector</SelectItem>
-              <SelectItem value="2">Water Sector</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        {/* Only show Sector selector if user is not bound to a single sector */}
+        {!sectorId && (
+          <div className="space-y-1.5">
+            <Label>Sector *</Label>
+            <Select value={sector} onValueChange={setSector}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1">Farm Sector</SelectItem>
+                <SelectItem value="2">Water Sector</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       <div className="space-y-1.5">
@@ -189,7 +212,7 @@ function ProblemReportForm({ sectorId, onSave, onClose }: { sectorId?: number; o
 
       <div className="flex gap-3 pt-2">
         <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancel</Button>
-        <Button type="submit" className="flex-1">Submit Problem Report</Button>
+        <Button type="submit" className="flex-1 bg-emerald-800 hover:bg-emerald-900 text-white">Submit Problem Report</Button>
       </div>
     </form>
   );
@@ -197,9 +220,10 @@ function ProblemReportForm({ sectorId, onSave, onClose }: { sectorId?: number; o
 
 export default function IncidentsPage() {
   const qc = useQueryClient();
-  const { user } = useAuth();
+  const { user, isSuperAdmin } = useAuth();
   const sectorId = user?.role === 'water_manager' ? 2 : user?.role === 'farm_manager' ? 1 : undefined;
 
+  const [adminSectorTab, setAdminSectorTab] = useState<'all' | '1' | '2'>('all');
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
@@ -210,10 +234,15 @@ export default function IncidentsPage() {
   const [resolutionNotes, setResolutionNotes] = useState('');
   const [resolutionStatus, setResolutionStatus] = useState<'open' | 'in_progress' | 'resolved'>('resolved');
 
+  // Query params: filter by sector_id for sector managers, or by admin tab for admin
+  const effectiveSectorId = sectorId ?? (adminSectorTab === 'all' ? undefined : Number(adminSectorTab));
+
   const { data: incidents = [], isLoading } = useQuery<Incident[]>({
-    queryKey: ['incidents', sectorId],
-    queryFn: () => api.get('/incidents', { params: { sector_id: sectorId } }).then(r => r.data),
+    queryKey: ['incidents', effectiveSectorId],
+    queryFn: () => api.get('/incidents', { params: { sector_id: effectiveSectorId } }).then(r => r.data),
   });
+
+  const availableCategories = sectorId === 2 ? WATER_CATEGORIES : sectorId === 1 ? FARM_CATEGORIES : ALL_CATEGORIES;
 
   const createMut = useMutation({
     mutationFn: (fd: FormData) => api.post('/incidents', fd, { headers: { 'Content-Type': 'multipart/form-data' } }),
@@ -263,16 +292,31 @@ export default function IncidentsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            <AlertTriangle className="w-6 h-6 text-amber-500" /> Problem & Event Reports
+            <AlertTriangle className="w-6 h-6 text-amber-500" /> Reported Problems & Incidents
           </h2>
           <p className="text-muted-foreground text-sm">
-            Track equipment breakdowns, mortality events, leaks, and operational issues
+            {sectorId === 2 
+              ? 'Track water purification, bottling line, and distribution issues' 
+              : sectorId === 1 
+              ? 'Track animal health, mortality, feed, and farm equipment issues'
+              : 'Audit operational issues, machinery failures, and incidents across all sectors'}
           </p>
         </div>
-        <Button onClick={() => setOpen(true)} className="bg-amber-600 hover:bg-amber-700 text-white">
+        <Button onClick={() => setOpen(true)} className="bg-amber-600 hover:bg-amber-700 text-white font-bold">
           <Plus className="w-4 h-4 mr-2" /> Report Problem / Event
         </Button>
       </div>
+
+      {/* Admin Sector Switcher Tabs */}
+      {isSuperAdmin && (
+        <Tabs value={adminSectorTab} onValueChange={(v: any) => setAdminSectorTab(v)}>
+          <TabsList className="grid grid-cols-3 max-w-md">
+            <TabsTrigger value="all">All Sectors</TabsTrigger>
+            <TabsTrigger value="1">Farm Sector</TabsTrigger>
+            <TabsTrigger value="2">Water Sector</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      )}
 
       {/* KPI summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -338,13 +382,13 @@ export default function IncidentsPage() {
         </div>
 
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-[200px]">
             <Filter className="w-3.5 h-3.5 mr-1.5" />
             <SelectValue placeholder="Category" />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+            {availableCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
           </SelectContent>
         </Select>
 
@@ -554,7 +598,7 @@ export default function IncidentsPage() {
 
               <div className="flex gap-3 pt-2">
                 <Button type="button" variant="outline" className="flex-1" onClick={() => setSelectedIncident(null)}>Cancel</Button>
-                <Button type="submit" className="flex-1">Save Updates</Button>
+                <Button type="submit" className="flex-1 bg-emerald-800 hover:bg-emerald-900 text-white">Save Updates</Button>
               </div>
             </form>
           )}
