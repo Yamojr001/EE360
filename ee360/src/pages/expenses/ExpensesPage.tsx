@@ -70,9 +70,9 @@ function ExpenseForm({ onSave, onClose }: { onSave: (d: any) => void; onClose: (
 export default function ExpensesPage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
-  const { user } = useAuth();
+  const [search, setSearch] = useState('');
+  const { user, isSuperAdmin } = useAuth();
   const sectorId = user?.role === 'water_manager' ? 2 : user?.role === 'farm_manager' ? 1 : undefined;
 
   const { data: expenses = [], isLoading } = useQuery<Expense[]>({
@@ -82,8 +82,8 @@ export default function ExpensesPage() {
 
   const createMut = useMutation({
     mutationFn: (d: any) => api.post('/expenses', { ...d, sector_id: sectorId }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['expenses'] }); toast.success('Expense added'); setOpen(false); },
-    onError: () => toast.error('Failed to add expense'),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['expenses'] }); toast.success('Expense recorded!'); setOpen(false); },
+    onError: () => toast.error('Failed to record expense'),
   });
 
   const deleteMut = useMutation({
@@ -93,13 +93,12 @@ export default function ExpensesPage() {
 
   const filtered = expenses.filter(e => {
     const matchCat = catFilter === 'all' || e.category === catFilter;
-    const matchSearch = !search || e.description.toLowerCase().includes(search.toLowerCase()) || e.vendor.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = !search || e.description.toLowerCase().includes(search.toLowerCase()) || (e.vendor || '').toLowerCase().includes(search.toLowerCase());
     return matchCat && matchSearch;
   });
 
   const total = filtered.reduce((s, e) => s + Number(e.amount), 0);
 
-  // Pie chart data
   const pieData = CATEGORIES.map((c, i) => ({
     name: c, value: expenses.filter(e => e.category === c).reduce((s, e) => s + Number(e.amount), 0), fill: CAT_COLORS[i],
   })).filter(d => d.value > 0);
@@ -108,10 +107,13 @@ export default function ExpensesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Expenses</h2>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            Expenses
+            {isSuperAdmin && <span className="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200">Admin View Only</span>}
+          </h2>
           <p className="text-muted-foreground text-sm">{expenses.length} expense entries</p>
         </div>
-        <Button onClick={() => setOpen(true)}><Plus className="w-4 h-4 mr-2" /> Add Expense</Button>
+        {!isSuperAdmin && <Button onClick={() => setOpen(true)} className="font-bold bg-emerald-800 hover:bg-emerald-900 text-white"><Plus className="w-4 h-4 mr-2" /> Add Expense</Button>}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

@@ -19,7 +19,7 @@ interface Customer {
 
 export default function CustomersPage() {
   const qc = useQueryClient();
-  const { user } = useAuth();
+  const { user, isSuperAdmin } = useAuth();
   const sectorId = user?.role === 'water_manager' ? 2 : user?.role === 'farm_manager' ? 1 : undefined;
 
   const [search, setSearch] = useState('');
@@ -79,10 +79,13 @@ export default function CustomersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Regular Customers</h2>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            Regular Customers
+            {isSuperAdmin && <span className="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200">Admin View Only</span>}
+          </h2>
           <p className="text-muted-foreground text-sm">Manage customer profiles and contacts</p>
         </div>
-        <Button onClick={() => openForm()}><Plus className="w-4 h-4 mr-2" /> Add Customer</Button>
+        {!isSuperAdmin && <Button onClick={() => openForm()} className="font-bold bg-emerald-800 hover:bg-emerald-900 text-white"><Plus className="w-4 h-4 mr-2" /> Add Customer</Button>}
       </div>
 
       <div className="flex gap-3">
@@ -127,14 +130,16 @@ export default function CustomersPage() {
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">{c.phone || '—'}</td>
                     <td className="px-4 py-3">
-                      <div className="flex gap-2 justify-end">
-                        <button onClick={() => openForm(c)} className="text-muted-foreground hover:text-foreground">
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button onClick={() => { if (confirm('Delete this customer?')) deleteMut.mutate(c.id); }} className="text-muted-foreground hover:text-destructive">
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
+                      {!isSuperAdmin && (
+                        <div className="flex gap-2 justify-end">
+                          <button onClick={() => openForm(c)} className="text-muted-foreground hover:text-foreground">
+                            <Edit2 className="w-4 h-4" />
+                          </button>
+                          <button onClick={() => { if (confirm('Delete this customer?')) deleteMut.mutate(c.id); }} className="text-muted-foreground hover:text-destructive">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 ))}

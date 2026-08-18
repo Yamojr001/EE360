@@ -102,4 +102,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/applications/{id}', [InternshipApplicationController::class, 'update']);
     Route::delete('/applications/{id}', [InternshipApplicationController::class, 'destroy']);
     Route::post('/applications/settings', [InternshipApplicationController::class, 'updateSettings']);
+
+    // Admin User & Portal Access Management
+    Route::apiResource('users', \App\Http\Controllers\Api\UserController::class);
 });

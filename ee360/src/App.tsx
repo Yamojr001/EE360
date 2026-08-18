@@ -33,6 +33,7 @@ import GalleryManagePage  from '@/pages/admin/GalleryManagePage';
 import StaffDirectoryPage from '@/pages/admin/StaffDirectoryPage';
 import ApplicationsPage   from '@/pages/admin/ApplicationsPage';
 import ActivityLogsPage   from '@/pages/admin/ActivityLogsPage';
+import UserManagementPage from '@/pages/admin/UserManagementPage';
 
 function ProtectedRoute({ children, adminOnly = false }: { children: React.ReactNode; adminOnly?: boolean }) {
   const { isAuthenticated, isLoading, isSuperAdmin } = useAuth();
@@ -191,6 +192,14 @@ export default function App() {
           <ProtectedRoute adminOnly>
             <DashboardLayout>
               <StaffDirectoryPage />
+            </DashboardLayout>
+          </ProtectedRoute>
+        </Route>
+
+        <Route path="/dashboard/admin/users">
+          <ProtectedRoute adminOnly>
+            <DashboardLayout>
+              <UserManagementPage />
             </DashboardLayout>
           </ProtectedRoute>
         </Route>

@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Bird, ShoppingCart, Wallet, Package,
   Droplets, Users, BarChart3, ChevronLeft, ChevronRight, LogOut,
-  Images, BookOpen, UserCog, Layers, FlaskConical, Store, Clock, Egg, AlertTriangle, GraduationCap,
+  Images, BookOpen, UserCog, Layers, FlaskConical, Store, Clock, Egg, AlertTriangle, GraduationCap, ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 
@@ -70,6 +70,7 @@ const SUPER_ADMIN_NAV: { section: string; items: NavItem[] }[] = [
   {
     section: 'People & Contacts',
     items: [
+      { label: 'Portal Accounts',  href: '/dashboard/admin/users',    icon: <ShieldCheck className="w-4 h-4 text-amber-500" /> },
       { label: 'All Workers',      href: '/dashboard/workers',        icon: <Users className="w-4 h-4" /> },
       { label: 'All Vendors',      href: '/dashboard/vendors',        icon: <Store className="w-4 h-4" /> },
       { label: 'Staff Directory',  href: '/dashboard/admin/staff',    icon: <UserCog className="w-4 h-4" /> },

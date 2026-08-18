@@ -328,13 +328,14 @@ function PaymentForm({ sale, onSave, onClose }: { sale: any; onSave: (d: any) =>
 
 export default function WaterPage() {
   const qc = useQueryClient();
-  const { user } = useAuth();
-  const sectorId = user?.role === 'water_manager' ? 2 : user?.role === 'farm_manager' ? 1 : undefined;
-
+  const { user, isSuperAdmin } = useAuth();
   const [prodOpen, setProdOpen] = useState(false);
   const [saleOpen, setSaleOpen] = useState(false);
+  const [paymentSale, setPaymentSale] = useState<WaterSale | null>(null);
   const [expOpen, setExpOpen] = useState(false);
   const [invOpen, setInvOpen] = useState(false);
+  
+  const sectorId = user?.role === 'water_manager' ? 2 : user?.role === 'farm_manager' ? 1 : undefined;
 
   const { data: production = [] } = useQuery<Production[]>({ queryKey: ['water-production', sectorId], queryFn: () => api.get('/water/production', { params: { sector_id: sectorId } }).then(r => r.data) });
   const { data: waterSales = [] } = useQuery<WaterSale[]>({ queryKey: ['water-sales', sectorId], queryFn: () => api.get('/water/sales', { params: { sector_id: sectorId } }).then(r => r.data) });
@@ -387,15 +388,20 @@ export default function WaterPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Water Business</h2>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            Water Business
+            {isSuperAdmin && <span className="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200">Admin View Only</span>}
+          </h2>
           <p className="text-muted-foreground text-sm">Sachet water production & sales management</p>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          <Button variant="outline" onClick={() => setProdOpen(true)}><Droplets className="w-4 h-4 mr-2" /> Log Production</Button>
-          <Button variant="outline" onClick={() => setInvOpen(true)}><Package className="w-4 h-4 mr-2" /> Stock Inventory</Button>
-          <Button onClick={() => setSaleOpen(true)}><Plus className="w-4 h-4 mr-2" /> Record New Sale</Button>
-          <Button variant="destructive" onClick={() => setExpOpen(true)}><Plus className="w-4 h-4 mr-2" /> Log Expense</Button>
-        </div>
+        {!isSuperAdmin && (
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" onClick={() => setProdOpen(true)}><Droplets className="w-4 h-4 mr-2" /> Log Production</Button>
+            <Button variant="outline" onClick={() => setInvOpen(true)}><Package className="w-4 h-4 mr-2" /> Stock Inventory</Button>
+            <Button onClick={() => setSaleOpen(true)}><Plus className="w-4 h-4 mr-2" /> Record Sale</Button>
+            <Button variant="outline" onClick={() => setExpOpen(true)}>Add Expense</Button>
+          </div>
+        )}
       </div>
 
       {/* KPIs */}

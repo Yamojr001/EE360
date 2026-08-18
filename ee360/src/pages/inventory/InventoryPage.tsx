@@ -325,7 +325,7 @@ export default function InventoryPage() {
   const [alertOpen, setAlertOpen] = useState(false);
   const [search, setSearch]       = useState('');
   const [catFilter, setCatFilter] = useState('all');
-  const { user } = useAuth();
+  const { user, isSuperAdmin } = useAuth();
   
   const sectorId = user?.role === 'water_manager' ? 2 : user?.role === 'farm_manager' ? 1 : undefined;
 
@@ -366,13 +366,18 @@ export default function InventoryPage() {
             <Package className="w-5 h-5" />
           </div>
           <div>
-            <h2 className="text-2xl font-extrabold text-foreground">Inventory</h2>
+            <h2 className="text-2xl font-extrabold text-foreground flex items-center gap-2">
+              Inventory
+              {isSuperAdmin && <span className="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200">Admin View Only</span>}
+            </h2>
             <p className="text-sm text-muted-foreground">{items.length} items · {formatCurrency(totalValue)} total value</p>
           </div>
         </div>
-        <Button onClick={() => { setEditing(null); setOpen(true); }} className="gap-2">
-          <Plus className="w-4 h-4" /> Add Item
-        </Button>
+        {!isSuperAdmin && (
+          <Button onClick={() => { setEditing(null); setOpen(true); }} className="gap-2">
+            <Plus className="w-4 h-4" /> Add Item
+          </Button>
+        )}
       </div>
 
       {/* KPI Strip */}
@@ -507,17 +512,19 @@ export default function InventoryPage() {
                 )}
 
                 {/* Actions */}
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" className="flex-1 h-8 text-xs gap-1" onClick={() => { setEditing(item); setOpen(true); }}>
-                    <Edit2 className="w-3 h-3" /> Edit
-                  </Button>
-                  <Button
-                    variant="outline" size="sm" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10"
-                    onClick={() => { if (confirm(`Delete "${item.name}"?`)) deleteMut.mutate(item.id); }}
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
-                </div>
+                {!isSuperAdmin && (
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" className="flex-1 h-8 text-xs gap-1" onClick={() => { setEditing(item); setOpen(true); }}>
+                      <Edit2 className="w-3 h-3" /> Edit
+                    </Button>
+                    <Button
+                      variant="outline" size="sm" className="h-8 w-8 p-0 text-destructive hover:bg-destructive/10"
+                      onClick={() => { if (confirm(`Delete "${item.name}"?`)) deleteMut.mutate(item.id); }}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                )}
               </div>
             );
           })}

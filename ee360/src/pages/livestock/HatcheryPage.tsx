@@ -25,7 +25,7 @@ interface HatcheryRecord {
 
 export default function HatcheryPage() {
   const qc = useQueryClient();
-  const { user } = useAuth();
+  const { user, isSuperAdmin } = useAuth();
   const sectorId = user?.role === 'water_manager' ? 2 : user?.role === 'farm_manager' ? 1 : undefined;
 
   const [search, setSearch] = useState('');
@@ -113,10 +113,13 @@ export default function HatcheryPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Hatchery Records</h2>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            Hatchery Records
+            {isSuperAdmin && <span className="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200">Admin View Only</span>}
+          </h2>
           <p className="text-muted-foreground text-sm">Manage hatch batches and incubation success rates</p>
         </div>
-        <Button onClick={() => openForm()}><Plus className="w-4 h-4 mr-2" /> Add Record</Button>
+        {!isSuperAdmin && <Button onClick={() => openForm()} className="font-bold bg-emerald-800 hover:bg-emerald-900 text-white"><Plus className="w-4 h-4 mr-2" /> Add Record</Button>}
       </div>
 
       <div className="flex gap-3">
@@ -168,14 +171,16 @@ export default function HatcheryPage() {
                       <td className="px-4 py-3 text-red-500">{r.mortality}</td>
                       <td className="px-4 py-3 font-medium">{hatchRate}%</td>
                       <td className="px-4 py-3">
-                        <div className="flex gap-2 justify-end">
-                          <button onClick={() => openForm(r)} className="text-muted-foreground hover:text-foreground">
-                            <Edit2 className="w-4 h-4" />
-                          </button>
-                          <button onClick={() => { if (confirm('Delete this record?')) deleteMut.mutate(r.id); }} className="text-muted-foreground hover:text-destructive">
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                        {!isSuperAdmin && (
+                          <div className="flex gap-2 justify-end">
+                            <button onClick={() => openForm(r)} className="text-muted-foreground hover:text-foreground">
+                              <Edit2 className="w-4 h-4" />
+                            </button>
+                            <button onClick={() => { if (confirm('Delete this record?')) deleteMut.mutate(r.id); }} className="text-muted-foreground hover:text-destructive">
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   );

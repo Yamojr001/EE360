@@ -302,9 +302,11 @@ export default function IncidentsPage() {
               : 'Audit operational issues, machinery failures, and incidents across all sectors'}
           </p>
         </div>
-        <Button onClick={() => setOpen(true)} className="bg-amber-600 hover:bg-amber-700 text-white font-bold">
-          <Plus className="w-4 h-4 mr-2" /> Report Problem / Event
-        </Button>
+        {!isSuperAdmin && (
+          <Button onClick={() => setOpen(true)} className="bg-amber-600 hover:bg-amber-700 text-white font-bold">
+            <Plus className="w-4 h-4 mr-2" /> Report Problem / Event
+          </Button>
+        )}
       </div>
 
       {/* Admin Sector Switcher Tabs */}

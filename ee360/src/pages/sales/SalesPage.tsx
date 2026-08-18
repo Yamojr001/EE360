@@ -174,10 +174,9 @@ export default function SalesPage() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [paymentSale, setPaymentSale] = useState<Sale | null>(null);
-  const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
-
-  const { user } = useAuth();
+  const [search, setSearch] = useState('');
+  const { user, isSuperAdmin } = useAuth();
   const sectorId = user?.role === 'water_manager' ? 2 : user?.role === 'farm_manager' ? 1 : undefined;
 
   const { data: catData = [] } = useQuery<AnimalCategory[]>({
@@ -227,10 +226,13 @@ export default function SalesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Sales</h2>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            Sales
+            {isSuperAdmin && <span className="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200">Admin View Only</span>}
+          </h2>
           <p className="text-muted-foreground text-sm">{sales.length} transactions on record</p>
         </div>
-        <Button onClick={() => setOpen(true)}><Plus className="w-4 h-4 mr-2" /> Record New Sale</Button>
+        {!isSuperAdmin && <Button onClick={() => setOpen(true)} className="font-bold bg-emerald-800 hover:bg-emerald-900 text-white"><Plus className="w-4 h-4 mr-2" /> Record New Sale</Button>}
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

@@ -92,7 +92,7 @@ function ProductionForm({ initial, categories, onSave, onClose }: { initial?: Pa
 
 export default function FarmProductionPage() {
   const qc = useQueryClient();
-  const { user } = useAuth();
+  const { user, isSuperAdmin } = useAuth();
   const sectorId = 1; // Only for Farm Sector
 
   const [search, setSearch] = useState('');
@@ -137,12 +137,17 @@ export default function FarmProductionPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Daily Production</h2>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            Daily Production
+            {isSuperAdmin && <span className="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200">Admin View Only</span>}
+          </h2>
           <p className="text-muted-foreground text-sm">Log daily eggs, milk, and other farm yields</p>
         </div>
-        <Button onClick={() => { setEditing(null); setOpen(true); }}>
-          <Plus className="w-4 h-4 mr-2" /> Log Production
-        </Button>
+        {!isSuperAdmin && (
+          <Button onClick={() => { setEditing(null); setOpen(true); }} className="font-bold bg-emerald-800 hover:bg-emerald-900 text-white">
+            <Plus className="w-4 h-4 mr-2" /> Log Production
+          </Button>
+        )}
       </div>
 
       <div className="flex items-center gap-3">
