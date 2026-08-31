@@ -245,13 +245,16 @@ export default function IncidentsPage() {
   const availableCategories = sectorId === 2 ? WATER_CATEGORIES : sectorId === 1 ? FARM_CATEGORIES : ALL_CATEGORIES;
 
   const createMut = useMutation({
-    mutationFn: (fd: FormData) => api.post('/incidents', fd, { headers: { 'Content-Type': 'multipart/form-data' } }),
+    mutationFn: (fd: FormData) => api.post('/incidents', fd),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['incidents'] });
       toast.success('Problem report logged successfully!');
       setOpen(false);
     },
-    onError: () => toast.error('Failed to log problem report'),
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || 'Failed to log problem report';
+      toast.error(msg);
+    },
   });
 
   const updateMut = useMutation({

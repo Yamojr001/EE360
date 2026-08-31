@@ -62,6 +62,14 @@ class IncidentController extends Controller
         }
 
         $user = $request->user();
+        $sectorId = $validated['sector_id'] ?? null;
+        if (empty($sectorId) && $user) {
+            if ($user->role === 'water_manager') {
+                $sectorId = 2;
+            } elseif ($user->role === 'farm_manager') {
+                $sectorId = 1;
+            }
+        }
 
         $incident = Incident::create([
             'title'            => $validated['title'],
@@ -70,7 +78,7 @@ class IncidentController extends Controller
             'severity'         => $validated['severity'] ?? 'medium',
             'status'           => $validated['status'] ?? 'open',
             'reported_date'    => $validated['reported_date'],
-            'sector_id'        => $validated['sector_id'] ?? null,
+            'sector_id'        => $sectorId,
             'reported_by'      => $user ? $user->id : null,
             'resolution_notes' => $validated['resolution_notes'] ?? null,
             'image_path'       => $imagePath,
