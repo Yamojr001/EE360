@@ -188,7 +188,7 @@ export default function WorkersPage() {
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['workers'] }); toast.success('Worker removed'); },
   });
 
-  const filtered = workers.filter(w => !search || w.name.toLowerCase().includes(search.toLowerCase()) || w.role.toLowerCase().includes(search.toLowerCase()) || w.staff_id?.toLowerCase().includes(search.toLowerCase()));
+  const filtered = workers.filter(w => !search || w.name.toLowerCase().includes(search.toLowerCase()) || (w.role || (w as any).role_title || '').toLowerCase().includes(search.toLowerCase()) || w.staff_id?.toLowerCase().includes(search.toLowerCase()));
   const active = workers.filter(w => w.status === 'active').length;
   const totalSalary = workers.filter(w => w.status === 'active').reduce((s, w) => s + Number(w.salary), 0);
 

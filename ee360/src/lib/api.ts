@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-//const BASE_URL = 'https://api.eefarm360.com/api'
-const BASE_URL = 'http://localhost:8000/api';
+const BASE_URL = 'https://api.eefarm360.com/api'
+//const BASE_URL = 'http://localhost:8000/api';
 
 
 export const api = axios.create({

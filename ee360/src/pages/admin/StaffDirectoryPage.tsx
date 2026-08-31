@@ -66,12 +66,15 @@ export default function StaffDirectoryPage() {
     else createMut.mutate(form);
   };
 
-  const filtered = workers
-    .filter(w => sectorFilter === 'all' || w.sector === sectorFilter)
-    .filter(w => !search || w.name.toLowerCase().includes(search.toLowerCase()) || w.role_title.toLowerCase().includes(search.toLowerCase()));
+  const getWorkerSector = (w: any) => w.sector === 'water' || w.sector_id === 2 ? 'water' : 'farm';
+  const getWorkerRole = (w: any) => w.role_title || w.role || 'Staff Member';
 
-  const farmCount  = workers.filter(w => w.sector === 'farm'  && w.status === 'active').length;
-  const waterCount = workers.filter(w => w.sector === 'water' && w.status === 'active').length;
+  const filtered = workers
+    .filter(w => sectorFilter === 'all' || getWorkerSector(w) === sectorFilter)
+    .filter(w => !search || w.name.toLowerCase().includes(search.toLowerCase()) || getWorkerRole(w).toLowerCase().includes(search.toLowerCase()));
+
+  const farmCount  = workers.filter(w => getWorkerSector(w) === 'farm'  && w.status === 'active').length;
+  const waterCount = workers.filter(w => getWorkerSector(w) === 'water' && w.status === 'active').length;
   const totalPayroll = workers.filter(w => w.status === 'active').reduce((a, w) => a + Number(w.salary), 0);
 
   return (
@@ -157,12 +160,12 @@ export default function StaffDirectoryPage() {
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-muted-foreground">{w.role_title}</td>
+                  <td className="px-4 py-3 text-muted-foreground">{getWorkerRole(w)}</td>
                   <td className="px-4 py-3">
                     <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full capitalize',
-                      w.sector === 'farm' ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
-                                          : 'bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300'
-                    )}>{w.sector}</span>
+                      getWorkerSector(w) === 'farm' ? 'bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300'
+                                                    : 'bg-sky-100 text-sky-700 dark:bg-sky-950 dark:text-sky-300'
+                    )}>{getWorkerSector(w)}</span>
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{w.phone}</td>
                   <td className="px-4 py-3 font-semibold text-foreground">{formatCurrency(w.salary)}</td>

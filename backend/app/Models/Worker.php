@@ -13,7 +13,7 @@ class Worker extends Model
     use HasFactory;
 
     protected $fillable = [
-        'staff_id', 'manager_id', 'name', 'photo', 'role', 'phone', 'salary', 'hire_date',
+        'staff_id', 'manager_id', 'sector_id', 'name', 'photo', 'role', 'phone', 'salary', 'hire_date',
         'status', 'address', 'notes',
     ];
 
@@ -28,13 +28,6 @@ class Worker extends Model
             $user = request()->user('sanctum') ?? auth()->user();
             if ($user && in_array($user->role, ['admin', 'super_admin'])) {
                 $builder->withTrashed();
-            }
-        });
-
-        static::addGlobalScope('manager_staff_only', function (\Illuminate\Database\Eloquent\Builder $builder) {
-            $user = request()->user('sanctum') ?? auth()->user();
-            if ($user && !in_array($user->role, ['admin', 'super_admin'])) {
-                $builder->where('manager_id', $user->id);
             }
         });
 

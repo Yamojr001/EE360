@@ -107,6 +107,13 @@ export default function HomePage() {
 
   return (
     <>
+      {menuOpen && (
+        <div 
+          className="nav-overlay" 
+          onClick={() => setMenuOpen(false)} 
+          aria-hidden="true" 
+        />
+      )}
       <header>
         <nav className="nav">
           <a href="#top" className="logo" onClick={() => setMenuOpen(false)}>
@@ -121,7 +128,7 @@ export default function HomePage() {
             <li><a href="#stock" onClick={() => setMenuOpen(false)}>Services</a></li>
             <li><a href="#yateem" onClick={() => setMenuOpen(false)}>Yateem Water</a></li>
             <li><a href="#why" onClick={() => setMenuOpen(false)}>Why Us</a></li>
-            <li><a href="#contact" className="btn btn-outline-light" onClick={() => setMenuOpen(false)}>Get in Touch</a></li>
+            <li><a href="/apply" className="btn btn-outline-light" onClick={() => setMenuOpen(false)}>Get in Touch</a></li>
           </ul>
           <button 
             className={`burger ${menuOpen ? 'active' : ''}`} 
@@ -243,7 +250,7 @@ export default function HomePage() {
                 <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><polyline points="20 6 9 17 4 12" /></svg>Sealed and batch-dated for traceability</li>
                 <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><polyline points="20 6 9 17 4 12" /></svg>Available by the pack or on wholesale terms</li>
               </ul>
-              <a href="#contact" className="btn btn-outline-light">Request Wholesale Pricing</a>
+              <a href="/apply" className="btn btn-outline-light">Request Wholesale Pricing</a>
             </div>
           </div>
         </section>
@@ -326,27 +333,6 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* FLOATING WHATSAPP BUTTON - STICKY ON SCROLL */}
-      <a
-        href="https://wa.me/2347061444050"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="whatsapp-float"
-        aria-label="Chat on WhatsApp"
-      >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 20l1.1-5.4A8.5 8.5 0 1 1 21 11.5z" />
-          <line x1="8" y1="12" x2="16" y2="12" />
-          <line x1="8" y1="16" x2="13" y2="16" />
-        </svg>
-      </a>
     </>
   );
 }

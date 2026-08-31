@@ -110,6 +110,13 @@ export default function LandingPage() {
 
   return (
     <div className="landing-page">
+      {menuOpen && (
+        <div 
+          className="nav-overlay" 
+          onClick={() => setMenuOpen(false)} 
+          aria-hidden="true" 
+        />
+      )}
       <header>
         <nav className="nav">
           <a href="#top" className="logo" onClick={() => setMenuOpen(false)}>
@@ -125,7 +132,7 @@ export default function LandingPage() {
             <li><a href="#yateem" onClick={() => setMenuOpen(false)}>Yateem Water</a></li>
             <li><a href="#why" onClick={() => setMenuOpen(false)}>Why Us</a></li>
             <li><a href="/apply" onClick={() => setMenuOpen(false)}>Apply (SIWES/NYSC)</a></li>
-            <li><a href="#contact" className="btn btn-outline-light" onClick={() => setMenuOpen(false)}>Customer Care</a></li>
+            <li><a href="/apply" className="btn btn-outline-light" onClick={() => setMenuOpen(false)}>Apply Now</a></li>
           </ul>
           <button 
             className={`burger ${menuOpen ? 'active' : ''}`} 
@@ -247,7 +254,7 @@ export default function LandingPage() {
                 <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><polyline points="20 6 9 17 4 12" /></svg>Sealed and batch-dated for traceability</li>
                 <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2"><polyline points="20 6 9 17 4 12" /></svg>Available by the pack or on wholesale terms</li>
               </ul>
-              <a href="#contact" className="btn btn-outline-light">Request Wholesale Pricing</a>
+              <a href="/apply" className="btn btn-outline-light">Request Wholesale Pricing</a>
             </div>
           </div>
         </section>
@@ -266,48 +273,6 @@ export default function LandingPage() {
                   <p>{item.text}</p>
                 </div>
               ))}
-            </div>
-          </div>
-        </section>
-
-        {/* Customer Care Section */}
-        <section className="contact" id="contact" style={{ padding: '80px 0', background: '#064e3b', color: '#fff' }}>
-          <div className="wrap">
-            <div className="section-head text-center" style={{ color: '#fff', marginBottom: '40px' }}>
-              <span className="label" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff' }}>Customer Care & Support</span>
-              <h2 style={{ color: '#fff', marginTop: '12px' }}>We are always here to help you</h2>
-              <p style={{ color: 'rgba(255,255,255,0.8)', maxWidth: '600px', margin: '12px auto 0' }}>
-                Whether you want to place a wholesale fish or water order, make an inquiry about our farm management services, or apply for SIWES/Internship/NYSC, our customer care team is available.
-              </p>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px', marginTop: '30px' }}>
-              <div style={{ background: 'rgba(255,255,255,0.08)', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.15)' }}>
-                <h3 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '12px', color: '#f59e0b' }}>📞 Phone Support</h3>
-                <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.9)', marginBottom: '6px' }}><strong>Line 1:</strong> 07061444050</p>
-                <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.9)' }}><strong>Line 2:</strong> 09077640697</p>
-                <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginTop: '12px' }}>Available Mon – Sat (8:00 AM – 6:00 PM)</p>
-              </div>
-
-              <div style={{ background: 'rgba(255,255,255,0.08)', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.15)' }}>
-                <h3 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '12px', color: '#f59e0b' }}>✉️ Email & Location</h3>
-                <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.9)', marginBottom: '8px' }}><strong>Email:</strong> eefarmandranch@gmail.com</p>
-                <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.85)', lineHeight: '1.5' }}>
-                  <strong>Address:</strong> Madobi Road, Sharifai Community, Dutse, Jigawa State, Nigeria
-                </p>
-              </div>
-
-              <div style={{ background: 'rgba(255,255,255,0.08)', padding: '24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', flexDirection: 'column', justifyBetween: 'space-between' }}>
-                <div>
-                  <h3 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '12px', color: '#f59e0b' }}>🎓 Industrial Training</h3>
-                  <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.85)', marginBottom: '16px' }}>
-                    Applying for SIWES attachment, graduate internship, or NYSC posting? Submit your application directly online.
-                  </p>
-                </div>
-                <a href="/apply" style={{ display: 'inline-block', background: '#10b981', color: '#fff', padding: '12px 20px', borderRadius: '8px', fontWeight: 'bold', textAlign: 'center', textDecoration: 'none' }}>
-                  Open Application Portal
-                </a>
-              </div>
             </div>
           </div>
         </section>
@@ -372,27 +337,6 @@ export default function LandingPage() {
         </div>
       </footer>
 
-      {/* FLOATING WHATSAPP BUTTON - STICKY ON SCROLL */}
-      <a
-        href="https://wa.me/2347061444050"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="whatsapp-float"
-        aria-label="Chat on WhatsApp"
-      >
-        <svg
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.5L3 20l1.1-5.4A8.5 8.5 0 1 1 21 11.5z" />
-          <line x1="8" y1="12" x2="16" y2="12" />
-          <line x1="8" y1="16" x2="13" y2="16" />
-        </svg>
-      </a>
       <ChatBotWidget />
     </div>
   );

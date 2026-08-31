@@ -83,7 +83,7 @@ h3 { font-size: 19px; }
 .utility-bar .u-right a { color: rgba(255,255,255,0.82); padding: 4px 8px; border-radius: 999px; transition: background 0.2s ease, color 0.2s ease; }
 .utility-bar .u-right a:hover { color: #fff; background: rgba(255,255,255,0.08); }
 header { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.95); backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(8, 44, 43, 0.06); border-bottom: 1px solid rgba(15,42,68,0.08); }
-.nav { max-width: calc(var(--container) + 24px); margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; min-height: 84px; gap: 20px; }
+.nav { max-width: calc(var(--container) + 24px); margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; min-height: 84px; gap: 20px; position: relative; }
 .logo { display: flex; align-items: center; gap: 14px; padding-right: 8px; }
 .logo-mark { width: auto; height: auto; display: flex; align-items: center; justify-content: center; flex-shrink: 0; padding: 0; background: transparent; border: none; box-shadow: none; }
 .logo-mark img { width: auto; max-width: 140px; height: auto; max-height: 72px; object-fit: contain; display: block; }
@@ -94,7 +94,10 @@ header { position: sticky; top: 0; z-index: 100; background: rgba(255,255,255,0.
 .nav-links a.btn-outline-light { background: linear-gradient(135deg, var(--navy-900), var(--navy-800)); color: #fff; border-color: transparent; padding: 10px 18px; box-shadow: 0 8px 20px rgba(8,44,43,0.16); }
 .nav-links a.btn-outline-light:hover { background: linear-gradient(135deg, var(--navy-950), var(--navy-900)); color: #fff; }
 .burger { display: none; flex-direction: column; gap: 5px; background: #fff; border: 1px solid var(--border); cursor: pointer; padding: 10px; border-radius: 12px; box-shadow: 0 8px 18px rgba(11,30,48,0.06); }
-.burger span { width: 22px; height: 2px; background: var(--navy-900); border-radius: 999px; }
+.burger span { width: 22px; height: 2px; background: var(--navy-900); border-radius: 999px; transition: all 0.3s ease; }
+.burger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.burger.active span:nth-child(2) { opacity: 0; }
+.burger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 .hero {
   background: linear-gradient(rgba(8, 44, 43, 0.62), rgba(8, 44, 43, 0.7)), url('/Gate.png');
   background-size: cover;
@@ -230,18 +233,109 @@ footer { background: linear-gradient(135deg, var(--navy-950), var(--navy-900)); 
   .footer-grid { grid-template-columns: 1fr 1fr; }
 }
 @media (max-width: 720px) {
-  .nav { padding: 12px 16px; min-height: 76px; }
-  .logo { gap: 10px; }
-  .logo-mark { width: 56px; height: 56px; border-radius: 14px; }
-  .logo-text { font-size: 20px; }
-  .nav-links { position: fixed; top: 76px; left: 0; right: 0; height: calc(100vh - 76px);  background: rgba(255,255,255,0.98); backdrop-filter: blur(18px); flex-direction: column; align-items: flex-start; gap: 0; padding: 18px 20px 24px; transform: translateX(-100%); transition: transform 0.3s ease; overflow-y: auto; border-radius: 0 0 24px 24px; border: 1px solid rgba(15,42,68,0.06); box-shadow: 0 16px 36px rgba(8,44,43,0.12); }
-  .nav-links.open { transform: translateX(0); }
-  .nav-links a { width: 100%; padding: 14px 0; border-bottom: 1px solid var(--border); border-radius: 0; background: transparent; box-shadow: none; }
-  .nav-links a.btn-outline-light { margin-top: 8px; padding: 12px 16px; border-radius: 10px; background: linear-gradient(135deg, var(--gold-600), #e7b12a); }
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .nav { 
+    padding: 10px 16px; 
+    min-height: 64px; 
+    position: relative;
+  }
+  .logo { gap: 8px; }
+  .logo-mark img { max-height: 42px; max-width: 100px; }
+  .logo-text { font-size: 19px; }
+  
+  .nav-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(6, 19, 36, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 90;
+    animation: navOverlayFade 0.2s ease forwards;
+  }
+  @keyframes navOverlayFade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .nav-links { 
+    position: absolute; 
+    top: calc(100% + 8px); 
+    left: 12px; 
+    right: 12px; 
+    width: calc(100% - 24px);
+    background: #ffffff !important; 
+    flex-direction: column; 
+    align-items: stretch; 
+    gap: 4px; 
+    padding: 12px; 
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-10px) scale(0.98); 
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); 
+    overflow: hidden; 
+    border-radius: 20px; 
+    border: 1px solid rgba(6, 78, 59, 0.12); 
+    box-shadow: 0 20px 40px -4px rgba(6, 19, 36, 0.22), 0 4px 12px rgba(6, 19, 36, 0.08); 
+    z-index: 100;
+  }
+  .nav-links.open { 
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1); 
+  }
+  .nav-links li {
+    width: 100%;
+    display: block;
+  }
+  .nav-links a { 
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%; 
+    padding: 12px 16px; 
+    border-bottom: 1px solid #f1f5f9; 
+    border-radius: 12px; 
+    background: transparent; 
+    box-shadow: none; 
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+    box-sizing: border-box;
+  }
+  .nav-links li:last-child a {
+    border-bottom: none;
+  }
+  .nav-links a:hover, .nav-links a:active {
+    background: #f0fdf4;
+    color: #064e3b;
+  }
+  .nav-links a.btn-outline-light { 
+    display: flex;
+    justify-content: center;
+    margin-top: 6px; 
+    margin-left: 0;
+    padding: 13px 20px; 
+    border-radius: 14px; 
+    background: #f59e0b !important; 
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 14.5px;
+    box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+    border: none;
+  }
+  .nav-links a.btn-outline-light:hover {
+    background: #d97706 !important;
+  }
   .burger { display: flex; }
-  .hero { padding: 76px 0 160px; min-height: auto; }
-  .hero h1 { font-size: clamp(28px, 3.8vw, 40px); }
-  .hero p.lead { font-size: 15px; }
+  .hero { padding: 54px 0 140px; min-height: auto; }
+  .hero h1 { font-size: clamp(26px, 5.5vw, 38px); }
+  .hero p.lead { font-size: 14.5px; }
   .service-grid { grid-template-columns: 1fr; }
   .why-grid { grid-template-columns: 1fr; }
   .footer-grid { grid-template-columns: 1fr; }

@@ -92,3 +92,11 @@
 #43 /home/yamojr/devyamo/EE360/backend/artisan(15): Illuminate\\Foundation\\Console\\Kernel->handle()
 #44 {main}
 "} 
+[2026-08-31 15:56:51] local.ERROR: Command "tinker" is not defined. {"exception":"[object] (Symfony\\Component\\Console\\Exception\\CommandNotFoundException(code: 0): Command \"tinker\" is not defined. at /home/yamojr/devyamo/EE360/backend/vendor/symfony/console/Application.php:759)
+[stacktrace]
+#0 /home/yamojr/devyamo/EE360/backend/vendor/symfony/console/Application.php(298): Symfony\\Component\\Console\\Application->find()
+#1 /home/yamojr/devyamo/EE360/backend/vendor/symfony/console/Application.php(195): Symfony\\Component\\Console\\Application->doRun()
+#2 /home/yamojr/devyamo/EE360/backend/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(198): Symfony\\Component\\Console\\Application->run()
+#3 /home/yamojr/devyamo/EE360/backend/artisan(15): Illuminate\\Foundation\\Console\\Kernel->handle()
+#4 {main}
+"} 

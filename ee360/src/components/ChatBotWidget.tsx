@@ -24,7 +24,7 @@ interface QuickQuestion {
 const QUICK_QUESTIONS: QuickQuestion[] = [
   {
     id: 'siwes',
-    label: '🎓 SIWES / Internship / NYSC',
+    label: 'SIWES / Internship / NYSC',
     question: 'How do I apply for SIWES, Internship, or NYSC posting?',
     answer: 'You can apply directly online through our official portal! We accept students for industrial attachments, graduate internships, and NYSC primary assignments. Applications are reviewed directly by EEFarm360 Management.',
     actionUrl: '/apply',
@@ -32,7 +32,7 @@ const QUICK_QUESTIONS: QuickQuestion[] = [
   },
   {
     id: 'sales',
-    label: '🐟 Wholesale Fish & Yateem Water',
+    label: 'Wholesale Fish & Yateem Water',
     question: 'How do I purchase Catfish, Poultry, or Yateem Water?',
     answer: 'We offer wholesale pricing for fresh catfish, fingerlings, dressed chicken, eggs, rabbits, pigeons, and Yateem Table Water. Call our sales desk directly at 07061444050 or 09077640697.',
     actionUrl: 'tel:07061444050',
@@ -40,13 +40,13 @@ const QUICK_QUESTIONS: QuickQuestion[] = [
   },
   {
     id: 'location',
-    label: '📍 Location & Hours',
+    label: 'Location & Hours',
     question: 'Where is EEFarm360 located and what are your opening hours?',
     answer: 'EEFarm360 is located at Madobi Road, Sharifai Community, Dutse, Jigawa State, Nigeria. We are open Monday to Saturday from 8:00 AM to 6:00 PM.',
   },
   {
     id: 'services',
-    label: '💼 Farm Setup & Management',
+    label: 'Farm Setup & Management',
     question: 'What farm management and setup services do you provide?',
     answer: 'We offer complete end-to-end farm management and setup services for landowners—including fish pond construction (earthen & tarpaulin), pen construction, feeding routines, sanitation compliance, and stock records.',
     actionUrl: '/#stock',
@@ -54,7 +54,7 @@ const QUICK_QUESTIONS: QuickQuestion[] = [
   },
   {
     id: 'contact',
-    label: '📞 Contact Support',
+    label: 'Contact Support',
     question: 'How can I reach EEFarm360 Customer Care directly?',
     answer: 'You can reach customer support via call (07061444050 or 09077640697), email (eefarmandranch@gmail.com), or chat directly on WhatsApp.',
     actionUrl: 'https://wa.me/2347061444050',
