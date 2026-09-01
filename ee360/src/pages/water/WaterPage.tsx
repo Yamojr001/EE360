@@ -477,8 +477,9 @@ export default function WaterPage() {
                       <tr key={p.id} className="border-b border-border hover:bg-muted/30">
                         <td className="px-4 py-3 text-xs text-muted-foreground">{formatDate(p.date)}</td>
                         <td className="px-4 py-3">
-                          <span className="font-medium capitalize">{p.product_type?.replace('_', ' ')}</span>
-                          <span className="text-xs text-muted-foreground block capitalize">{p.unit}</span>
+                          <span className="font-medium capitalize">
+                            {[p.product_type?.replace('_', ' '), p.unit].filter(Boolean).join(' ')}
+                          </span>
                         </td>
                         <td className="px-4 py-3 font-semibold text-muted-foreground">
                           {p.bags_produced}
@@ -486,7 +487,7 @@ export default function WaterPage() {
                         </td>
                         <td className="px-4 py-3 text-red-600 font-semibold">{p.bags_wasted || 0}</td>
                         <td className="px-4 py-3 text-blue-600 font-bold">{Number(p.bags_produced) - Number(p.bags_wasted || 0)}</td>
-                        <td className="px-4 py-3 text-destructive">{formatCurrency(p.cost)}</td>
+                        <td className="px-4 py-3 font-semibold text-destructive">₦{Number(p.cost || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                         <td className="px-4 py-3 text-muted-foreground text-xs">
                           {p.waste_reason ? <span className="text-red-600 mr-2 font-medium">Waste: {p.waste_reason}</span> : null}
                           {p.notes}
