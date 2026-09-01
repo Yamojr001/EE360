@@ -23,15 +23,13 @@ return [
         'https://www.eefarm360.com',
     ],
 
-    'allowed_origins_patterns' => [
-        '/^https:\/\/.*\.vercel\.app$/',
-    ],
+    'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
 
     'exposed_headers' => [],
 
-    'max_age' => 0,
+    'max_age' => 3600,
 
     'supports_credentials' => false,
 ];
