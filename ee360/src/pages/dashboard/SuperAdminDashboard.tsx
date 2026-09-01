@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import FarmDashboard from './FarmDashboard';
 import WaterDashboard from './WaterDashboard';
 
-const COLORS = ['oklch(0.52 0.18 175)', 'oklch(0.58 0.18 220)', 'oklch(0.62 0.18 140)', 'oklch(0.55 0.18 290)'];
+const COLORS = ['#10b981', '#ef4444', '#f59e0b', '#8b5cf6'];
 
 function KpiCard({ label, value, icon, change, positive, color }: any) {
   return (
@@ -138,12 +138,12 @@ export default function SuperAdminDashboard() {
             <AreaChart data={d.monthlyChart ?? []} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="farmGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="oklch(0.52 0.18 175)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="oklch(0.52 0.18 175)" stopOpacity={0} />
+                  <stop offset="5%"  stopColor="#10b981" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="oklch(0.55 0.18 220)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="oklch(0.55 0.18 220)" stopOpacity={0} />
+                  <stop offset="5%"  stopColor="#0ea5e9" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0 0)" />
@@ -151,8 +151,8 @@ export default function SuperAdminDashboard() {
               <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `₦${(v/1000).toFixed(0)}k`} />
               <Tooltip formatter={(v: any) => formatCurrency(v)} />
               <Legend />
-              <Area type="monotone" dataKey="farm_revenue"  stroke="oklch(0.52 0.18 175)" fill="url(#farmGrad)"  name="Farm" />
-              <Area type="monotone" dataKey="water_revenue" stroke="oklch(0.55 0.18 220)" fill="url(#waterGrad)" name="Water" />
+              <Area type="monotone" dataKey="farm_revenue"  stroke="#10b981" fill="url(#farmGrad)"  name="Farm" strokeWidth={2.5} />
+              <Area type="monotone" dataKey="water_revenue" stroke="#0ea5e9" fill="url(#waterGrad)" name="Water" strokeWidth={2.5} />
             </AreaChart>
           </ResponsiveContainer>
         </div>

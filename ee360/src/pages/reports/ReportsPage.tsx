@@ -16,7 +16,8 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 
-const COLORS = ['oklch(0.45 0.165 175)', 'oklch(0.62 0.22 25)', 'oklch(0.65 0.18 165)', 'oklch(0.55 0.14 200)', 'oklch(0.65 0.15 95)'];
+// Vivid, clearly distinguishable chart palette: Emerald | Crimson | Amber | Violet | Sky
+const COLORS = ['#10b981', '#ef4444', '#f59e0b', '#8b5cf6', '#0ea5e9'];
 
 interface SystemTransaction {
   id: string;
@@ -322,12 +323,12 @@ export default function ReportsPage() {
             <AreaChart data={data?.monthlyTrend ?? []}>
               <defs>
                 <linearGradient id="gRev" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="oklch(0.45 0.165 175)" stopOpacity={0.25} />
-                  <stop offset="95%" stopColor="oklch(0.45 0.165 175)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="gExp" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="oklch(0.62 0.22 25)" stopOpacity={0.2} />
-                  <stop offset="95%" stopColor="oklch(0.62 0.22 25)" stopOpacity={0} />
+                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.25} />
+                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" />
@@ -335,8 +336,8 @@ export default function ReportsPage() {
               <YAxis tick={{ fontSize: 12 }} tickFormatter={v => `₦${(v / 1000).toFixed(0)}K`} />
               <Tooltip formatter={(v: number) => formatCurrency(v)} />
               <Legend />
-              <Area type="monotone" dataKey="revenue" name="Revenue" stroke="oklch(0.45 0.165 175)" fill="url(#gRev)" strokeWidth={2.5} />
-              <Area type="monotone" dataKey="expenses" name="Expenses" stroke="oklch(0.62 0.22 25)" fill="url(#gExp)" strokeWidth={2.5} />
+              <Area type="monotone" dataKey="revenue" name="Revenue" stroke="#10b981" fill="url(#gRev)" strokeWidth={2.5} />
+              <Area type="monotone" dataKey="expenses" name="Expenses" stroke="#ef4444" fill="url(#gExp)" strokeWidth={2.5} />
             </AreaChart>
           </ResponsiveContainer>
         </CardContent>
@@ -353,7 +354,7 @@ export default function ReportsPage() {
                 <XAxis dataKey="category" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `₦${(v / 1000).toFixed(0)}K`} />
                 <Tooltip formatter={(v: number) => formatCurrency(v)} />
-                <Bar dataKey="total" name="Revenue" fill="oklch(0.45 0.165 175)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="total" name="Revenue" fill="#10b981" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -398,7 +399,7 @@ export default function ReportsPage() {
                 <XAxis dataKey="type" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `₦${(v / 1000).toFixed(0)}K`} />
                 <Tooltip formatter={(v: number) => formatCurrency(v)} />
-                <Bar dataKey="value" name="Value" fill="oklch(0.65 0.18 165)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="value" name="Value" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>

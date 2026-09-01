@@ -15,7 +15,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recha
 import { useAuth } from '@/contexts/auth-context';
 
 const CATEGORIES = ['feed', 'medicine', 'equipment', 'labour', 'transport', 'utilities', 'maintenance', 'other'];
-const CAT_COLORS = ['oklch(0.45 0.165 175)', 'oklch(0.55 0.14 200)', 'oklch(0.65 0.18 165)', 'oklch(0.62 0.22 25)', 'oklch(0.65 0.15 95)', 'oklch(0.35 0.14 25)', 'oklch(0.5 0.12 200)', 'oklch(0.7 0.05 200)'];
+const CAT_COLORS = ['#10b981', '#ef4444', '#f59e0b', '#8b5cf6', '#0ea5e9', '#ec4899', '#f97316', '#14b8a6'];
 const CAT_BG: Record<string, string> = {
   feed: 'bg-blue-100 text-blue-800', medicine: 'bg-blue-100 text-blue-800',
   equipment: 'bg-purple-100 text-purple-800', labour: 'bg-yellow-100 text-yellow-800',

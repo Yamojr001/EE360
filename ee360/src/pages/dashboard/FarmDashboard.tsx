@@ -69,8 +69,8 @@ export default function FarmDashboard() {
             <AreaChart data={d.monthlyChart ?? []}>
               <defs>
                 <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="oklch(0.52 0.18 175)" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="oklch(0.52 0.18 175)" stopOpacity={0} />
+                  <stop offset="5%"  stopColor="#10b981" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0 0)" />
@@ -78,8 +78,8 @@ export default function FarmDashboard() {
               <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `₦${(v/1000).toFixed(0)}k`} />
               <Tooltip formatter={(v: any) => formatCurrency(v)} />
               <Legend />
-              <Area type="monotone" dataKey="revenue"  stroke="oklch(0.52 0.18 175)" fill="url(#revGrad)" name="Revenue" />
-              <Area type="monotone" dataKey="expenses" stroke="oklch(0.62 0.20 30)"  fill="none"          name="Expenses" strokeDasharray="4 2" />
+              <Area type="monotone" dataKey="revenue"  stroke="#10b981" fill="url(#revGrad)" name="Revenue" strokeWidth={2.5} />
+              <Area type="monotone" dataKey="expenses" stroke="#ef4444"  fill="none"          name="Expenses" strokeDasharray="4 2" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -94,7 +94,7 @@ export default function FarmDashboard() {
               <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={v => `₦${(v/1000).toFixed(0)}k`} />
               <YAxis type="category" dataKey="category" tick={{ fontSize: 11 }} width={65} />
               <Tooltip formatter={(v: any) => formatCurrency(v)} />
-              <Bar dataKey="total" name="Revenue" fill="oklch(0.52 0.18 175)" radius={[0, 6, 6, 0]} />
+              <Bar dataKey="total" name="Revenue" fill="#10b981" radius={[0, 6, 6, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

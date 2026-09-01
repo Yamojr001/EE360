@@ -72,8 +72,8 @@ export default function WaterDashboard() {
               <YAxis tick={{ fontSize: 11 }} />
               <Tooltip />
               <Legend />
-              <Line type="monotone" dataKey="produced" stroke="oklch(0.52 0.18 220)" strokeWidth={2} dot={false} name="Produced" />
-              <Line type="monotone" dataKey="sold"     stroke="oklch(0.52 0.18 175)" strokeWidth={2} dot={false} name="Sold" />
+              <Line type="monotone" dataKey="produced" stroke="#f59e0b" strokeWidth={2.5} dot={false} name="Produced" />
+              <Line type="monotone" dataKey="sold"     stroke="#0ea5e9" strokeWidth={2.5} dot={false} name="Sold" />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -88,7 +88,7 @@ export default function WaterDashboard() {
               <XAxis dataKey="area" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `₦${(v/1000).toFixed(0)}k`} />
               <Tooltip formatter={(v: any) => formatCurrency(v)} />
-              <Bar dataKey="total" name="Revenue" fill="oklch(0.52 0.18 220)" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="total" name="Revenue" fill="#0ea5e9" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
