@@ -22,10 +22,14 @@ interface LedgerItem {
 
 export default function LedgerPage() {
   const [dateFilter, setDateFilter] = useState(new Date().toISOString().split('T')[0]);
-  const [sectorTab, setSectorTab] = useState('all');
+  
+  const { user, isSuperAdmin, isWaterManager, isFarmManager } = useAuth();
+  
+  // Set default sector tab based on role
+  const defaultTab = isWaterManager ? 'water' : isFarmManager ? 'farm' : 'all';
+  const [sectorTab, setSectorTab] = useState(defaultTab);
 
-  const { user } = useAuth();
-  const sectorId = user?.role === 'water_manager' ? 2 : user?.role === 'farm_manager' ? 1 : undefined;
+  const sectorId = isWaterManager ? 2 : isFarmManager ? 1 : undefined;
 
   const { data: ledger = [], isLoading } = useQuery<LedgerItem[]>({
     queryKey: ['ledger', sectorId],
@@ -34,7 +38,9 @@ export default function LedgerPage() {
 
   const filtered = ledger.filter(item => {
     const matchDate = !dateFilter || item.date === dateFilter;
-    const matchSector = sectorTab === 'all' || (item.sector || '').toLowerCase() === sectorTab.toLowerCase();
+    const matchSector = isSuperAdmin 
+      ? (sectorTab === 'all' || (item.sector || '').toLowerCase() === sectorTab.toLowerCase())
+      : true; // Backend already strictly filtered by sector for managers
     return matchDate && matchSector;
   });
 
@@ -57,7 +63,11 @@ export default function LedgerPage() {
             <BookOpen className="w-6 h-6 text-primary" />
             Daily Ledger
           </h2>
-          <p className="text-muted-foreground text-sm">Unified financial timeline with separated Farm and Water sectors</p>
+          <p className="text-muted-foreground text-sm">
+            {isWaterManager ? 'Water Sector Financial & Operations Ledger' :
+             isFarmManager ? 'Farm Sector Financial & Operations Ledger' :
+             'Unified financial timeline with separated Farm and Water sectors'}
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <Label>Filter Date:</Label>
@@ -71,20 +81,22 @@ export default function LedgerPage() {
         </div>
       </div>
 
-      {/* Sector Tabs */}
-      <Tabs value={sectorTab} onValueChange={setSectorTab} className="w-full">
-        <TabsList className="grid grid-cols-3 w-full sm:w-96">
-          <TabsTrigger value="all" className="gap-1.5 font-bold">
-            <Layers className="w-4 h-4" /> All Sectors
-          </TabsTrigger>
-          <TabsTrigger value="farm" className="gap-1.5 font-bold text-emerald-700">
-            <Bird className="w-4 h-4" /> Farm Sector
-          </TabsTrigger>
-          <TabsTrigger value="water" className="gap-1.5 font-bold text-blue-700">
-            <Droplets className="w-4 h-4" /> Water Sector
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+      {/* Sector Tabs — Only visible to Super Admin / Oversight users */}
+      {isSuperAdmin && (
+        <Tabs value={sectorTab} onValueChange={setSectorTab} className="w-full">
+          <TabsList className="grid grid-cols-3 w-full sm:w-96">
+            <TabsTrigger value="all" className="gap-1.5 font-bold">
+              <Layers className="w-4 h-4" /> All Sectors
+            </TabsTrigger>
+            <TabsTrigger value="farm" className="gap-1.5 font-bold text-emerald-700">
+              <Bird className="w-4 h-4" /> Farm Sector
+            </TabsTrigger>
+            <TabsTrigger value="water" className="gap-1.5 font-bold text-blue-700">
+              <Droplets className="w-4 h-4" /> Water Sector
+            </TabsTrigger>
+          </TabsList>
+        </Tabs>
+      )}
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -122,7 +134,10 @@ export default function LedgerPage() {
       <Card>
         <CardHeader className="py-4 border-b flex flex-row items-center justify-between">
           <CardTitle className="text-lg">
-            {sectorTab === 'all' ? 'Combined All Sectors Activity Log' : sectorTab === 'farm' ? 'Farm Sector Activity Log' : 'Water Sector Activity Log'}
+            {isWaterManager ? 'Water Sector Activity Log' :
+             isFarmManager ? 'Farm Sector Activity Log' :
+             sectorTab === 'all' ? 'Combined All Sectors Activity Log' :
+             sectorTab === 'farm' ? 'Farm Sector Activity Log' : 'Water Sector Activity Log'}
           </CardTitle>
           <span className="text-xs text-muted-foreground">{filtered.length} entries</span>
         </CardHeader>

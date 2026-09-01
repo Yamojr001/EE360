@@ -17,132 +17,128 @@ class LedgerController extends Controller
     public function index(Request $request)
     {
         $activities = collect();
+        $user = $request->user();
+        $role = $user ? $user->role : null;
+
         $sectorId = $request->query('sector_id');
 
-        // 1. Water Productions
-        $wpQuery = WaterProduction::query();
-        if ($sectorId) $wpQuery->where('sector_id', $sectorId);
-        $wpQuery->get()->each(function($item) use (&$activities) {
-            $activities->push([
-                'id' => 'wp_'.$item->id,
-                'date' => $item->date->format('Y-m-d'),
-                'type' => 'Water Production',
-                'description' => "Produced {$item->bags_produced} bags",
-                'amount' => 0,
-                'sector' => 'water',
-                'is_income' => true,
-                'notes' => $item->notes
-            ]);
-        });
+        // Strictly enforce role boundaries at server level
+        if ($role === 'water_manager') {
+            $sectorId = 2;
+        } elseif ($role === 'farm_manager') {
+            $sectorId = 1;
+        }
 
-        // 2. Water Sales
-        $wsQuery = WaterSale::query();
-        if ($sectorId) $wsQuery->where('sector_id', $sectorId);
-        $wsQuery->get()->each(function($item) use (&$activities) {
-            $activities->push([
-                'id' => 'ws_'.$item->id,
-                'date' => $item->date,
-                'type' => 'Water Sale',
-                'description' => "Sold {$item->quantity} bags to {$item->buyer}",
-                'amount' => reset_number($item->total_amount),
-                'sector' => 'water',
-                'is_income' => true,
-                'notes' => ''
-            ]);
-        });
+        $includeWater = !$sectorId || (int)$sectorId === 2;
+        $includeFarm  = !$sectorId || (int)$sectorId === 1;
 
-        // 3. Farm Sales (Eggs, Animals)
-        $fsQuery = Sale::query();
-        if ($sectorId) $fsQuery->where('sector_id', $sectorId);
-        $fsQuery->get()->each(function($item) use (&$activities) {
-            $activities->push([
-                'id' => 'fs_'.$item->id,
-                'date' => $item->date,
-                'type' => 'Farm Sale',
-                'description' => "Sold {$item->item_type} ({$item->quantity}) to {$item->buyer}",
-                'amount' => reset_number($item->total_amount),
-                'sector' => 'farm',
-                'is_income' => true,
-                'notes' => $item->notes
-            ]);
-        });
+        // 1. Water Sector Records
+        if ($includeWater) {
+            WaterProduction::get()->each(function($item) use (&$activities) {
+                $activities->push([
+                    'id' => 'wp_'.$item->id,
+                    'date' => $item->date ? (is_string($item->date) ? $item->date : $item->date->format('Y-m-d')) : now()->toDateString(),
+                    'type' => 'Water Production',
+                    'description' => "Produced {$item->bags_produced} bags",
+                    'amount' => 0,
+                    'sector' => 'water',
+                    'is_income' => true,
+                    'notes' => $item->notes ?? ''
+                ]);
+            });
 
-        // 4. Animal Births / Deaths
-        $anQuery = Animal::query();
-        if ($sectorId) $anQuery->where('sector_id', $sectorId);
-        $anQuery->get()->each(function($item) use (&$activities) {
-            $date = $item->created_at->format('Y-m-d');
-            $status = $item->status; // active, sold, dead
-            
-            $activities->push([
-                'id' => 'an_'.$item->id,
-                'date' => $date,
-                'type' => 'Livestock Entry',
-                'description' => "New Animal Logged ({$item->type})",
-                'amount' => 0,
-                'sector' => 'farm',
-                'is_income' => true,
-                'notes' => "Health: {$item->health_status}"
-            ]);
-        });
+            WaterSale::get()->each(function($item) use (&$activities) {
+                $activities->push([
+                    'id' => 'ws_'.$item->id,
+                    'date' => $item->date,
+                    'type' => 'Water Sale',
+                    'description' => "Sold {$item->quantity} bags to " . ($item->buyer ?: 'Customer'),
+                    'amount' => reset_number($item->total_amount),
+                    'sector' => 'water',
+                    'is_income' => true,
+                    'notes' => ''
+                ]);
+            });
 
-        // 5. Farm Expenses
-        $feQuery = Expense::query();
-        if ($sectorId) $feQuery->where('sector_id', $sectorId);
-        $feQuery->get()->each(function($item) use (&$activities) {
-            $activities->push([
-                'id' => 'fe_'.$item->id,
-                'date' => $item->date,
-                'type' => 'Farm Expense',
-                'description' => $item->description,
-                'amount' => reset_number($item->amount),
-                'sector' => 'farm',
-                'is_income' => false,
-                'notes' => $item->vendor
-            ]);
-        });
+            WaterExpense::get()->each(function($item) use (&$activities) {
+                $activities->push([
+                    'id' => 'we_'.$item->id,
+                    'date' => $item->date,
+                    'type' => 'Water Expense',
+                    'description' => $item->description,
+                    'amount' => reset_number($item->amount),
+                    'sector' => 'water',
+                    'is_income' => false,
+                    'notes' => $item->vendor ?? ''
+                ]);
+            });
+        }
 
-        // 6. Water Expenses
-        $weQuery = WaterExpense::query();
-        if ($sectorId) $weQuery->where('sector_id', $sectorId);
-        $weQuery->get()->each(function($item) use (&$activities) {
-            $activities->push([
-                'id' => 'we_'.$item->id,
-                'date' => $item->date,
-                'type' => 'Water Expense',
-                'description' => $item->description,
-                'amount' => reset_number($item->amount),
-                'sector' => 'water',
-                'is_income' => false,
-                'notes' => $item->vendor
-            ]);
-        });
+        // 2. Farm Sector Records
+        if ($includeFarm) {
+            Sale::get()->each(function($item) use (&$activities) {
+                $activities->push([
+                    'id' => 'fs_'.$item->id,
+                    'date' => $item->date,
+                    'type' => 'Farm Sale',
+                    'description' => "Sold {$item->item_type} ({$item->quantity}) to " . ($item->buyer ?: 'Customer'),
+                    'amount' => reset_number($item->total_amount),
+                    'sector' => 'farm',
+                    'is_income' => true,
+                    'notes' => $item->notes ?? ''
+                ]);
+            });
 
-        // Inventory Transactions
+            Animal::get()->each(function($item) use (&$activities) {
+                $activities->push([
+                    'id' => 'an_'.$item->id,
+                    'date' => $item->created_at ? $item->created_at->format('Y-m-d') : now()->toDateString(),
+                    'type' => 'Livestock Entry',
+                    'description' => "New Animal Logged ({$item->type})",
+                    'amount' => 0,
+                    'sector' => 'farm',
+                    'is_income' => true,
+                    'notes' => "Health: {$item->health_status}"
+                ]);
+            });
+
+            Expense::get()->each(function($item) use (&$activities) {
+                $activities->push([
+                    'id' => 'fe_'.$item->id,
+                    'date' => $item->date,
+                    'type' => 'Farm Expense',
+                    'description' => $item->description,
+                    'amount' => reset_number($item->amount),
+                    'sector' => 'farm',
+                    'is_income' => false,
+                    'notes' => $item->vendor ?? ''
+                ]);
+            });
+        }
+
+        // 3. Inventory Transactions
         $invQuery = DB::table('inventory_transactions')
           ->join('inventory_items', 'inventory_transactions.inventory_item_id', '=', 'inventory_items.id')
-          ->select('inventory_transactions.*', 'inventory_items.name', 'inventory_items.category', 'inventory_items.unit');
-        
+          ->select('inventory_transactions.*', 'inventory_items.name', 'inventory_items.category', 'inventory_items.unit', 'inventory_items.sector_id');
+
         if ($sectorId) {
             $invQuery->where('inventory_items.sector_id', $sectorId);
         }
 
-        $invQuery->get()
-          ->each(function($tx) use (&$activities) {
-              $activities->push([
-                  'id' => 'it_'.$tx->id,
-                  'date' => $tx->date,
-                  'type' => 'Inventory ' . ($tx->type === 'in' ? 'Added' : 'Used'),
-                  'description' => "{$tx->name}: " . ($tx->type === 'in' ? '+' : '-') . "{$tx->quantity} {$tx->unit}",
-                  'amount' => 0,
-                  'sector' => strtolower($tx->category),
-                  'is_income' => $tx->type === 'in',
-                  'notes' => $tx->description
-              ]);
-          });
+        $invQuery->get()->each(function($tx) use (&$activities) {
+            $activities->push([
+                'id' => 'it_'.$tx->id,
+                'date' => $tx->date,
+                'type' => 'Inventory ' . ($tx->type === 'in' ? 'Added' : 'Used'),
+                'description' => "{$tx->name}: " . ($tx->type === 'in' ? '+' : '-') . "{$tx->quantity} {$tx->unit}",
+                'amount' => 0,
+                'sector' => (int)$tx->sector_id === 2 ? 'water' : 'farm',
+                'is_income' => $tx->type === 'in',
+                'notes' => $tx->description ?? ''
+            ]);
+        });
 
         $sorted = $activities->sortByDesc('date')->values();
-        
         return response()->json($sorted);
     }
 }
