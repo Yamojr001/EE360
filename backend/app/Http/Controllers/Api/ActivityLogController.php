@@ -10,6 +10,6 @@ class ActivityLogController extends Controller
 {
     public function index(Request $request)
     {
-        return ActivityLog::with('user:id,name,role')->orderByDesc('created_at')->limit(100)->get();
+        return ActivityLog::with('user:id,name,role,email')->orderByDesc('created_at')->limit(200)->get();
     }
 }

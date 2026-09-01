@@ -390,18 +390,16 @@ export default function WaterPage() {
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             Water Business
-            {isSuperAdmin && <span className="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200">Admin View Only</span>}
           </h2>
           <p className="text-muted-foreground text-sm">Sachet water production & sales management</p>
         </div>
-        {!isSuperAdmin && (
+        
           <div className="flex gap-2 flex-wrap">
             <Button variant="outline" onClick={() => setProdOpen(true)}><Droplets className="w-4 h-4 mr-2" /> Log Production</Button>
             <Button variant="outline" onClick={() => setInvOpen(true)}><Package className="w-4 h-4 mr-2" /> Stock Inventory</Button>
             <Button onClick={() => setSaleOpen(true)}><Plus className="w-4 h-4 mr-2" /> Record Sale</Button>
             <Button variant="outline" onClick={() => setExpOpen(true)}>Add Expense</Button>
           </div>
-        )}
       </div>
 
       {/* KPIs */}

@@ -109,11 +109,10 @@ export default function ExpensesPage() {
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             Expenses
-            {isSuperAdmin && <span className="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200">Admin View Only</span>}
           </h2>
           <p className="text-muted-foreground text-sm">{expenses.length} expense entries</p>
         </div>
-        {!isSuperAdmin && <Button onClick={() => setOpen(true)} className="font-bold bg-emerald-800 hover:bg-emerald-900 text-white"><Plus className="w-4 h-4 mr-2" /> Add Expense</Button>}
+        <Button onClick={() => setOpen(true)} className="font-bold bg-emerald-800 hover:bg-emerald-900 text-white"><Plus className="w-4 h-4 mr-2" /> Add Expense</Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

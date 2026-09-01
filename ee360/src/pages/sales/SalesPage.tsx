@@ -228,11 +228,10 @@ export default function SalesPage() {
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             Sales
-            {isSuperAdmin && <span className="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200">Admin View Only</span>}
           </h2>
           <p className="text-muted-foreground text-sm">{sales.length} transactions on record</p>
         </div>
-        {!isSuperAdmin && <Button onClick={() => setOpen(true)} className="font-bold bg-emerald-800 hover:bg-emerald-900 text-white"><Plus className="w-4 h-4 mr-2" /> Record New Sale</Button>}
+        <Button onClick={() => setOpen(true)} className="font-bold bg-emerald-800 hover:bg-emerald-900 text-white"><Plus className="w-4 h-4 mr-2" /> Record New Sale</Button>
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>

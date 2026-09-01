@@ -115,11 +115,10 @@ export default function HatcheryPage() {
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             Hatchery Records
-            {isSuperAdmin && <span className="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200">Admin View Only</span>}
           </h2>
           <p className="text-muted-foreground text-sm">Manage hatch batches and incubation success rates</p>
         </div>
-        {!isSuperAdmin && <Button onClick={() => openForm()} className="font-bold bg-emerald-800 hover:bg-emerald-900 text-white"><Plus className="w-4 h-4 mr-2" /> Add Record</Button>}
+        <Button onClick={() => openForm()} className="font-bold bg-emerald-800 hover:bg-emerald-900 text-white"><Plus className="w-4 h-4 mr-2" /> Add Record</Button>
       </div>
 
       <div className="flex gap-3">
@@ -171,7 +170,7 @@ export default function HatcheryPage() {
                       <td className="px-4 py-3 text-red-500">{r.mortality}</td>
                       <td className="px-4 py-3 font-medium">{hatchRate}%</td>
                       <td className="px-4 py-3">
-                        {!isSuperAdmin && (
+                        
                           <div className="flex gap-2 justify-end">
                             <button onClick={() => openForm(r)} className="text-muted-foreground hover:text-foreground">
                               <Edit2 className="w-4 h-4" />
@@ -180,7 +179,6 @@ export default function HatcheryPage() {
                               <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
-                        )}
                       </td>
                     </tr>
                   );

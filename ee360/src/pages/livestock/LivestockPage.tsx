@@ -216,11 +216,10 @@ export default function LivestockPage() {
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             Livestock
-            {isSuperAdmin && <span className="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200">Admin View Only</span>}
           </h2>
           <p className="text-muted-foreground text-sm">{animals.length} animals on record</p>
         </div>
-        {!isSuperAdmin && (
+        
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setManageOpen(true)}>
               <Settings2 className="w-4 h-4 mr-2" /> Categories
@@ -229,7 +228,6 @@ export default function LivestockPage() {
               <Plus className="w-4 h-4 mr-2" /> Add Animal
             </Button>
           </div>
-        )}
       </div>
 
       <Tabs value={tab} onValueChange={setTab}>
@@ -281,7 +279,7 @@ export default function LivestockPage() {
                         <span>Cost: <strong className="text-foreground">₦{a.purchase_price?.toLocaleString()}</strong></span>
                       </div>
                       {a.notes && <p className="text-xs text-muted-foreground italic mb-3 line-clamp-2">{a.notes}</p>}
-                      {!isSuperAdmin && (
+                      
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm" className="flex-1" onClick={() => { setEditing(a); setOpen(true); }}>
                             <Edit2 className="w-3 h-3 mr-1" /> Edit
@@ -290,7 +288,6 @@ export default function LivestockPage() {
                             <Trash2 className="w-3 h-3" />
                           </Button>
                         </div>
-                      )}
                     </CardContent>
                   </Card>
                 ))}

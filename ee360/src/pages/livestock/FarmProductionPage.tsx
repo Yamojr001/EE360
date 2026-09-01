@@ -139,15 +139,13 @@ export default function FarmProductionPage() {
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
             Daily Production
-            {isSuperAdmin && <span className="text-xs bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded border border-amber-200">Admin View Only</span>}
           </h2>
           <p className="text-muted-foreground text-sm">Log daily eggs, milk, and other farm yields</p>
         </div>
-        {!isSuperAdmin && (
+        
           <Button onClick={() => { setEditing(null); setOpen(true); }} className="font-bold bg-emerald-800 hover:bg-emerald-900 text-white">
             <Plus className="w-4 h-4 mr-2" /> Log Production
           </Button>
-        )}
       </div>
 
       <div className="flex items-center gap-3">
