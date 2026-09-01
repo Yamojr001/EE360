@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\RecordsDeletedBy;
+use App\Traits\LogsActivity;
 
 class FarmProduction extends Model
 {
-    use HasFactory, SoftDeletes, RecordsDeletedBy;
+    use HasFactory, SoftDeletes, RecordsDeletedBy, LogsActivity;
 
     protected $fillable = [
         'date',

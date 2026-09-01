@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Clock, Search, User, Eye, Tag, Database, Shield, CheckCircle2, FileText, X } from 'lucide-react';
+import { Clock, Search, User, Eye, Tag, Database, Shield, FileText, Info, Layers } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import api from '@/lib/api';
 import { formatDate, capitalize } from '@/lib/utils';
@@ -14,6 +13,7 @@ interface ActivityLog {
   user_id: number | null;
   action: string;
   description: string;
+  details?: Record<string, any> | string | null;
   model_type?: string | null;
   model_id?: number | null;
   created_at: string;
@@ -57,12 +57,44 @@ export default function ActivityLogsPage() {
     return parts[parts.length - 1].replace(/([A-Z])/g, ' $1').trim();
   };
 
+  const parseDetails = (details?: any): Record<string, any> | null => {
+    if (!details) return null;
+    if (typeof details === 'string') {
+      try {
+        return JSON.parse(details);
+      } catch {
+        return null;
+      }
+    }
+    if (typeof details === 'object') return details;
+    return null;
+  };
+
+  const formatKeyName = (key: string) => {
+    return key
+      .replace(/_/g, ' ')
+      .replace(/([A-Z])/g, ' $1')
+      .replace(/^./, str => str.toUpperCase())
+      .trim();
+  };
+
+  const formatVal = (key: string, val: any) => {
+    if (val === null || val === undefined) return '—';
+    if (typeof val === 'boolean') return val ? 'Yes' : 'No';
+    if (key.includes('amount') || key.includes('price') || key.includes('cost') || key.includes('value')) {
+      const num = Number(val);
+      if (!isNaN(num)) return `₦${num.toLocaleString('en-NG', { minimumFractionDigits: 2 })}`;
+    }
+    if (typeof val === 'object') return JSON.stringify(val);
+    return String(val);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Activity Logs</h2>
-          <p className="text-muted-foreground text-sm">Real-time system audit trail & operational history</p>
+          <p className="text-muted-foreground text-sm">Real-time system audit trail & detailed record snapshots</p>
         </div>
       </div>
 
@@ -170,11 +202,11 @@ export default function ActivityLogsPage() {
 
       {/* Activity Log Full Details Modal */}
       <Dialog open={!!selectedLog} onOpenChange={(open) => { if (!open) setSelectedLog(null); }}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 text-lg">
               <FileText className="w-5 h-5 text-primary" />
-              Activity Log Details #{selectedLog?.id}
+              Activity Audit Log #{selectedLog?.id}
             </DialogTitle>
           </DialogHeader>
 
@@ -206,7 +238,7 @@ export default function ActivityLogsPage() {
               {/* User Metadata */}
               <div className="bg-card border border-border rounded-lg p-4 space-y-3">
                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5" /> User Information
+                  <User className="w-3.5 h-3.5 text-primary" /> User Information
                 </p>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
@@ -229,18 +261,58 @@ export default function ActivityLogsPage() {
               {/* Action Description */}
               <div className="space-y-2">
                 <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                  <Tag className="w-3.5 h-3.5" /> Event Description
+                  <Tag className="w-3.5 h-3.5 text-primary" /> Audit Summary
                 </p>
                 <div className="bg-muted/30 border border-border rounded-lg p-4 text-sm font-medium leading-relaxed text-foreground">
                   {selectedLog.description}
                 </div>
               </div>
 
+              {/* Item Snapshot Details (When available) */}
+              {(() => {
+                const detailsObj = parseDetails(selectedLog.details);
+                if (!detailsObj || Object.keys(detailsObj).length === 0) return null;
+
+                const isDeleted = selectedLog.action.toLowerCase().includes('delete');
+                const ignoredKeys = ['created_at', 'updated_at', 'deleted_at'];
+
+                const entryPairs = Object.entries(detailsObj).filter(([k]) => !ignoredKeys.includes(k));
+                if (entryPairs.length === 0) return null;
+
+                return (
+                  <div className="space-y-2">
+                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                      <Layers className="w-3.5 h-3.5 text-primary" />
+                      {isDeleted ? 'Deleted Item Record Snapshot' : 'Item Field Details'}
+                    </p>
+
+                    <div className="bg-card border border-border rounded-lg overflow-hidden">
+                      <div className="bg-muted/40 px-3 py-2 border-b border-border flex justify-between items-center text-xs">
+                        <span className="font-bold text-foreground">Captured Attributes</span>
+                        <span className="text-[10px] text-muted-foreground">{entryPairs.length} fields logged</span>
+                      </div>
+                      <div className="p-3 grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto">
+                        {entryPairs.map(([k, v]) => (
+                          <div key={k} className="bg-muted/20 border border-border/50 rounded p-2 text-xs">
+                            <p className="text-muted-foreground text-[10px] font-medium uppercase tracking-tight">
+                              {formatKeyName(k)}
+                            </p>
+                            <p className="font-semibold text-foreground mt-0.5 break-words">
+                              {formatVal(k, v)}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+
               {/* Module & Technical Metadata */}
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-card border border-border rounded-lg p-3">
                   <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-                    <Database className="w-3 h-3" /> Target Entity / Module
+                    <Database className="w-3 h-3 text-primary" /> Target Entity / Module
                   </p>
                   <p className="text-xs font-semibold mt-1">{formatModelName(selectedLog.model_type)}</p>
                   {selectedLog.model_type && (
@@ -250,7 +322,7 @@ export default function ActivityLogsPage() {
 
                 <div className="bg-card border border-border rounded-lg p-3">
                   <p className="text-[11px] text-muted-foreground flex items-center gap-1">
-                    <Shield className="w-3 h-3" /> Record ID
+                    <Shield className="w-3 h-3 text-primary" /> Record ID
                   </p>
                   <p className="text-xs font-semibold mt-1">
                     {selectedLog.model_id ? `#${selectedLog.model_id}` : 'None'}

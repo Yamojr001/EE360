@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\RecordsDeletedBy;
+use App\Traits\LogsActivity;
 
 class WaterProduction extends Model
 {
-    use SoftDeletes, RecordsDeletedBy;
+    use SoftDeletes, RecordsDeletedBy, LogsActivity;
 
     use HasFactory;
 
