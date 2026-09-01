@@ -521,12 +521,13 @@ export default function WaterPage() {
                       <tr key={s.id} className={`border-b border-border hover:bg-muted/30 ${isPartial ? 'bg-orange-50/50' : ''}`}>
                         <td className="px-4 py-3 text-xs text-muted-foreground">{formatDate(s.date)}</td>
                         <td className="px-4 py-3">
-                          <span className="font-medium capitalize">{s.product_type?.replace('_', ' ')}</span>
-                          <span className="text-xs text-muted-foreground block capitalize">{s.unit}</span>
+                          <span className="font-medium capitalize">
+                            {[s.product_type?.replace('_', ' '), s.unit].filter(Boolean).join(' ')}
+                          </span>
                         </td>
                         <td className="px-4 py-3 font-semibold">{s.quantity}</td>
-                        <td className="px-4 py-3 font-semibold text-blue-600">{formatCurrency(s.total_amount)}</td>
-                        <td className="px-4 py-3 font-semibold text-green-600">{formatCurrency(s.amount_paid || s.total_amount)}</td>
+                        <td className="px-4 py-3 font-semibold text-blue-600">₦{Number(s.total_amount || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        <td className="px-4 py-3 font-semibold text-green-600">₦{Number(s.amount_paid || s.total_amount || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                         <td className="px-4 py-3">{s.buyer || '—'}</td>
                         <td className="px-4 py-3 text-xs font-medium">{s.payment_method || '—'}</td>
                         <td className="px-4 py-3">
@@ -570,7 +571,7 @@ export default function WaterPage() {
                       <tr key={e.id} className="border-b border-border hover:bg-muted/30">
                         <td className="px-4 py-3 text-xs text-muted-foreground">{formatDate(e.date)}</td>
                         <td className="px-4 py-3 font-medium">{e.description}</td>
-                        <td className="px-4 py-3 font-semibold text-destructive">{formatCurrency(e.amount)}</td>
+                        <td className="px-4 py-3 font-semibold text-destructive">₦{Number(e.amount || 0).toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
                         <td className="px-4 py-3">{e.vendor || '—'}</td>
                         <td className="px-4 py-3 text-muted-foreground text-xs">{e.notes || '—'}</td>
                         <td className="px-4 py-3"><button onClick={() => { if (confirm('Delete expense?')) delExp.mutate(e.id); }} className="text-muted-foreground hover:text-destructive"><Trash2 className="w-4 h-4" /></button></td>
