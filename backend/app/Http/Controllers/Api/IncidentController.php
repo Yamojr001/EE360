@@ -71,6 +71,11 @@ class IncidentController extends Controller
             }
         }
 
+        // Guard: verify the sector actually exists to prevent FK constraint violation
+        if ($sectorId && !\Illuminate\Support\Facades\DB::table('sectors')->where('id', $sectorId)->exists()) {
+            $sectorId = null;
+        }
+
         $incident = Incident::create([
             'title'            => $validated['title'],
             'description'      => $validated['description'],
