@@ -11,12 +11,29 @@ class AnimalCategoryController extends Controller
     public function index(Request $request)
     {
         $query = AnimalCategory::query();
-        if ($request->has('sector_id')) {
-            $query->where('sector_id', $request->sector_id);
+        $user = $request->user();
+
+        $sectorId = $request->query('sector_id');
+        if ($user && $user->role === 'farm_manager') {
+            $sectorId = 1;
+        } elseif ($user && $user->role === 'water_manager') {
+            $sectorId = 2;
         }
+
+        if ($sectorId !== null && $sectorId !== '') {
+            if ((int)$sectorId === 1) {
+                $query->where(function($q) {
+                    $q->where('sector_id', 1)->orWhereNull('sector_id');
+                });
+            } else {
+                $query->where('sector_id', $sectorId);
+            }
+        }
+
         if ($request->has('type')) {
             $query->where('type', $request->type);
         }
+
         return response()->json($query->orderBy('name')->get());
     }
 
@@ -27,6 +44,15 @@ class AnimalCategoryController extends Controller
             'type' => 'required|in:animal,product',
             'sector_id' => 'nullable|integer',
         ]);
+
+        $user = $request->user();
+        if (empty($validated['sector_id'])) {
+            if ($user && $user->role === 'water_manager') {
+                $validated['sector_id'] = 2;
+            } else {
+                $validated['sector_id'] = 1; // Default Farm sector
+            }
+        }
 
         $category = AnimalCategory::create($validated);
         return response()->json($category, 201);

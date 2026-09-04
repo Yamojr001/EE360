@@ -10,11 +10,27 @@ class InventoryController extends Controller
 {
     public function index(Request $request)
     {
-        $query = InventoryItem::orderBy('category')->orderBy('name');
-        if ($request->has('sector_id')) {
-            $query->where('sector_id', $request->sector_id);
+        $query = InventoryItem::query();
+        $user = $request->user();
+
+        $sectorId = $request->query('sector_id');
+        if ($user && $user->role === 'farm_manager') {
+            $sectorId = 1;
+        } elseif ($user && $user->role === 'water_manager') {
+            $sectorId = 2;
         }
-        return $query->get();
+
+        if ($sectorId !== null && $sectorId !== '') {
+            if ((int)$sectorId === 1) {
+                $query->where(function($q) {
+                    $q->where('sector_id', 1)->orWhereNull('sector_id');
+                });
+            } else {
+                $query->where('sector_id', $sectorId);
+            }
+        }
+
+        return $query->orderBy('category')->orderBy('name')->get();
     }
 
     public function store(Request $request)
@@ -31,6 +47,15 @@ class InventoryController extends Controller
             'notes'           => 'nullable|string',
             'sector_id'       => 'nullable|integer',
         ]);
+
+        $user = $request->user();
+        if (empty($data['sector_id'])) {
+            if ($user && $user->role === 'water_manager') {
+                $data['sector_id'] = 2;
+            } else {
+                $data['sector_id'] = 1; // Default Farm sector
+            }
+        }
 
         return response()->json(InventoryItem::create($data), 201);
     }

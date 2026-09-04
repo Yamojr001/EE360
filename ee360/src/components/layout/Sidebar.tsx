@@ -11,30 +11,30 @@ import { useAuth } from '@/contexts/auth-context';
 interface NavItem { label: string; href: string; icon: React.ReactNode; }
 
 const FARM_NAV: NavItem[] = [
-  { label: 'Farm Dashboard', href: '/dashboard',            icon: <LayoutDashboard className="w-4 h-4" /> },
-  { label: 'Livestock',      href: '/dashboard/livestock',  icon: <Bird className="w-4 h-4" /> },
-  { label: 'Hatchery',       href: '/dashboard/hatchery',   icon: <Egg className="w-4 h-4" /> },
-  { label: 'Daily Production',href: '/dashboard/production', icon: <Layers className="w-4 h-4" /> },
-  { label: 'Farm Sales',     href: '/dashboard/sales',      icon: <ShoppingCart className="w-4 h-4" /> },
-  { label: 'Farm Expenses',  href: '/dashboard/expenses',   icon: <Wallet className="w-4 h-4" /> },
-  { label: 'Inventory',      href: '/dashboard/inventory',  icon: <Package className="w-4 h-4" /> },
-  { label: 'Daily Ledger',   href: '/dashboard/ledger',     icon: <BookOpen className="w-4 h-4" /> },
-  { label: 'Report Problem', href: '/dashboard/incidents',  icon: <AlertTriangle className="w-4 h-4 text-amber-500" /> },
-  { label: 'Farm Workers',   href: '/dashboard/workers',    icon: <Users className="w-4 h-4" /> },
-  { label: 'Vendors',        href: '/dashboard/vendors',    icon: <Store className="w-4 h-4" /> },
-  { label: 'Customers',      href: '/dashboard/customers',  icon: <Users className="w-4 h-4" /> },
-  { label: 'Reports',        href: '/dashboard/reports',    icon: <BarChart3 className="w-4 h-4" /> },
+  { label: 'Farm Dashboard', href: '/dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
+  { label: 'Livestock', href: '/dashboard/livestock', icon: <Bird className="w-4 h-4" /> },
+  { label: 'Hatchery', href: '/dashboard/hatchery', icon: <Egg className="w-4 h-4" /> },
+  { label: 'Daily Production', href: '/dashboard/production', icon: <Layers className="w-4 h-4" /> },
+  { label: 'Farm Sales', href: '/dashboard/sales', icon: <ShoppingCart className="w-4 h-4" /> },
+  { label: 'Farm Expenses', href: '/dashboard/expenses', icon: <Wallet className="w-4 h-4" /> },
+  { label: 'Inventory', href: '/dashboard/inventory', icon: <Package className="w-4 h-4" /> },
+  { label: 'Daily Ledger', href: '/dashboard/ledger', icon: <BookOpen className="w-4 h-4" /> },
+  { label: 'Report Problem', href: '/dashboard/incidents', icon: <AlertTriangle className="w-4 h-4 text-amber-500" /> },
+  { label: 'Farm Workers', href: '/dashboard/workers', icon: <Users className="w-4 h-4" /> },
+  { label: 'Vendors', href: '/dashboard/vendors', icon: <Store className="w-4 h-4" /> },
+  { label: 'Customers', href: '/dashboard/customers', icon: <Users className="w-4 h-4" /> },
+  { label: 'Reports', href: '/dashboard/reports', icon: <BarChart3 className="w-4 h-4" /> },
 ];
 
 const WATER_NAV: NavItem[] = [
-  { label: 'Water Dashboard', href: '/dashboard',        icon: <LayoutDashboard className="w-4 h-4" /> },
-  { label: 'Water Business',  href: '/dashboard/water',  icon: <Droplets className="w-4 h-4" /> },
-  { label: 'Daily Ledger',    href: '/dashboard/ledger', icon: <BookOpen className="w-4 h-4" /> },
-  { label: 'Report Problem',  href: '/dashboard/incidents', icon: <AlertTriangle className="w-4 h-4 text-amber-500" /> },
-  { label: 'Water Workers',   href: '/dashboard/workers',icon: <Users className="w-4 h-4" /> },
-  { label: 'Vendors',         href: '/dashboard/vendors', icon: <Store className="w-4 h-4" /> },
-  { label: 'Customers',       href: '/dashboard/customers',icon: <Users className="w-4 h-4" /> },
-  { label: 'Reports',         href: '/dashboard/reports',icon: <BarChart3 className="w-4 h-4" /> },
+  { label: 'Water Dashboard', href: '/dashboard', icon: <LayoutDashboard className="w-4 h-4" /> },
+  { label: 'Water Business', href: '/dashboard/water', icon: <Droplets className="w-4 h-4" /> },
+  { label: 'Daily Ledger', href: '/dashboard/ledger', icon: <BookOpen className="w-4 h-4" /> },
+  { label: 'Report Problem', href: '/dashboard/incidents', icon: <AlertTriangle className="w-4 h-4 text-amber-500" /> },
+  { label: 'Water Workers', href: '/dashboard/workers', icon: <Users className="w-4 h-4" /> },
+  { label: 'Vendors', href: '/dashboard/vendors', icon: <Store className="w-4 h-4" /> },
+  { label: 'Customers', href: '/dashboard/customers', icon: <Users className="w-4 h-4" /> },
+  { label: 'Reports', href: '/dashboard/reports', icon: <BarChart3 className="w-4 h-4" /> },
 ];
 
 const SUPER_ADMIN_NAV: { section: string; items: NavItem[] }[] = [
@@ -42,23 +42,22 @@ const SUPER_ADMIN_NAV: { section: string; items: NavItem[] }[] = [
     section: 'Overview',
     items: [
       { label: 'Command Centre', href: '/dashboard', icon: <Layers className="w-4 h-4" /> },
-      { label: 'Applications',   href: '/dashboard/admin/applications', icon: <GraduationCap className="w-4 h-4 text-emerald-500" /> },
       { label: 'Reported Problems', href: '/dashboard/incidents', icon: <AlertTriangle className="w-4 h-4 text-amber-500" /> },
-      { label: 'Activity Logs',  href: '/dashboard/admin/logs', icon: <Clock className="w-4 h-4" /> },
-      { label: 'Customers',      href: '/dashboard/customers',  icon: <Users className="w-4 h-4" /> },
-      { label: 'Daily Ledger',   href: '/dashboard/ledger', icon: <BookOpen className="w-4 h-4" /> },
-      { label: 'Full Reports',   href: '/dashboard/reports', icon: <BarChart3 className="w-4 h-4" /> },
+      { label: 'Activity Logs', href: '/dashboard/admin/logs', icon: <Clock className="w-4 h-4" /> },
+      { label: 'Customers', href: '/dashboard/customers', icon: <Users className="w-4 h-4" /> },
+      { label: 'Daily Ledger', href: '/dashboard/ledger', icon: <BookOpen className="w-4 h-4" /> },
+      { label: 'Full Reports', href: '/dashboard/reports', icon: <BarChart3 className="w-4 h-4" /> },
     ],
   },
   {
     section: 'Farm Sector',
     items: [
-      { label: 'Livestock',     href: '/dashboard/livestock', icon: <Bird className="w-4 h-4" /> },
-      { label: 'Hatchery',      href: '/dashboard/hatchery',  icon: <Egg className="w-4 h-4" /> },
-      { label: 'Daily Production',href: '/dashboard/production', icon: <Layers className="w-4 h-4" /> },
-      { label: 'Farm Sales',    href: '/dashboard/sales',     icon: <ShoppingCart className="w-4 h-4" /> },
-      { label: 'Farm Expenses', href: '/dashboard/expenses',  icon: <Wallet className="w-4 h-4" /> },
-      { label: 'Inventory',     href: '/dashboard/inventory', icon: <Package className="w-4 h-4" /> },
+      { label: 'Livestock', href: '/dashboard/livestock', icon: <Bird className="w-4 h-4" /> },
+      { label: 'Hatchery', href: '/dashboard/hatchery', icon: <Egg className="w-4 h-4" /> },
+      { label: 'Daily Production', href: '/dashboard/production', icon: <Layers className="w-4 h-4" /> },
+      { label: 'Farm Sales', href: '/dashboard/sales', icon: <ShoppingCart className="w-4 h-4" /> },
+      { label: 'Farm Expenses', href: '/dashboard/expenses', icon: <Wallet className="w-4 h-4" /> },
+      { label: 'Inventory', href: '/dashboard/inventory', icon: <Package className="w-4 h-4" /> },
     ],
   },
   {
@@ -70,10 +69,11 @@ const SUPER_ADMIN_NAV: { section: string; items: NavItem[] }[] = [
   {
     section: 'People & Contacts',
     items: [
-      { label: 'Portal Accounts',  href: '/dashboard/admin/users',    icon: <ShieldCheck className="w-4 h-4 text-amber-500" /> },
-      { label: 'All Workers',      href: '/dashboard/workers',        icon: <Users className="w-4 h-4" /> },
-      { label: 'All Vendors',      href: '/dashboard/vendors',        icon: <Store className="w-4 h-4" /> },
-      { label: 'Staff Directory',  href: '/dashboard/admin/staff',    icon: <UserCog className="w-4 h-4" /> },
+      { label: 'Portal Accounts', href: '/dashboard/admin/users', icon: <ShieldCheck className="w-4 h-4 text-amber-500" /> },
+      { label: 'All Workers', href: '/dashboard/workers', icon: <Users className="w-4 h-4" /> },
+      { label: 'Applications', href: '/dashboard/admin/applications', icon: <GraduationCap className="w-4 h-4 text-emerald-500" /> },
+      { label: 'All Vendors', href: '/dashboard/vendors', icon: <Store className="w-4 h-4" /> },
+      { label: 'Staff Directory', href: '/dashboard/admin/staff', icon: <UserCog className="w-4 h-4" /> },
     ],
   },
 ];
@@ -108,11 +108,11 @@ export default function Sidebar() {
 
   const roleBadge = user?.role === 'super_admin' ? 'Super Admin'
     : user?.role === 'farm_manager' ? 'Farm Manager'
-    : 'Water Manager';
+      : 'Water Manager';
 
   const sectorColor = user?.role === 'super_admin' ? 'bg-amber-500/20 text-amber-700 dark:text-amber-400'
     : user?.role === 'farm_manager' ? 'bg-blue-500/20 text-blue-700 dark:text-blue-400'
-    : 'bg-sky-500/20 text-sky-700 dark:text-sky-400';
+      : 'bg-sky-500/20 text-sky-700 dark:text-sky-400';
 
   return (
     <aside className={cn(

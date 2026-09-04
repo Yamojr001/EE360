@@ -11,9 +11,25 @@ class HatcheryRecordController extends Controller
     public function index(Request $request)
     {
         $query = HatcheryRecord::query();
-        if ($request->has('sector_id')) {
-            $query->where('sector_id', $request->sector_id);
+        $user = $request->user();
+
+        $sectorId = $request->query('sector_id');
+        if ($user && $user->role === 'farm_manager') {
+            $sectorId = 1;
+        } elseif ($user && $user->role === 'water_manager') {
+            $sectorId = 2;
         }
+
+        if ($sectorId !== null && $sectorId !== '') {
+            if ((int)$sectorId === 1) {
+                $query->where(function($q) {
+                    $q->where('sector_id', 1)->orWhereNull('sector_id');
+                });
+            } else {
+                $query->where('sector_id', $sectorId);
+            }
+        }
+
         return $query->orderBy('date', 'desc')->get();
     }
 
@@ -29,6 +45,15 @@ class HatcheryRecordController extends Controller
             'mortality'    => 'required|integer|min:0',
             'notes'        => 'nullable|string'
         ]);
+
+        $user = $request->user();
+        if (empty($data['sector_id'])) {
+            if ($user && $user->role === 'water_manager') {
+                $data['sector_id'] = 2;
+            } else {
+                $data['sector_id'] = 1; // Default Farm sector
+            }
+        }
 
         return response()->json(HatcheryRecord::create($data), 201);
     }
