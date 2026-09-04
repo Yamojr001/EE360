@@ -12,7 +12,7 @@ function KpiCard({ label, value, icon, sub }: any) {
     <div className="bg-card border border-border rounded-2xl p-5">
       <div className="flex items-center justify-between mb-3">
         <span className="text-sm text-muted-foreground">{label}</span>
-        <div className="w-8 h-8 bg-primary/10 text-primary rounded-lg flex items-center justify-center">{icon}</div>
+        <div className="w-8 h-8 bg-purple-500/15 text-purple-600 dark:text-purple-400 rounded-lg flex items-center justify-center">{icon}</div>
       </div>
       <p className="text-2xl font-extrabold text-foreground">{value}</p>
       {sub && <p className="text-xs text-muted-foreground mt-1">{sub}</p>}
@@ -42,7 +42,7 @@ export default function FarmDashboard() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className="w-10 h-10 bg-blue-500 rounded-xl flex items-center justify-center">
+        <div className="w-10 h-10 bg-purple-600 rounded-xl flex items-center justify-center">
           <Bird className="w-5 h-5 text-white" />
         </div>
         <div>
@@ -69,16 +69,16 @@ export default function FarmDashboard() {
             <AreaChart data={d.monthlyChart ?? []}>
               <defs>
                 <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#10b981" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                  <stop offset="5%"  stopColor="#8b5cf6" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0 0)" />
               <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `₦${(v/1000).toFixed(0)}k`} />
+              <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `₦${v.toLocaleString()}`} />
               <Tooltip formatter={(v: any) => formatCurrency(v)} />
               <Legend />
-              <Area type="monotone" dataKey="revenue"  stroke="#10b981" fill="url(#revGrad)" name="Revenue" strokeWidth={2.5} />
+              <Area type="monotone" dataKey="revenue"  stroke="#8b5cf6" fill="url(#revGrad)" name="Revenue" strokeWidth={2.5} />
               <Area type="monotone" dataKey="expenses" stroke="#ef4444"  fill="none"          name="Expenses" strokeDasharray="4 2" strokeWidth={2} />
             </AreaChart>
           </ResponsiveContainer>
@@ -91,10 +91,10 @@ export default function FarmDashboard() {
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={d.salesByCategory ?? []} layout="vertical">
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0 0)" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={v => `₦${(v/1000).toFixed(0)}k`} />
+              <XAxis type="number" tick={{ fontSize: 11 }} tickFormatter={v => `₦${v.toLocaleString()}`} />
               <YAxis type="category" dataKey="category" tick={{ fontSize: 11 }} width={65} />
               <Tooltip formatter={(v: any) => formatCurrency(v)} />
-              <Bar dataKey="total" name="Revenue" fill="#10b981" radius={[0, 6, 6, 0]} />
+              <Bar dataKey="total" name="Revenue" fill="#8b5cf6" radius={[0, 6, 6, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

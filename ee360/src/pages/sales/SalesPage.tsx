@@ -27,7 +27,7 @@ interface Sale { id: number; date: string; category: string; item: string; quant
 interface AnimalCategory { id: number; name: string; type: string; }
 
 function SaleForm({ categories, sectorId, onSave, onClose }: { categories: string[]; sectorId?: number; onSave: (d: any) => void; onClose: () => void }) {
-  const [form, setForm] = useState<any>({ date: new Date().toISOString().split('T')[0], category: categories[0] || 'livestock', item: '', quantity: '', unit: 'unit', unit_price: '', total_amount: 0, amount_paid: 0, buyer: '', customer_id: '', notes: '', payment_method: 'Cash', payment_status: 'paid' });
+  const [form, setForm] = useState<any>({ date: new Date().toISOString().split('T')[0], category: categories[0] || 'livestock', item: '', quantity: '', unit: 'unit', unit_price: '', total_amount: '', amount_paid: '', buyer: '', customer_id: '', notes: '', payment_method: 'Cash', payment_status: 'paid' });
   const set = (k: string, v: any) => setForm((p: any) => {
     const next = { ...p, [k]: v };
     if (k === 'quantity' || k === 'unit_price') {

@@ -143,7 +143,7 @@ function ProductionForm({ onSave, onClose, inventoryItems = [] }: { onSave: (d: 
 }
 
 function SaleForm({ onSave, onClose, sectorId }: { onSave: (d: any) => void; onClose: () => void; sectorId?: number; }) {
-  const [form, setForm] = useState<any>({ date: new Date().toISOString().split('T')[0], product_type: 'sachet', unit: 'bags', quantity: '', unit_price: '', total_amount: 0, amount_paid: 0, buyer: '', customer_id: '', distribution_area: '', payment_method: 'Cash', payment_status: 'paid' });
+  const [form, setForm] = useState<any>({ date: new Date().toISOString().split('T')[0], product_type: 'sachet', unit: 'bags', quantity: '', unit_price: '', total_amount: '', amount_paid: '', buyer: '', customer_id: '', distribution_area: '', payment_method: 'Cash', payment_status: 'paid' });
   const set = (k: string, v: any) => setForm((p: any) => {
     const n = { ...p, [k]: v };
     if (k === 'quantity' || k === 'unit_price') {
@@ -447,7 +447,7 @@ export default function WaterPage() {
               <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
               <Tooltip cursor={{fill: 'transparent'}} />
               <Legend wrapperStyle={{ fontSize: '12px' }} />
-              <Bar dataKey="produced" name="Valid Production" stackId="a" fill="#0ea5e9" radius={[0, 0, 0, 0]} />
+              <Bar dataKey="produced" name="Valid Production" stackId="a" fill="#f59e0b" radius={[0, 0, 0, 0]} />
               <Bar dataKey="wasted" name="Waste" stackId="a" fill="#ef4444" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>

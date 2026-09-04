@@ -15,12 +15,12 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recha
 import { useAuth } from '@/contexts/auth-context';
 
 const CATEGORIES = ['feed', 'medicine', 'equipment', 'labour', 'transport', 'utilities', 'maintenance', 'other'];
-const CAT_COLORS = ['#10b981', '#ef4444', '#f59e0b', '#8b5cf6', '#0ea5e9', '#ec4899', '#f97316', '#14b8a6'];
+const CAT_COLORS = ['#8b5cf6', '#ef4444', '#f59e0b', '#ec4899', '#f97316', '#14b8a6', '#6366f1', '#84cc16'];
 const CAT_BG: Record<string, string> = {
-  feed: 'bg-blue-100 text-blue-800', medicine: 'bg-blue-100 text-blue-800',
-  equipment: 'bg-purple-100 text-purple-800', labour: 'bg-yellow-100 text-yellow-800',
-  transport: 'bg-orange-100 text-orange-800', utilities: 'bg-blue-100 text-blue-800',
-  maintenance: 'bg-red-100 text-red-800', other: 'bg-gray-100 text-gray-800',
+  feed: 'bg-purple-100 text-purple-800', medicine: 'bg-red-100 text-red-800',
+  equipment: 'bg-amber-100 text-amber-800', labour: 'bg-pink-100 text-pink-800',
+  transport: 'bg-orange-100 text-orange-800', utilities: 'bg-teal-100 text-teal-800',
+  maintenance: 'bg-indigo-100 text-indigo-800', other: 'bg-gray-100 text-gray-800',
 };
 
 interface Expense { id: number; date: string; category: string; description: string; amount: number; vendor: string; notes: string; }

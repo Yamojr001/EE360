@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import FarmDashboard from './FarmDashboard';
 import WaterDashboard from './WaterDashboard';
 
-const COLORS = ['#10b981', '#ef4444', '#f59e0b', '#8b5cf6'];
+const COLORS = ['#8b5cf6', '#f59e0b', '#ec4899', '#10b981'];
 
 function KpiCard({ label, value, icon, change, positive, color }: any) {
   return (
@@ -23,7 +23,7 @@ function KpiCard({ label, value, icon, change, positive, color }: any) {
       </div>
       <p className="text-2xl font-extrabold text-foreground">{value}</p>
       {change != null && (
-        <div className={cn('flex items-center gap-1 text-xs font-medium', positive ? 'text-blue-600' : 'text-red-500')}>
+        <div className={cn('flex items-center gap-1 text-xs font-medium', positive ? 'text-emerald-600' : 'text-red-500')}>
           {positive ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
           {change}% vs last month
         </div>
@@ -45,80 +45,102 @@ export default function SuperAdminDashboard() {
   if (isLoading) return (
     <div className="space-y-4 animate-pulse">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[...Array(4)].map((_, i) => <div key={i} className="h-32 bg-muted rounded-2xl" />)}
+        {[...Array(4)].map((_, i) => <div key={i} className="h-28 bg-muted rounded-2xl" />)}
       </div>
-      <div className="h-72 bg-muted rounded-2xl" />
+      <div className="h-64 bg-muted rounded-2xl" />
     </div>
   );
 
   const d = data ?? {};
 
   return (
-    <Tabs defaultValue="both" className="space-y-6">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between mb-2 flex-wrap gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 gradient-primary rounded-xl flex items-center justify-center">
-            <Layers className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-extrabold text-foreground">Command Centre</h1>
-            <p className="text-sm text-muted-foreground">All sectors · Real-time overview</p>
-          </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-extrabold text-foreground flex items-center gap-2">
+            Command Centre <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+          </h1>
+          <p className="text-sm text-muted-foreground">Combined Farm & Water operations overview</p>
         </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          <a
-            href="/dashboard/admin/applications"
-            className="inline-flex items-center gap-2 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold px-3.5 py-2 rounded-lg transition-colors shadow-sm"
-          >
-            🎓 Manage Applications Portal
-          </a>
-          <div className="flex items-center gap-2 bg-card border border-border rounded-lg px-3 py-1.5">
-            <span className="text-sm text-muted-foreground font-medium">From:</span>
-            <input type="date" value={fromDate} onChange={e => setFromDate(e.target.value)} className="bg-transparent text-sm font-medium outline-none text-foreground" />
-            <span className="text-sm text-muted-foreground font-medium ml-1">To:</span>
-            <input type="date" value={toDate} onChange={e => setToDate(e.target.value)} className="bg-transparent text-sm font-medium outline-none text-foreground" />
-          </div>
-          <TabsList>
-            <TabsTrigger value="both">Combined</TabsTrigger>
-            <TabsTrigger value="farm">Farm Only</TabsTrigger>
-            <TabsTrigger value="water">Water Only</TabsTrigger>
-          </TabsList>
+        <div className="flex items-center gap-2">
+          <input
+            type="date"
+            className="border rounded-lg px-3 py-1.5 text-xs bg-background text-foreground"
+            value={fromDate}
+            onChange={e => setFromDate(e.target.value)}
+          />
+          <span className="text-xs text-muted-foreground">to</span>
+          <input
+            type="date"
+            className="border rounded-lg px-3 py-1.5 text-xs bg-background text-foreground"
+            value={toDate}
+            onChange={e => setToDate(e.target.value)}
+          />
         </div>
       </div>
 
-      <TabsContent value="both" className="space-y-6 mt-0">
-
-      {/* KPI Grid */}
+      {/* Top Combined KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard label="Total Revenue"   value={formatCurrency(d.totalRevenue)}  icon={<TrendingUp className="w-4 h-4" />}  change={14.2} positive />
-        <KpiCard label="Total Expenses"  value={formatCurrency(d.totalExpenses)} icon={<TrendingDown className="w-4 h-4" />} change={5.8}  positive={false} />
-        <KpiCard label="Net Profit"      value={formatCurrency(d.netProfit)}     icon={<ArrowUpRight className="w-4 h-4" />}change={21.0} positive />
-        <KpiCard label="Total Staff"     value={d.totalStaff ?? '—'}             icon={<Users className="w-4 h-4" />} />
+        <KpiCard
+          label="Total Business Revenue"
+          value={formatCurrency(d.totalRevenue)}
+          icon={<TrendingUp className="w-4 h-4" />}
+          change={d.revChange}
+          positive={(d.revChange ?? 0) >= 0}
+        />
+        <KpiCard
+          label="Total Operating Expenses"
+          value={formatCurrency(d.totalExpenses)}
+          icon={<TrendingDown className="w-4 h-4 text-red-500" />}
+          change={d.expChange}
+          positive={(d.expChange ?? 0) <= 0}
+        />
+        <KpiCard
+          label="Combined Net Profit"
+          value={formatCurrency(d.combinedNet)}
+          icon={<ArrowUpRight className="w-4 h-4" />}
+          color="ring-2 ring-primary/20 bg-primary/5"
+        />
+        <KpiCard
+          label="Sachet Water Bags Produced"
+          value={(d.waterBagsProduced ?? 0).toLocaleString()}
+          icon={<Droplets className="w-4 h-4 text-sky-500" />}
+        />
       </div>
 
-      {/* Sector Cards */}
-      <div className="grid md:grid-cols-2 gap-4">
-        {(d.sectorBreakdown ?? []).map((s: any) => (
-          <div key={s.sector} className={cn(
-            'border rounded-2xl p-5',
-            s.sector === 'Farm' ? 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900'
-                               : 'bg-sky-50 dark:bg-sky-950/20 border-sky-200 dark:border-sky-900',
-          )}>
-            <div className="flex items-center gap-2 mb-4">
-              {s.sector === 'Farm' ? <Bird className="w-5 h-5 text-blue-600" /> : <Droplets className="w-5 h-5 text-sky-600" />}
-              <h3 className="font-bold text-foreground">{s.sector} Sector</h3>
-              <span className={cn('ml-auto text-xs font-semibold px-2 py-0.5 rounded-full', s.sector === 'Farm' ? 'bg-blue-100 text-blue-700' : 'bg-sky-100 text-sky-700')}>
-                {s.workers} active workers
+      {/* Sector breakdown quick cards */}
+      <div className="grid md:grid-cols-2 gap-5">
+        {(d.sectorBreakdown ?? []).map((sec: any) => (
+          <div key={sec.sector} className="bg-card border border-border rounded-2xl p-5 space-y-3">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div className="flex items-center gap-2">
+                {sec.sector === 'Farm Sector' ? (
+                  <div className="w-8 h-8 bg-purple-500/15 text-purple-600 rounded-lg flex items-center justify-center font-bold">
+                    <Bird className="w-4 h-4" />
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 bg-amber-500/15 text-amber-600 rounded-lg flex items-center justify-center font-bold">
+                    <Droplets className="w-4 h-4" />
+                  </div>
+                )}
+                <div>
+                  <h3 className="font-bold text-foreground">{sec.sector}</h3>
+                  <p className="text-xs text-muted-foreground">Performance stats</p>
+                </div>
+              </div>
+              <span className={cn('text-xs font-extrabold px-2.5 py-1 rounded-full', sec.net >= 0 ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-red-100 text-red-800')}>
+                Net: {formatCurrency(sec.net)}
               </span>
             </div>
-            <div className="grid grid-cols-3 gap-3">
+
+            <div className="grid grid-cols-3 gap-2 pt-1">
               {[
-                { label: 'Revenue',  value: formatCurrency(s.revenue)  },
-                { label: 'Expenses', value: formatCurrency(s.expenses) },
-                { label: 'Net',      value: formatCurrency(s.net),       highlight: s.net > 0 },
+                { label: 'Revenue',  value: formatCurrency(sec.revenue), highlight: true },
+                { label: 'Expenses', value: formatCurrency(sec.expenses) },
+                { label: 'Margin',   value: `${sec.revenue ? ((sec.net / sec.revenue) * 100).toFixed(1) : 0}%` },
               ].map(item => (
-                <div key={item.label} className="bg-white/60 dark:bg-white/5 rounded-xl p-3 text-center">
+                <div key={item.label} className="bg-muted/40 rounded-xl p-3 text-center border border-border">
                   <p className="text-xs text-muted-foreground mb-1">{item.label}</p>
                   <p className={cn('text-sm font-bold', item.highlight ? 'text-primary' : 'text-foreground')}>{item.value}</p>
                 </div>
@@ -133,26 +155,26 @@ export default function SuperAdminDashboard() {
         {/* Combined monthly revenue */}
         <div className="bg-card border border-border rounded-2xl p-5">
           <h3 className="font-bold text-foreground mb-1">Monthly Revenue by Sector</h3>
-          <p className="text-xs text-muted-foreground mb-4">Farm vs Water — last 7 months</p>
+          <p className="text-xs text-muted-foreground mb-4">Farm (Purple) vs Water (Gold) — last 7 months</p>
           <ResponsiveContainer width="100%" height={220}>
             <AreaChart data={d.monthlyChart ?? []} margin={{ top: 0, right: 0, left: 0, bottom: 0 }}>
               <defs>
                 <linearGradient id="farmGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#10b981" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                  <stop offset="5%"  stopColor="#8b5cf6" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#8b5cf6" stopOpacity={0} />
                 </linearGradient>
                 <linearGradient id="waterGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%"  stopColor="#0ea5e9" stopOpacity={0.3} />
-                  <stop offset="95%" stopColor="#0ea5e9" stopOpacity={0} />
+                  <stop offset="5%"  stopColor="#f59e0b" stopOpacity={0.3} />
+                  <stop offset="95%" stopColor="#f59e0b" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.92 0 0)" />
               <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `₦${(v/1000).toFixed(0)}k`} />
+              <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `₦${v.toLocaleString()}`} />
               <Tooltip formatter={(v: any) => formatCurrency(v)} />
               <Legend />
-              <Area type="monotone" dataKey="farm_revenue"  stroke="#10b981" fill="url(#farmGrad)"  name="Farm" strokeWidth={2.5} />
-              <Area type="monotone" dataKey="water_revenue" stroke="#0ea5e9" fill="url(#waterGrad)" name="Water" strokeWidth={2.5} />
+              <Area type="monotone" dataKey="farm_revenue"  stroke="#8b5cf6" fill="url(#farmGrad)"  name="Farm" strokeWidth={2.5} />
+              <Area type="monotone" dataKey="water_revenue" stroke="#f59e0b" fill="url(#waterGrad)" name="Water" strokeWidth={2.5} />
             </AreaChart>
           </ResponsiveContainer>
         </div>
@@ -178,72 +200,6 @@ export default function SuperAdminDashboard() {
           </ResponsiveContainer>
         </div>
       </div>
-
-      {/* Bottom row */}
-      <div className="grid lg:grid-cols-2 gap-5">
-        {/* Recent Activity */}
-        <div className="bg-card border border-border rounded-2xl p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <Clock className="w-4 h-4 text-muted-foreground" />
-            <h3 className="font-bold text-foreground">Recent Activity</h3>
-            <span className="ml-auto text-xs text-muted-foreground">Across all sectors</span>
-          </div>
-          <div className="space-y-2">
-            {(d.recentActivity ?? []).map((a: any, i: number) => (
-              <div key={i} className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted/40 transition-colors">
-                <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0',
-                  a.sector === 'Farm' ? 'bg-blue-500' : 'bg-sky-500')}>
-                  {a.sector === 'Farm' ? <Bird className="w-4 h-4" /> : <Droplets className="w-4 h-4" />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-foreground truncate">{a.desc}</p>
-                  <p className="text-xs text-muted-foreground">{a.sector} · {a.date}</p>
-                </div>
-                <span className="text-sm font-semibold text-primary shrink-0">{formatCurrency(a.amount)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Top Customers */}
-        <div className="bg-card border border-border rounded-2xl p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <Star className="w-4 h-4 text-yellow-500" />
-            <h3 className="font-bold text-foreground">Top Customers</h3>
-            <span className="ml-auto text-xs text-muted-foreground">Highest total spent</span>
-          </div>
-          <div className="space-y-2">
-            {(d.topCustomers ?? []).map((c: any) => (
-              <div key={c.id} className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/40 transition-colors">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold flex items-center justify-center">
-                    {c.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-foreground">{c.name}</p>
-                    {c.phone && <p className="text-xs text-muted-foreground">{c.phone}</p>}
-                  </div>
-                </div>
-                <span className="text-sm font-semibold text-primary">{formatCurrency(c.total_spent)}</span>
-              </div>
-            ))}
-            {(!d.topCustomers || d.topCustomers.length === 0) && (
-              <div className="text-center text-sm text-muted-foreground py-4">
-                No regular customers found.
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      </TabsContent>
-
-      <TabsContent value="farm" className="mt-0">
-        <FarmDashboard />
-      </TabsContent>
-
-      <TabsContent value="water" className="mt-0">
-        <WaterDashboard />
-      </TabsContent>
-    </Tabs>
+    </div>
   );
 }
