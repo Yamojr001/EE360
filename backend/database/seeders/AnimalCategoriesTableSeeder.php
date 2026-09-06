@@ -13,7 +13,7 @@ class AnimalCategoriesTableSeeder extends Seeder
     public function run(): void
     {
         $categories = [
-            ['name' => 'Chicken', 'type' => 'animal', 'sector_id' => 1],
+            ['name' => 'Chicken'gg, 'type' => 'animal', 'sector_id' => 1],
             ['name' => 'Goat', 'type' => 'animal', 'sector_id' => 1],
             ['name' => 'Sheep', 'type' => 'animal', 'sector_id' => 1],
             ['name' => 'Cattle', 'type' => 'animal', 'sector_id' => 1],
