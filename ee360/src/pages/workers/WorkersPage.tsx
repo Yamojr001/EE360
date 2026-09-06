@@ -94,66 +94,7 @@ function WorkerForm({ initial, onSave, onClose }: { initial?: Partial<Worker>; o
     </form>
   );
 }
-
-function IDCard({ worker }: { worker: Worker }) {
-  const handlePrint = () => {
-    // Basic window.print approach. We'll rely on CSS print styles to hide everything except the card.
-    window.print();
-  };
-
-  return (
-    <div className="flex flex-col items-center">
-      <div id="print-section" className="w-[300px] h-[450px] relative bg-white shadow-xl rounded-2xl overflow-hidden flex flex-col items-center border border-gray-100 print:shadow-none print:border-none" style={{ fontFamily: 'Inter, sans-serif' }}>
-        {/* Background Design */}
-        <div className="absolute top-0 w-full h-32 bg-gradient-to-r from-blue-700 to-indigo-800" />
-        <div className="absolute top-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10" />
-        
-        {/* Logo and Header */}
-        <div className="z-10 mt-6 flex flex-col items-center text-white">
-          <h2 className="text-xl font-black tracking-widest uppercase">EE360</h2>
-          <p className="text-[10px] font-medium tracking-widest opacity-80 uppercase">Farm & Water Portal</p>
-        </div>
-
-        {/* Photo */}
-        <div className="z-10 mt-6 w-32 h-32 bg-white rounded-full p-1 shadow-lg">
-          <div className="w-full h-full rounded-full overflow-hidden bg-gray-200">
-            {worker.photo ? (
-              <img src={getImageUrl(worker.photo)} className="w-full h-full object-cover" alt="ID" />
-            ) : (
-              <Users className="w-12 h-12 text-gray-400 mx-auto mt-10" />
-            )}
-          </div>
-        </div>
-
-        {/* Details */}
-        <div className="z-10 mt-4 flex flex-col items-center text-center w-full px-6">
-          <h1 className="text-2xl font-bold text-gray-900 leading-tight">{worker.name}</h1>
-          <p className="text-sm font-semibold text-blue-700 uppercase tracking-widest mt-1 mb-4">{worker.role}</p>
-          
-          <div className="w-full h-px bg-gray-200 mb-4" />
-          
-          <div className="flex w-full justify-between items-center text-xs text-gray-600 mb-2">
-            <span className="font-medium text-gray-400 uppercase tracking-wider">ID Number</span>
-            <span className="font-bold text-gray-900">{worker.staff_id || 'PENDING'}</span>
-          </div>
-          <div className="flex w-full justify-between items-center text-xs text-gray-600">
-            <span className="font-medium text-gray-400 uppercase tracking-wider">Phone</span>
-            <span className="font-bold text-gray-900">{worker.phone || 'N/A'}</span>
-          </div>
-        </div>
-
-        {/* Footer */}
-        <div className="absolute bottom-0 w-full bg-gray-900 py-3 text-center">
-          <p className="text-[9px] text-gray-400 font-medium">Property of EE360 Farm & Water. If found, please return.</p>
-        </div>
-      </div>
-      
-      <Button onClick={() => handlePrint()} className="mt-6 gap-2 w-[300px]" variant="secondary">
-        <Download className="w-4 h-4" /> Print ID Card
-      </Button>
-    </div>
-  );
-}
+import StaffIDCardDialog from '@/components/StaffIDCard';
 
 export default function WorkersPage() {
   const qc = useQueryClient();
@@ -173,14 +114,17 @@ export default function WorkersPage() {
 
   const saveMut = useMutation({
     mutationFn: (d: FormData) => {
-      d.append('sector_id', String(sectorId || ''));
+      d.append('sector_id', String(sectorId || '1'));
       // Using axios post for both because we use _method=PUT in the FormData for update
       return api.post(editing ? `/workers/${editing.id}` : '/workers', d, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
     },
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['workers'] }); toast.success('Worker saved'); setOpen(false); setEditing(null); },
-    onError: () => toast.error('Failed to save worker'),
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || 'Failed to save worker';
+      toast.error(msg);
+    },
   });
 
   const deleteMut = useMutation({
@@ -275,8 +219,8 @@ export default function WorkersPage() {
       </Dialog>
       
       <Dialog open={idCardOpen} onOpenChange={setIdCardOpen}>
-        <DialogContent className="max-w-md bg-muted/30 p-10 flex flex-col items-center">
-          {selectedWorker && <IDCard worker={selectedWorker} />}
+        <DialogContent className="max-w-3xl bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 flex flex-col items-center max-h-[90vh] overflow-y-auto">
+          {selectedWorker && <StaffIDCardDialog worker={selectedWorker} onClose={() => setIdCardOpen(false)} />}
         </DialogContent>
       </Dialog>
     </div>

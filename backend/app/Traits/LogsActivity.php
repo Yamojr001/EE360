@@ -122,8 +122,9 @@ trait LogsActivity
 
             case 'Worker':
                 $name = $model->name ?? 'Staff member';
-                $role = $model->job_title ? " ({$model->job_title})" : "";
-                return "{$userName} ({$roleName}) {$action} Staff directory record: {$name}{$role}";
+                $role = $model->role ?? $model->job_title ?? '';
+                $roleStr = $role ? " ({$role})" : "";
+                return "{$userName} ({$roleName}) {$action} Staff directory record: {$name}{$roleStr}";
 
             default:
                 $readable = ucwords(strtolower(preg_replace('/(?<!^)[A-Z]/', ' $0', $modelName)));

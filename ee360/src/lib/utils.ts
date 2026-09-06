@@ -22,6 +22,12 @@ export function capitalize(str: string) {
 
 export function getImageUrl(path: string | undefined | null) {
   if (!path) return '';
-  if (path.startsWith('http')) return path;
-  return `https://api.eefarm360.com/storage/${path}`;
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:') || path.startsWith('blob:')) {
+    return path;
+  }
+  const clean = path.replace(/^\/?(storage\/)+/, '').replace(/^\//, '');
+  const apiBase = import.meta.env.VITE_API_URL
+    ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '')
+    : 'https://api.eefarm360.com';
+  return `${apiBase}/storage/${clean}`;
 }

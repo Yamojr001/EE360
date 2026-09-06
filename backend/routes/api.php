@@ -32,6 +32,23 @@ Route::post('/auth/login',  [AuthController::class, 'login']);
 Route::get('/public/applications/settings', [InternshipApplicationController::class, 'getPublicSettings']);
 Route::post('/public/applications', [InternshipApplicationController::class, 'submit']);
 
+// Public storage route fallback
+Route::get('/storage/{path}', function ($path) {
+    if (str_contains($path, '..')) {
+        abort(403);
+    }
+    if (!\Illuminate\Support\Facades\Storage::disk('public')->exists($path)) {
+        abort(404, 'File not found');
+    }
+    $fullPath = \Illuminate\Support\Facades\Storage::disk('public')->path($path);
+    $mimeType = \Illuminate\Support\Facades\Storage::disk('public')->mimeType($path) ?: 'application/octet-stream';
+    return \Illuminate\Support\Facades\Response::file($fullPath, [
+        'Content-Type'                => $mimeType,
+        'Cache-Control'               => 'public, max-age=31536000, immutable',
+        'Access-Control-Allow-Origin' => '*',
+    ]);
+})->where('path', '.*');
+
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout']);

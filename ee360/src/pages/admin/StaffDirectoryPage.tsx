@@ -8,15 +8,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, UserCog, Search, Users, Bird, Droplets } from 'lucide-react';
+import { Plus, Pencil, Trash2, UserCog, Search, Users, Bird, Droplets, IdCard } from 'lucide-react';
 import { cn, formatCurrency } from '@/lib/utils';
+import StaffIDCardDialog from '@/components/StaffIDCard';
 
 const SECTORS    = ['farm','water'];
 const STATUSES   = ['active','on_leave','terminated'];
 
 interface Worker {
-  id: number; name: string; role_title: string; phone: string;
-  salary: number; hire_date: string; status: string; sector: string;
+  id: number; staff_id?: string; photo?: string; name: string; role_title: string; role?: string; phone: string;
+  salary: number; hire_date: string; status: string; sector: string; sector_id?: number;
   address: string; notes: string;
 }
 
@@ -37,6 +38,8 @@ export default function StaffDirectoryPage() {
   const [form, setForm]       = useState<Omit<Worker,'id'>>({ ...EMPTY });
   const [search, setSearch]   = useState('');
   const [sectorFilter, setSectorFilter] = useState<'all'|'farm'|'water'>('all');
+  const [idCardOpen, setIdCardOpen] = useState(false);
+  const [selectedWorker, setSelectedWorker] = useState<Worker | null>(null);
 
   const { data: workers = [], isLoading } = useQuery<Worker[]>({
     queryKey: ['all-workers'],
@@ -46,14 +49,26 @@ export default function StaffDirectoryPage() {
   const createMut = useMutation({
     mutationFn: (body: any) => api.post('/workers', body),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['all-workers'] }); toast.success('Staff member added'); closeDialog(); },
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || 'Failed to add staff member';
+      toast.error(msg);
+    },
   });
   const updateMut = useMutation({
     mutationFn: ({ id, body }: { id: number; body: any }) => api.put(`/workers/${id}`, body),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['all-workers'] }); toast.success('Updated'); closeDialog(); },
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || 'Failed to update staff member';
+      toast.error(msg);
+    },
   });
   const deleteMut = useMutation({
     mutationFn: (id: number) => api.delete(`/workers/${id}`),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['all-workers'] }); toast.success('Removed'); },
+    onError: (err: any) => {
+      const msg = err.response?.data?.message || 'Failed to remove staff member';
+      toast.error(msg);
+    },
   });
 
   const openCreate = () => { setEditing(null); setForm({ ...EMPTY }); setOpen(true); };
@@ -177,6 +192,7 @@ export default function StaffDirectoryPage() {
                   <td className="px-4 py-3 text-muted-foreground text-xs">{w.hire_date}</td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center gap-1 justify-end">
+                      <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-blue-600 hover:text-blue-700 hover:bg-blue-50" title="View Staff ID Card" onClick={() => { setSelectedWorker(w); setIdCardOpen(true); }}><IdCard className="w-3.5 h-3.5" /></Button>
                       <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => openEdit(w)}><Pencil className="w-3.5 h-3.5" /></Button>
                       <Button size="sm" variant="ghost" className="h-7 w-7 p-0 text-destructive hover:text-destructive" onClick={() => deleteMut.mutate(w.id)}><Trash2 className="w-3.5 h-3.5" /></Button>
                     </div>
@@ -238,6 +254,12 @@ export default function StaffDirectoryPage() {
               <Button type="submit">{editing ? 'Save Changes' : 'Add Staff'}</Button>
             </div>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={idCardOpen} onOpenChange={setIdCardOpen}>
+        <DialogContent className="max-w-3xl bg-slate-50 dark:bg-slate-950 p-4 sm:p-6 flex flex-col items-center max-h-[90vh] overflow-y-auto">
+          {selectedWorker && <StaffIDCardDialog worker={selectedWorker} onClose={() => setIdCardOpen(false)} />}
         </DialogContent>
       </Dialog>
     </div>
