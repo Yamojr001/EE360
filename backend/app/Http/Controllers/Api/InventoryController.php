@@ -40,13 +40,17 @@ class InventoryController extends Controller
             'category'        => 'required|string',
             'quantity'        => 'required|numeric|min:0',
             'unit'            => 'nullable|string|max:30',
-            'units_per_package' => 'nullable|integer|min:1',
+            'units_per_package' => 'nullable|numeric',
             'unit_cost'       => 'numeric|min:0',
             'min_stock_level' => 'numeric|min:0',
             'supplier'        => 'nullable|string|max:100',
             'notes'           => 'nullable|string',
             'sector_id'       => 'nullable|integer',
         ]);
+
+        if (isset($data['units_per_package']) && $data['units_per_package'] <= 0) {
+            $data['units_per_package'] = null;
+        }
 
         $user = $request->user();
         if (empty($data['sector_id'])) {
@@ -67,13 +71,17 @@ class InventoryController extends Controller
             'category'        => 'string',
             'quantity'        => 'numeric|min:0',
             'unit'            => 'nullable|string|max:30',
-            'units_per_package' => 'nullable|integer|min:1',
+            'units_per_package' => 'nullable|numeric',
             'unit_cost'       => 'numeric|min:0',
             'min_stock_level' => 'numeric|min:0',
             'supplier'        => 'nullable|string|max:100',
             'notes'           => 'nullable|string',
             'sector_id'       => 'nullable|integer',
         ]);
+
+        if (isset($data['units_per_package']) && $data['units_per_package'] <= 0) {
+            $data['units_per_package'] = null;
+        }
 
         $inventory->update($data);
         return $inventory;

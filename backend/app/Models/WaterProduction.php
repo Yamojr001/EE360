@@ -17,7 +17,7 @@ class WaterProduction extends Model
     protected $table = 'water_productions';
 
     protected $fillable = [
-        'date', 'product_type', 'unit', 'bags_produced', 'bags_wasted', 'waste_reason', 'liters_used', 'cost', 'notes', 'deleted_by', 'sector_id'
+        'date', 'product_type', 'unit', 'bags_produced', 'bags_wasted', 'waste_reason', 'liters_used', 'cost', 'price_per_bag', 'notes', 'deleted_by', 'sector_id'
     ];
 
     protected $casts = [
@@ -25,6 +25,7 @@ class WaterProduction extends Model
         'bags_produced' => 'integer',
         'liters_used'   => 'decimal:2',
         'cost'          => 'decimal:2',
+        'price_per_bag' => 'decimal:2',
     ];
 
     protected static function booted()

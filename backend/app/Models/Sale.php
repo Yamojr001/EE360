@@ -15,7 +15,7 @@ class Sale extends Model
 
     protected $fillable = [
         'date', 'category', 'item', 'quantity', 'unit',
-        'unit_price', 'total_amount', 'amount_paid', 'payment_status', 'buyer', 'notes',
+        'unit_price', 'total_amount', 'amount_paid', 'payment_status', 'payment_method', 'buyer', 'customer_id', 'sector_id', 'notes',
     ];
 
     protected $casts = [

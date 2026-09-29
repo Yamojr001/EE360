@@ -332,7 +332,6 @@ export default function LandingPage() {
             <li><a href="#stock">Services</a></li>
             <li><a href="#yateem">Yateem Water</a></li>
             <li><a href="#why">Why Us</a></li>
-            <li><a href="/login">Login</a></li>
           </ul>
         </div>
       </footer>

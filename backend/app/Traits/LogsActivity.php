@@ -116,9 +116,11 @@ trait LogsActivity
                 return "{$userName} ({$roleName}) {$action} Vendor contact: {$name}{$type}";
 
             case 'HatcheryRecord':
-                $batch = $model->batch_name ?? 'Hatchery Batch';
+                $batch = $model->batch_number ?? $model->batch_name ?? 'Hatchery Batch';
+                $type = $model->hatch_type ? " [" . ucfirst($model->hatch_type) . "]" : "";
+                $provider = ($model->hatch_type === 'external' && $model->external_provider) ? " via {$model->external_provider}" : "";
                 $set = $model->eggs_set ?? 0;
-                return "{$userName} ({$roleName}) {$action} Hatchery record: '{$batch}' ({$set} eggs set)";
+                return "{$userName} ({$roleName}) {$action} Hatchery record{$type}: '{$batch}' ({$set} eggs set){$provider}";
 
             case 'Worker':
                 $name = $model->name ?? 'Staff member';

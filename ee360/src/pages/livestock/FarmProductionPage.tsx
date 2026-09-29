@@ -73,6 +73,7 @@ function ProductionForm({ initial, categories, onSave, onClose }: { initial?: Pa
               <SelectItem value="bunches">Bunches</SelectItem>
               <SelectItem value="buckets">Buckets</SelectItem>
               <SelectItem value="liters">Liters</SelectItem>
+              <SelectItem value="ml">ml (Milliliters)</SelectItem>
               <SelectItem value="kg">Kg</SelectItem>
             </SelectContent>
           </Select>

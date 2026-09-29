@@ -96,13 +96,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/farm-production/{id}',  [FarmProductionController::class, 'update']);
     Route::delete('/farm-production/{id}', [FarmProductionController::class, 'destroy']);
 
-    Route::get('/customers',       [CustomerController::class, 'index']);
-    Route::post('/customers',      [CustomerController::class, 'store']);
-    Route::put('/customers/{id}',  [CustomerController::class, 'update']);
-    Route::delete('/customers/{id}', [CustomerController::class, 'destroy']);
+    Route::get('/customers',                  [CustomerController::class, 'index']);
+    Route::get('/customers/{id}',             [CustomerController::class, 'show']);
+    Route::post('/customers/{id}/payments',   [CustomerController::class, 'recordPayment']);
+    Route::post('/customers',                 [CustomerController::class, 'store']);
+    Route::put('/customers/{id}',             [CustomerController::class, 'update']);
+    Route::delete('/customers/{id}',          [CustomerController::class, 'destroy']);
 
     Route::get('/water/sales',           [WaterSaleController::class, 'index']);
     Route::post('/water/sales',          [WaterSaleController::class, 'store']);
+    Route::put('/water/sales/{id}',      [WaterSaleController::class, 'update']);
+    Route::put('/water-sales/{id}',      [WaterSaleController::class, 'update']);
     Route::delete('/water/sales/{id}',   [WaterSaleController::class, 'destroy']);
 
     Route::get('/water/expenses',        [WaterExpenseController::class, 'index']);
@@ -122,4 +126,27 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Admin User & Portal Access Management
     Route::apiResource('users', \App\Http\Controllers\Api\UserController::class);
+
+    // Database Migration Runner for deployment
+    Route::match(['get', 'post'], '/admin/run-migrations', function () {
+        $user = request()->user();
+        if (!$user || !in_array($user->role, ['super_admin', 'admin'])) {
+            return response()->json(['error' => 'Unauthorized. Admin access required.'], 403);
+        }
+        try {
+            \App\Support\DatabaseSchemaEnsurer::ensureAll();
+            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            $output = \Illuminate\Support\Facades\Artisan::output();
+            return response()->json([
+                'success' => true,
+                'message' => 'Migrations executed successfully',
+                'output'  => $output,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'error'   => $e->getMessage(),
+            ], 500);
+        }
+    });
 });

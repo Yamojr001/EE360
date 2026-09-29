@@ -14,7 +14,7 @@ class WaterExpense extends Model
     use HasFactory;
 
     protected $fillable = [
-        'date', 'description', 'amount', 'vendor', 'notes',
+        'date', 'description', 'amount', 'vendor', 'sector_id', 'notes',
     ];
 
     protected $casts = [

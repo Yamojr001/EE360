@@ -69,6 +69,9 @@ function ItemForm({ initial, onSave, onClose }: {
               <SelectItem value="bags">Bags</SelectItem>
               <SelectItem value="kg">Kg</SelectItem>
               <SelectItem value="liters">Liters</SelectItem>
+              <SelectItem value="ml">ml (Milliliters - Drugs/Injections)</SelectItem>
+              <SelectItem value="vials">Vials / Bottles</SelectItem>
+              <SelectItem value="doses">Doses</SelectItem>
               <SelectItem value="pieces">Pieces</SelectItem>
             </SelectContent>
           </Select>
@@ -79,6 +82,14 @@ function ItemForm({ initial, onSave, onClose }: {
         )}
         {form.unit.toLowerCase() === 'bags' && (
           <div className="space-y-1.5 col-span-2"><Label>Weight per Bag (e.g. grams)</Label><Input type="number" min={1} value={form.units_per_package} onChange={e => set('units_per_package', +e.target.value)} /></div>
+        )}
+        {(form.unit.toLowerCase() === 'vials' || form.unit.toLowerCase() === 'bottles') && (
+          <div className="space-y-1.5 col-span-2"><Label>Volume per Bottle / Vial (e.g. ml)</Label><Input type="number" min={1} value={form.units_per_package} onChange={e => set('units_per_package', +e.target.value)} placeholder="e.g. 50 or 100 ml" /></div>
+        )}
+        {form.unit.toLowerCase() === 'ml' && (
+          <div className="space-y-1 col-span-2">
+            <p className="text-[11px] text-blue-600 dark:text-blue-400 font-medium">Measuring in ml (milliliters) for liquid medication, injections, vaccines, and dosages.</p>
+          </div>
         )}
         <div className="space-y-1.5">
           <Label>Quantity in Stock</Label>

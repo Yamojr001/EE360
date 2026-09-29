@@ -13,6 +13,8 @@ use App\Models\WaterExpense;
 use App\Models\WaterProduction;
 use App\Models\Customer;
 use Illuminate\Support\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -107,43 +109,127 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function waterSummary()
+    public function waterSummary(Request $request)
     {
         $now       = Carbon::now();
         $thisMonth = $now->format('Y-m');
 
-        $rev = (float) WaterSale::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('total_amount');
-        $exp = (float) WaterExpense::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('amount');
-        $prodCost = (float) WaterProduction::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('cost');
+        $from = $request->query('from');
+        $to   = $request->query('to');
 
-        $totalExp = $exp + $prodCost;
+        $prodQuery = WaterProduction::query();
+        $saleQuery = WaterSale::query();
+        $expQuery  = WaterExpense::query();
 
-        $totalBagsProduced = (int) WaterProduction::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('bags_produced');
-        $totalBagsSold = (int) WaterSale::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('quantity');
+        if ($from && $to) {
+            $prodQuery->whereBetween('date', [$from, $to]);
+            $saleQuery->whereBetween('date', [$from, $to]);
+            $expQuery->whereBetween('date', [$from, $to]);
+        } elseif ($from) {
+            $prodQuery->where('date', '>=', $from);
+            $saleQuery->where('date', '>=', $from);
+            $expQuery->where('date', '>=', $from);
+        } elseif ($to) {
+            $prodQuery->where('date', '<=', $to);
+            $saleQuery->where('date', '<=', $to);
+            $expQuery->where('date', '<=', $to);
+        } else {
+            $prodQuery->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth]);
+            $saleQuery->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth]);
+            $expQuery->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth]);
+        }
 
+        // 1. Water Production in Selected Time
+        $totalBagsProduced = (int) (clone $prodQuery)->sum('bags_produced');
+        $totalBagsWasted   = (int) (clone $prodQuery)->sum('bags_wasted');
+        $netBagsProduced   = max(0, $totalBagsProduced - $totalBagsWasted);
+        $prodCost          = (float) (clone $prodQuery)->sum('cost');
+        $totalLitersUsed   = (float) (clone $prodQuery)->sum('liters_used');
+
+        \App\Support\DatabaseSchemaEnsurer::ensureWaterSaleColumns();
+        \App\Support\DatabaseSchemaEnsurer::ensureWaterProductionColumns();
+        $hasWaterPaymentMethod = \Illuminate\Support\Facades\Schema::hasColumn('water_sales', 'payment_method');
+
+        // 2. Commercial Sales (Excluding Drawings)
+        $commercialSalesQ   = $hasWaterPaymentMethod ? (clone $saleQuery)->whereNotIn('payment_method', ['Drawing', 'Draw']) : clone $saleQuery;
+        $totalBagsSold      = (int) (clone $commercialSalesQ)->sum('quantity');
+        $waterSalesRevenue  = (float) (clone $commercialSalesQ)->sum('total_amount');
+        $waterCashCollected = (float) (clone $commercialSalesQ)->sum('amount_paid');
+        $avgPricePerBag     = $totalBagsSold > 0 ? round($waterSalesRevenue / $totalBagsSold, 2) : 0;
+
+        // 3. Drawings (Owner / Internal Personal Withdrawals)
+        $drawingSalesQ      = $hasWaterPaymentMethod ? (clone $saleQuery)->whereIn('payment_method', ['Drawing', 'Draw']) : null;
+        $totalDrawingBags   = $drawingSalesQ ? (int) (clone $drawingSalesQ)->sum('quantity') : 0;
+        $totalDrawingAmount = $drawingSalesQ ? (float) (clone $drawingSalesQ)->sum('total_amount') : 0;
+
+        $allTimeDrawingAmount = $hasWaterPaymentMethod ? (float) WaterSale::whereIn('payment_method', ['Drawing', 'Draw'])->sum('total_amount') : 0;
+        $allTimeDrawingBags   = $hasWaterPaymentMethod ? (int) WaterSale::whereIn('payment_method', ['Drawing', 'Draw'])->sum('quantity') : 0;
+
+        // 4. Factory Dispatches (Total bags leaving factory = Commercial Sold + Personal Drawings)
+        $totalBagsDispatched    = $totalBagsSold + $totalDrawingBags;
+
+        // 5. Water Production - Dispatched (Remaining Stock in factory warehouse)
+        $productionMinusSold    = $totalBagsProduced - $totalBagsDispatched;
+        $netProductionMinusSold = $netBagsProduced - $totalBagsDispatched;
+
+        // 5. Debt / Receivables (Unpaid, Partial & Pending Sales)
+        $periodDebt = (float) (clone $commercialSalesQ)
+            ->where(function($q) {
+                $q->where('payment_status', '!=', 'paid')
+                  ->orWhereNull('payment_status');
+            })
+            ->whereRaw('(total_amount - COALESCE(amount_paid, 0)) > 0')
+            ->sum(DB::raw('total_amount - COALESCE(amount_paid, 0)'));
+
+        $waterDebtBaseQ = WaterSale::query();
+        if ($hasWaterPaymentMethod) {
+            $waterDebtBaseQ->whereNotIn('payment_method', ['Drawing', 'Draw']);
+        }
+        $waterDebtFiltered = (clone $waterDebtBaseQ)
+            ->where(function($q) {
+                $q->where('payment_status', '!=', 'paid')
+                  ->orWhereNull('payment_status');
+            })
+            ->whereRaw('(total_amount - COALESCE(amount_paid, 0)) > 0');
+
+        $totalAccumulatedDebt = (float) (clone $waterDebtFiltered)->sum(DB::raw('total_amount - COALESCE(amount_paid, 0)'));
+        $totalDebtorsCount    = (int) (clone $waterDebtFiltered)->count();
+
+        // 6. Expenses & Profit
+        $exp       = (float) (clone $expQuery)->sum('amount');
+        $totalExp  = $exp + $prodCost;
+        $netProfit = $waterSalesRevenue - $totalExp;
+
+        // Charts & Area Breakdown
         $productionChart = [];
         for ($i = 6; $i >= 0; $i--) {
             $m   = $now->copy()->subMonths($i)->format('Y-m');
             $mon = $now->copy()->subMonths($i)->format('M');
+            $soldQuery = WaterSale::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$m]);
+            if ($hasWaterPaymentMethod) {
+                $soldQuery->whereNotIn('payment_method', ['Drawing', 'Draw']);
+            }
             $productionChart[] = [
                 'month'    => $mon,
                 'produced' => (int) WaterProduction::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$m])->sum('bags_produced'),
-                'sold'     => (int) WaterSale::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$m])->sum('quantity'),
+                'sold'     => (int) $soldQuery->sum('quantity'),
             ];
         }
 
-        $salesByArea = WaterSale::selectRaw('distribution_area as area, SUM(total_amount) as total')
-            ->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])
+        $salesByArea = (clone $commercialSalesQ)
+            ->selectRaw('distribution_area as area, SUM(total_amount) as total')
             ->whereNotNull('distribution_area')
             ->where('distribution_area', '!=', '')
             ->groupBy('distribution_area')
             ->get();
 
-        $recentProduction = WaterProduction::orderByDesc('date')->limit(5)->get()->map(function ($p) {
+        $recentProduction = (clone $prodQuery)->orderByDesc('date')->limit(5)->get()->map(function ($p) {
             return [
                 'id' => $p->id,
-                'date' => $p->date->format('Y-m-d'),
+                'date' => $p->date ? (is_string($p->date) ? $p->date : $p->date->format('Y-m-d')) : '',
                 'bags_produced' => $p->bags_produced,
+                'bags_wasted' => $p->bags_wasted ?? 0,
+                'price_per_bag' => (float) ($p->price_per_bag ?? 0),
                 'liters_used' => $p->liters_used,
                 'cost' => $p->cost,
                 'notes' => $p->notes,
@@ -151,76 +237,209 @@ class DashboardController extends Controller
         });
 
         return response()->json([
-            'revenue'           => $rev,
-            'expenses'          => $totalExp,
-            'netProfit'         => $rev - $totalExp,
-            'totalBagsProduced' => $totalBagsProduced,
-            'totalBagsSold'     => $totalBagsSold,
-            'productionChart'   => $productionChart,
-            'salesByArea'       => $salesByArea,
-            'recentProduction'  => $recentProduction,
+            'revenue'                 => $waterSalesRevenue,
+            'cashCollected'           => $waterCashCollected,
+            'expenses'                => $totalExp,
+            'operationalExpenses'     => $exp,
+            'productionCost'          => $prodCost,
+            'netProfit'               => $netProfit,
+            'totalBagsProduced'       => $totalBagsProduced,
+            'totalBagsWasted'         => $totalBagsWasted,
+            'netBagsProduced'         => $netBagsProduced,
+            'totalBagsSold'           => $totalBagsSold,
+            'totalBagsDispatched'     => $totalBagsDispatched,
+            'avgPricePerBag'          => $avgPricePerBag,
+            'productionMinusSold'     => $productionMinusSold,
+            'netProductionMinusSold'  => $netProductionMinusSold,
+            'totalDebt'               => $periodDebt,
+            'totalAccumulatedDebt'    => $totalAccumulatedDebt,
+            'totalDebtorsCount'       => $totalDebtorsCount,
+            'totalDrawingAmount'      => $totalDrawingAmount,
+            'totalDrawingBags'        => $totalDrawingBags,
+            'allTimeDrawingAmount'    => $allTimeDrawingAmount,
+            'allTimeDrawingBags'      => $allTimeDrawingBags,
+            'productionChart'         => $productionChart,
+            'salesByArea'             => $salesByArea,
+            'recentProduction'        => $recentProduction,
         ]);
     }
 
-    public function superSummary(\Illuminate\Http\Request $request)
+    public function superSummary(Request $request)
     {
         $now       = Carbon::now();
         $thisMonth = $now->format('Y-m');
 
         $from = $request->query('from');
-        $to = $request->query('to');
+        $to   = $request->query('to');
+
+        $farmSaleQ  = Sale::query();
+        $farmExpQ   = Expense::query();
+        $waterSaleQ = WaterSale::query();
+        $waterExpQ  = WaterExpense::query();
+        $waterProdQ = WaterProduction::query();
 
         if ($from && $to) {
-            $farmRev = (float) Sale::whereBetween('date', [$from, $to])->sum('total_amount');
-            $farmExp = (float) Expense::whereBetween('date', [$from, $to])->sum('amount');
-            $waterRev = (float) WaterSale::whereBetween('date', [$from, $to])->sum('total_amount');
-            $waterExp = (float) WaterExpense::whereBetween('date', [$from, $to])->sum('amount');
+            $farmSaleQ->whereBetween('date', [$from, $to]);
+            $farmExpQ->whereBetween('date', [$from, $to]);
+            $waterSaleQ->whereBetween('date', [$from, $to]);
+            $waterExpQ->whereBetween('date', [$from, $to]);
+            $waterProdQ->whereBetween('date', [$from, $to]);
+        } elseif ($from) {
+            $farmSaleQ->where('date', '>=', $from);
+            $farmExpQ->where('date', '>=', $from);
+            $waterSaleQ->where('date', '>=', $from);
+            $waterExpQ->where('date', '>=', $from);
+            $waterProdQ->where('date', '>=', $from);
+        } elseif ($to) {
+            $farmSaleQ->where('date', '<=', $to);
+            $farmExpQ->where('date', '<=', $to);
+            $waterSaleQ->where('date', '<=', $to);
+            $waterExpQ->where('date', '<=', $to);
+            $waterProdQ->where('date', '<=', $to);
         } else {
-            $farmRev = (float) Sale::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('total_amount');
-            $farmExp = (float) Expense::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('amount');
-            $waterRev = (float) WaterSale::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('total_amount');
-            $waterExp = (float) WaterExpense::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth])->sum('amount');
+            $farmSaleQ->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth]);
+            $farmExpQ->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth]);
+            $waterSaleQ->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth]);
+            $waterExpQ->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth]);
+            $waterProdQ->whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$thisMonth]);
         }
 
-        $farmNet = $farmRev - $farmExp;
-        $waterNet = $waterRev - $waterExp;
+        // Ensure all required database columns are present
+        \App\Support\DatabaseSchemaEnsurer::ensureSaleColumns();
+        \App\Support\DatabaseSchemaEnsurer::ensureWaterSaleColumns();
+        \App\Support\DatabaseSchemaEnsurer::ensureWaterProductionColumns();
 
+        $hasFarmPaymentMethod = \Illuminate\Support\Facades\Schema::hasColumn('sales', 'payment_method');
+        $hasWaterPaymentMethod = \Illuminate\Support\Facades\Schema::hasColumn('water_sales', 'payment_method');
+
+        // Farm commercial calculations (excluding drawings)
+        $farmCommercialQ    = $hasFarmPaymentMethod ? (clone $farmSaleQ)->whereNotIn('payment_method', ['Drawing', 'Draw']) : clone $farmSaleQ;
+        $farmRev            = (float) (clone $farmCommercialQ)->sum('total_amount');
+        $farmCashCollected  = (float) (clone $farmCommercialQ)->sum('amount_paid');
+        $farmExp            = (float) (clone $farmExpQ)->sum('amount');
+        $farmNet            = $farmRev - $farmExp;
+
+        // Water commercial calculations (excluding drawings)
+        $waterCommercialQ   = $hasWaterPaymentMethod ? (clone $waterSaleQ)->whereNotIn('payment_method', ['Drawing', 'Draw']) : clone $waterSaleQ;
+        $waterRev           = (float) (clone $waterCommercialQ)->sum('total_amount');
+        $waterCashCollected = (float) (clone $waterCommercialQ)->sum('amount_paid');
+        $waterExpOnly       = (float) (clone $waterExpQ)->sum('amount');
+        $waterProdCost      = (float) (clone $waterProdQ)->sum('cost');
+        $waterExp           = $waterExpOnly + $waterProdCost;
+        $waterNet           = $waterRev - $waterExp;
+
+        // Drawings
+        $waterDrawingAmount   = $hasWaterPaymentMethod ? (float) (clone $waterSaleQ)->whereIn('payment_method', ['Drawing', 'Draw'])->sum('total_amount') : 0;
+        $waterDrawingBags     = $hasWaterPaymentMethod ? (int) (clone $waterSaleQ)->whereIn('payment_method', ['Drawing', 'Draw'])->sum('quantity') : 0;
+        $farmDrawingAmount    = $hasFarmPaymentMethod ? (float) (clone $farmSaleQ)->whereIn('payment_method', ['Drawing', 'Draw'])->sum('total_amount') : 0;
+        $totalDrawingAmount   = $waterDrawingAmount + $farmDrawingAmount;
+
+        $allTimeWaterDrawings = $hasWaterPaymentMethod ? (float) WaterSale::whereIn('payment_method', ['Drawing', 'Draw'])->sum('total_amount') : 0;
+        $allTimeFarmDrawings  = $hasFarmPaymentMethod ? (float) Sale::whereIn('payment_method', ['Drawing', 'Draw'])->sum('total_amount') : 0;
+        $allTimeTotalDrawings = $allTimeWaterDrawings + $allTimeFarmDrawings;
+
+        // Water Production - Dispatched (Sold + Drawings) in Selected Time
+        $waterBagsProduced = (int) (clone $waterProdQ)->sum('bags_produced');
+        $waterBagsWasted   = (int) (clone $waterProdQ)->sum('bags_wasted');
+        $waterNetProduced  = max(0, $waterBagsProduced - $waterBagsWasted);
+        $waterBagsSold     = (int) (clone $waterCommercialQ)->sum('quantity');
+        $waterBagsDispatched = $waterBagsSold + $waterDrawingBags;
+        $waterProductionMinusSold = $waterBagsProduced - $waterBagsDispatched;
+        $waterNetProductionMinusSold = $waterNetProduced - $waterBagsDispatched;
+        $waterAvgPricePerBag = $waterBagsSold > 0 ? round($waterRev / $waterBagsSold, 2) : 0;
+
+        // Debt (Unpaid / partial)
+        $waterDebt = (float) (clone $waterCommercialQ)
+            ->where(function($q) { $q->where('payment_status', '!=', 'paid')->orWhereNull('payment_status'); })
+            ->whereRaw('(total_amount - COALESCE(amount_paid, 0)) > 0')
+            ->sum(DB::raw('total_amount - COALESCE(amount_paid, 0)'));
+
+        $allTimeWaterDebtQ = WaterSale::query();
+        if ($hasWaterPaymentMethod) {
+            $allTimeWaterDebtQ->whereNotIn('payment_method', ['Drawing', 'Draw']);
+        }
+        $allTimeWaterDebt = (float) $allTimeWaterDebtQ
+            ->where(function($q) { $q->where('payment_status', '!=', 'paid')->orWhereNull('payment_status'); })
+            ->whereRaw('(total_amount - COALESCE(amount_paid, 0)) > 0')
+            ->sum(DB::raw('total_amount - COALESCE(amount_paid, 0)'));
+
+        $farmDebt = (float) (clone $farmCommercialQ)
+            ->where(function($q) { $q->where('payment_status', '!=', 'paid')->orWhereNull('payment_status'); })
+            ->whereRaw('(total_amount - COALESCE(amount_paid, 0)) > 0')
+            ->sum(DB::raw('total_amount - COALESCE(amount_paid, 0)'));
+
+        $allTimeFarmDebtQ = Sale::query();
+        if ($hasFarmPaymentMethod) {
+            $allTimeFarmDebtQ->whereNotIn('payment_method', ['Drawing', 'Draw']);
+        }
+        $allTimeFarmDebt = (float) $allTimeFarmDebtQ
+            ->where(function($q) { $q->where('payment_status', '!=', 'paid')->orWhereNull('payment_status'); })
+            ->whereRaw('(total_amount - COALESCE(amount_paid, 0)) > 0')
+            ->sum(DB::raw('total_amount - COALESCE(amount_paid, 0)'));
+
+        $totalDebt            = $farmDebt + $waterDebt;
+        $totalAccumulatedDebt = $allTimeFarmDebt + $allTimeWaterDebt;
+
+        // Totals
         $totalRev = $farmRev + $waterRev;
         $totalExp = $farmExp + $waterExp;
         $totalNet = $totalRev - $totalExp;
+        $totalCashCollected = $farmCashCollected + $waterCashCollected;
 
         $monthlyChart = [];
         for ($i = 6; $i >= 0; $i--) {
             $m   = $now->copy()->subMonths($i)->format('Y-m');
             $mon = $now->copy()->subMonths($i)->format('M');
+
+            $fRevQ = Sale::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$m]);
+            if ($hasFarmPaymentMethod) {
+                $fRevQ->whereNotIn('payment_method', ['Drawing', 'Draw']);
+            }
+            $wRevQ = WaterSale::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$m]);
+            if ($hasWaterPaymentMethod) {
+                $wRevQ->whereNotIn('payment_method', ['Drawing', 'Draw']);
+            }
+
             $monthlyChart[] = [
                 'month'         => $mon,
-                'farm_revenue'  => (float) Sale::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$m])->sum('total_amount'),
-                'water_revenue' => (float) WaterSale::whereRaw("DATE_FORMAT(date, '%Y-%m') = ?", [$m])->sum('total_amount'),
+                'farm_revenue'  => (float) $fRevQ->sum('total_amount'),
+                'water_revenue' => (float) $wRevQ->sum('total_amount'),
             ];
         }
 
-        $farmWorkers = Worker::where('status', 'active')->count(); // Assuming all workers are farm for now or need a sector column
-        $waterWorkers = 0; // If you have a sector column, you'd filter by it
+        $farmWorkers  = Worker::where('status', 'active')->where(function($q) { $q->where('sector_id', 1)->orWhereNull('sector_id'); })->count();
+        $waterWorkers = Worker::where('status', 'active')->where('sector_id', 2)->count();
 
         $sectorBreakdown = [
             [
-                'sector'   => 'Farm',
-                'workers'  => $farmWorkers,
-                'revenue'  => $farmRev,
-                'expenses' => $farmExp,
-                'net'      => $farmNet,
+                'sector'          => 'Farm',
+                'workers'         => $farmWorkers,
+                'revenue'         => $farmRev,
+                'cash_collected'  => $farmCashCollected,
+                'expenses'        => $farmExp,
+                'net'             => $farmNet,
+                'debt'            => $farmDebt,
+                'drawings'        => $farmDrawingAmount,
             ],
             [
-                'sector'   => 'Water',
-                'workers'  => $waterWorkers,
-                'revenue'  => $waterRev,
-                'expenses' => $waterExp,
-                'net'      => $waterNet,
+                'sector'          => 'Water',
+                'workers'         => $waterWorkers,
+                'revenue'         => $waterRev,
+                'cash_collected'  => $waterCashCollected,
+                'expenses'        => $waterExp,
+                'net'             => $waterNet,
+                'debt'            => $waterDebt,
+                'drawings'        => $waterDrawingAmount,
+                'bags_produced'   => $waterBagsProduced,
+                'bags_sold'       => $waterBagsSold,
+                'bags_drawn'      => $waterDrawingBags,
+                'bags_dispatched' => $waterBagsDispatched,
+                'net_balance'     => $waterProductionMinusSold,
+                'avg_price'       => $waterAvgPricePerBag,
             ],
         ];
 
-        // Combine recent activity from Farm and Water
+        // Combine recent activity
         $recentFarmQuery = Sale::orderByDesc('date');
         $recentWaterQuery = WaterSale::orderByDesc('date');
 
@@ -231,18 +450,18 @@ class DashboardController extends Controller
 
         $recentFarm = $recentFarmQuery->limit(3)->get()->map(function ($s) {
             return [
-                'desc'   => 'Sale: ' . $s->item,
+                'desc'   => 'Farm Sale: ' . ($s->item ?? 'Item') . ' (' . ($s->payment_method ?? 'Cash') . ')',
                 'sector' => 'Farm',
-                'date'   => $s->date->format('Y-m-d'),
+                'date'   => $s->date ? (is_string($s->date) ? $s->date : $s->date->format('Y-m-d')) : '',
                 'amount' => $s->total_amount,
             ];
         });
 
         $recentWater = $recentWaterQuery->limit(3)->get()->map(function ($s) {
             return [
-                'desc'   => 'Water Sale to ' . $s->buyer,
+                'desc'   => 'Water Sale to ' . ($s->buyer ?: 'Customer') . ' (' . ($s->payment_method ?? 'Cash') . ')',
                 'sector' => 'Water',
-                'date'   => $s->date->format('Y-m-d'),
+                'date'   => $s->date ? (is_string($s->date) ? $s->date : $s->date->format('Y-m-d')) : '',
                 'amount' => $s->total_amount,
             ];
         });
@@ -261,14 +480,36 @@ class DashboardController extends Controller
             ->values();
 
         return response()->json([
-            'totalRevenue'    => $totalRev,
-            'totalExpenses'   => $totalExp,
-            'netProfit'       => $totalNet,
-            'totalStaff'      => Worker::where('status', 'active')->count(),
-            'sectorBreakdown' => $sectorBreakdown,
-            'monthlyChart'    => $monthlyChart,
-            'recentActivity'  => $recentActivity,
-            'topCustomers'    => $topCustomers,
+            'totalRevenue'                => $totalRev,
+            'totalExpenses'               => $totalExp,
+            'netProfit'                   => $totalNet,
+            'combinedNet'                 => $totalNet,
+            'totalCashCollected'          => $totalCashCollected,
+            'totalStaff'                  => Worker::where('status', 'active')->count(),
+            'totalDebt'                   => $totalDebt,
+            'totalAccumulatedDebt'        => $totalAccumulatedDebt,
+            'waterDebt'                   => $waterDebt,
+            'farmDebt'                    => $farmDebt,
+            'totalDrawingAmount'          => $totalDrawingAmount,
+            'allTimeTotalDrawings'        => $allTimeTotalDrawings,
+            'waterDrawingAmount'          => $waterDrawingAmount,
+            'waterDrawingBags'            => $waterDrawingBags,
+            'farmDrawingAmount'           => $farmDrawingAmount,
+            'waterBagsProduced'           => $waterBagsProduced,
+            'waterBagsWasted'             => $waterBagsWasted,
+            'waterBagsSold'               => $waterBagsSold,
+            'waterBagsDispatched'         => $waterBagsDispatched,
+            'waterProductionMinusSold'    => $waterProductionMinusSold,
+            'waterNetProductionMinusSold' => $waterNetProductionMinusSold,
+            'waterAvgPricePerBag'         => $waterAvgPricePerBag,
+            'waterRevenue'                => $waterRev,
+            'waterCashCollected'          => $waterCashCollected,
+            'farmRevenue'                 => $farmRev,
+            'farmCashCollected'           => $farmCashCollected,
+            'sectorBreakdown'             => $sectorBreakdown,
+            'monthlyChart'                => $monthlyChart,
+            'recentActivity'              => $recentActivity,
+            'topCustomers'                => $topCustomers,
         ]);
     }
 }

@@ -40,6 +40,16 @@ function SaleForm({ categories, sectorId, onSave, onClose }: { categories: strin
       next.amount_paid = 0;
       next.payment_status = 'paid';
     }
+    if (k === 'payment_method' && (v === 'Pending' || v === 'pending')) {
+      next.amount_paid = 0;
+      next.payment_status = 'pending';
+    }
+    if (k === 'payment_method' && v !== 'Drawing' && v !== 'Draw' && v !== 'Pending') {
+      if (next.payment_status === 'pending') {
+        next.payment_status = 'paid';
+        next.amount_paid = next.total_amount;
+      }
+    }
     return next;
   });
 
@@ -79,6 +89,9 @@ function SaleForm({ categories, sectorId, onSave, onClose }: { categories: strin
               <SelectItem value="crates">Crates</SelectItem>
               <SelectItem value="birds">Birds</SelectItem>
               <SelectItem value="liters">Liters</SelectItem>
+              <SelectItem value="ml">ml (Milliliters - Drugs/Injections)</SelectItem>
+              <SelectItem value="vials">Vials / Bottles</SelectItem>
+              <SelectItem value="doses">Doses</SelectItem>
               <SelectItem value="tonnes">Tonnes</SelectItem>
               <SelectItem value="units">Units</SelectItem>
               <SelectItem value="other">Other</SelectItem>
@@ -110,7 +123,9 @@ function SaleForm({ categories, sectorId, onSave, onClose }: { categories: strin
             <SelectTrigger><SelectValue /></SelectTrigger>
             <SelectContent>
               <SelectItem value="Cash">Cash</SelectItem>
+              <SelectItem value="Transfer">Bank Transfer</SelectItem>
               <SelectItem value="POS">POS</SelectItem>
+              <SelectItem value="Pending">Pending (Pay After Sale)</SelectItem>
               <SelectItem value="Drawing">Drawing</SelectItem>
             </SelectContent>
           </Select>
@@ -121,9 +136,12 @@ function SaleForm({ categories, sectorId, onSave, onClose }: { categories: strin
             type="number" min={0} 
             value={form.amount_paid} 
             onChange={e => set('amount_paid', e.target.value === '' ? '' : +e.target.value)} 
-            disabled={form.payment_method === 'Drawing' || form.payment_method === 'Draw'}
+            disabled={form.payment_method === 'Drawing' || form.payment_method === 'Draw' || form.payment_method === 'Pending'}
             placeholder="0" 
           />
+          {form.payment_method === 'Pending' && (
+            <p className="text-[11px] text-amber-600 dark:text-amber-400 font-medium">Payment deferred. Debt will be recorded and collected after sale.</p>
+          )}
         </div>
       </div>
       <div className="space-y-1.5">
@@ -140,31 +158,69 @@ function SaleForm({ categories, sectorId, onSave, onClose }: { categories: strin
 
 function PaymentForm({ sale, onSave, onClose }: { sale: Sale; onSave: (d: any) => void; onClose: () => void }) {
   const [paid, setPaid] = useState<number | ''>(sale.amount_paid || 0);
+  const [method, setMethod] = useState<string>(sale.payment_method === 'Pending' ? 'Cash' : (sale.payment_method || 'Cash'));
   
+  const total = Number(sale.total_amount) || 0;
+  const prevPaid = Number(sale.amount_paid) || 0;
+  const remaining = Math.max(0, total - (Number(paid) || 0));
+
   return (
-    <form onSubmit={e => { e.preventDefault(); onSave({ amount_paid: paid }); }} className="space-y-4">
-      <div className="space-y-3">
-        <div className="flex justify-between items-center text-sm border-b pb-2">
-          <span className="text-muted-foreground">Total Amount:</span>
+    <form onSubmit={e => { e.preventDefault(); onSave({ amount_paid: paid, payment_method: method }); }} className="space-y-4">
+      <div className="space-y-2.5 bg-muted/40 p-3 rounded-xl border border-border">
+        <div className="flex justify-between items-center text-sm border-b pb-1.5">
+          <span className="text-muted-foreground">Buyer / Customer:</span>
+          <span className="font-bold">{sale.buyer || 'Customer'}</span>
+        </div>
+        <div className="flex justify-between items-center text-sm border-b pb-1.5">
+          <span className="text-muted-foreground">Total Invoiced Amount:</span>
           <span className="font-bold">{formatCurrency(sale.total_amount)}</span>
         </div>
-        <div className="flex justify-between items-center text-sm border-b pb-2">
+        <div className="flex justify-between items-center text-sm border-b pb-1.5">
           <span className="text-muted-foreground">Previously Paid:</span>
-          <span className="font-bold text-blue-600">{formatCurrency(sale.amount_paid || 0)}</span>
+          <span className="font-bold text-green-600">{formatCurrency(prevPaid)}</span>
         </div>
-        <div className="flex justify-between items-center text-sm pb-2">
-          <span className="text-muted-foreground">Remaining Balance:</span>
-          <span className="font-bold text-destructive">{formatCurrency(sale.total_amount - (Number(sale.amount_paid) || 0))}</span>
+        <div className="flex justify-between items-center text-sm">
+          <span className="text-muted-foreground font-semibold">Remaining Debt:</span>
+          <span className="font-bold text-destructive">{formatCurrency(remaining)}</span>
         </div>
       </div>
-      <div className="space-y-1.5 pt-2">
-        <Label>Update Total Amount Paid (₦)</Label>
-        <Input type="number" min={0} value={paid} onChange={e => setPaid(e.target.value === '' ? '' : +e.target.value)} required />
-        <p className="text-xs text-muted-foreground">Enter the new total cumulative amount paid so far.</p>
+      <div className="space-y-1.5">
+        <Label>New Cumulative Amount Paid (₦)</Label>
+        <Input 
+          type="number" 
+          min={0} 
+          max={total} 
+          value={paid} 
+          onChange={e => setPaid(e.target.value === '' ? '' : +e.target.value)} 
+          required 
+          className="font-bold text-base"
+        />
+        <div className="flex gap-2 pt-1">
+          <Button 
+            type="button" 
+            variant="outline" 
+            size="sm" 
+            className="text-xs h-7" 
+            onClick={() => setPaid(total)}
+          >
+            Pay Full Balance ({formatCurrency(total)})
+          </Button>
+        </div>
+      </div>
+      <div className="space-y-1.5">
+        <Label>Payment Method Received</Label>
+        <Select value={method} onValueChange={setMethod}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="Cash">Cash</SelectItem>
+            <SelectItem value="Transfer">Bank Transfer</SelectItem>
+            <SelectItem value="POS">POS</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
       <div className="flex gap-3 pt-2">
         <Button type="button" variant="outline" className="flex-1" onClick={onClose}>Cancel</Button>
-        <Button type="submit" className="flex-1">Save Payment</Button>
+        <Button type="submit" className="flex-1 bg-emerald-700 hover:bg-emerald-800 text-white font-bold">Save Payment</Button>
       </div>
     </form>
   );
@@ -190,20 +246,57 @@ export default function SalesPage() {
   });
 
   const createMut = useMutation({
-    mutationFn: (d: any) => api.post('/sales', { ...d, sector_id: sectorId }),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['sales'] }); toast.success('Sale recorded!'); setOpen(false); },
-    onError: () => toast.error('Failed to record sale'),
+    mutationFn: (d: any) => {
+      const payload: any = {
+        ...d,
+        quantity: d.quantity !== '' && d.quantity !== undefined ? Number(d.quantity) : 1,
+        unit_price: d.unit_price !== '' && d.unit_price !== undefined ? Number(d.unit_price) : 0,
+        total_amount: Number(d.total_amount) || 0,
+        amount_paid: d.amount_paid !== '' && d.amount_paid !== undefined ? Number(d.amount_paid) : 0,
+        customer_id: d.customer_id ? Number(d.customer_id) : null,
+        sector_id: sectorId || 1,
+      };
+      return api.post('/sales', payload);
+    },
+    onSuccess: () => { 
+      qc.invalidateQueries({ queryKey: ['sales'] }); 
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      toast.success('Sale recorded!'); 
+      setOpen(false); 
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to record sale';
+      toast.error(msg);
+    },
   });
 
   const updatePaymentMut = useMutation({
-    mutationFn: (d: any) => api.put(`/sales/${paymentSale?.id}`, d),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['sales'] }); toast.success('Payment updated!'); setPaymentSale(null); },
-    onError: () => toast.error('Failed to update payment'),
+    mutationFn: (d: any) => {
+      const payload: any = {
+        amount_paid: Number(d.amount_paid) || 0,
+        payment_method: d.payment_method,
+      };
+      return api.put(`/sales/${paymentSale?.id}`, payload);
+    },
+    onSuccess: () => { 
+      qc.invalidateQueries({ queryKey: ['sales'] }); 
+      qc.invalidateQueries({ queryKey: ['dashboard'] });
+      toast.success('Payment updated!'); 
+      setPaymentSale(null); 
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to update payment';
+      toast.error(msg);
+    },
   });
 
   const deleteMut = useMutation({
     mutationFn: (id: number) => api.delete(`/sales/${id}`),
     onSuccess: () => { qc.invalidateQueries({ queryKey: ['sales'] }); toast.success('Sale deleted'); },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || 'Failed to delete sale';
+      toast.error(msg);
+    },
   });
 
   const categories = Array.from(new Set(['livestock', 'crops', 'fruits', 'plantation', 'feed', 'other', ...catData.map(c => c.name)]));
@@ -214,13 +307,27 @@ export default function SalesPage() {
     return matchCat && matchSearch;
   });
 
+  const getFarmSalePaid = (s: Sale) => {
+    if (s.payment_method === 'Drawing' || s.payment_method === 'Draw') return 0;
+    if (s.amount_paid !== null && s.amount_paid !== undefined && (s.amount_paid as any) !== '') {
+      return Number(s.amount_paid);
+    }
+    if (s.payment_status === 'pending' || s.payment_method === 'Pending') {
+      return 0;
+    }
+    return Number(s.total_amount || 0);
+  };
+
   const total = filtered.filter(s => s.payment_method !== 'Drawing' && s.payment_method !== 'Draw').reduce((sum, s) => sum + Number(s.total_amount), 0);
-  const cashTotal = filtered.filter(s => s.payment_method === 'Cash').reduce((sum, s) => sum + Number(s.amount_paid || s.total_amount), 0);
-  const transferTotal = filtered.filter(s => s.payment_method === 'Transfer').reduce((sum, s) => sum + Number(s.amount_paid || s.total_amount), 0);
-  const posTotal = filtered.filter(s => s.payment_method === 'POS').reduce((sum, s) => sum + Number(s.amount_paid || s.total_amount), 0);
+  const totalPaidIn = filtered.filter(s => s.payment_method !== 'Drawing' && s.payment_method !== 'Draw').reduce((sum, s) => sum + getFarmSalePaid(s), 0);
   
   // Outstanding is total expected minus what's paid (exclude Drawing)
-  const outstandingTotal = filtered.filter(s => s.payment_method !== 'Drawing' && s.payment_method !== 'Draw' && s.payment_status === 'partial').reduce((sum, s) => sum + (Number(s.total_amount) - Number(s.amount_paid || 0)), 0);
+  const outstandingTotal = filtered.filter(s => s.payment_method !== 'Drawing' && s.payment_method !== 'Draw').reduce((sum, s) => {
+    const paid = getFarmSalePaid(s);
+    return sum + Math.max(0, Number(s.total_amount) - paid);
+  }, 0);
+
+  const totalDrawings = filtered.filter(s => s.payment_method === 'Drawing' || s.payment_method === 'Draw').reduce((sum, s) => sum + Number(s.total_amount), 0);
 
   return (
     <div className="space-y-6">
@@ -243,7 +350,7 @@ export default function SalesPage() {
       
       <Dialog open={!!paymentSale} onOpenChange={(o) => !o && setPaymentSale(null)}>
         <DialogContent className="max-w-md">
-          <DialogHeader><DialogTitle>Log Payment</DialogTitle><DialogDescription>Update the amount paid for this sale.</DialogDescription></DialogHeader>
+          <DialogHeader><DialogTitle>Log Payment & Settle Debt</DialogTitle><DialogDescription>Update the amount paid for this sale.</DialogDescription></DialogHeader>
           {paymentSale && <PaymentForm sale={paymentSale} onSave={d => updatePaymentMut.mutate(d)} onClose={() => setPaymentSale(null)} />}
         </DialogContent>
       </Dialog>
@@ -258,16 +365,20 @@ export default function SalesPage() {
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-muted-foreground text-xs mb-1">Total Paid In</p>
-            <p className="text-sm font-bold mt-1 text-green-600">
-              {formatCurrency(cashTotal + transferTotal + posTotal)}
-            </p>
+            <p className="text-muted-foreground text-xs mb-1">Total Paid In (Cash Collected)</p>
+            <p className="text-xl font-bold text-green-600">{formatCurrency(totalPaidIn)}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-muted-foreground text-xs mb-1">Outstanding Balance</p>
+            <p className="text-muted-foreground text-xs mb-1">Outstanding Debt</p>
             <p className="text-xl font-bold text-orange-500">{formatCurrency(outstandingTotal)}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-muted-foreground text-xs mb-1">Total Drawings</p>
+            <p className="text-xl font-bold text-purple-600">{formatCurrency(totalDrawings)}</p>
           </CardContent>
         </Card>
       </div>
@@ -302,11 +413,16 @@ export default function SalesPage() {
       ) : (
         <div className="space-y-3">
           {filtered.map(s => {
-            const isPartial = s.payment_status === 'partial';
             const isDraw = s.payment_method === 'Drawing' || s.payment_method === 'Draw';
+            const isPending = s.payment_method === 'Pending' || s.payment_status === 'pending';
+            const isPartial = s.payment_status === 'partial';
+            const paidAmount = getFarmSalePaid(s);
+            const totalAmount = Number(s.total_amount || 0);
+            const debtAmount = Math.max(0, totalAmount - paidAmount);
+            const hasDebt = !isDraw && (isPending || isPartial || debtAmount > 0);
             
             return (
-            <Card key={s.id} className={`hover:border-primary/20 transition-colors ${isPartial ? 'border-orange-200' : ''}`}>
+            <Card key={s.id} className={`hover:border-primary/20 transition-colors ${isPending ? 'border-amber-300 bg-amber-50/20 dark:bg-amber-950/10' : isPartial ? 'border-orange-200 bg-orange-50/20' : ''}`}>
               <CardContent className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-start gap-4 flex-1">
                   <div className={`w-12 h-12 shrink-0 rounded-xl flex items-center justify-center ${CAT_COLOR[s.category] ?? CAT_COLOR.other}`}>
@@ -331,17 +447,28 @@ export default function SalesPage() {
                     <div className="flex items-center justify-end gap-1.5 text-[10px] uppercase font-bold mt-0.5">
                       {isDraw ? (
                         <span className="text-purple-600 flex items-center gap-1"><FileMinus className="w-3 h-3"/> DRAWING</span>
+                      ) : isPending ? (
+                        <span className="text-amber-600 dark:text-amber-400 flex items-center gap-1"><Clock className="w-3 h-3"/> PENDING (DEBT)</span>
                       ) : isPartial ? (
-                        <span className="text-orange-500 flex items-center gap-1"><Clock className="w-3 h-3"/> {formatCurrency(s.amount_paid)} PAID</span>
+                        <span className="text-orange-500 flex items-center gap-1"><Clock className="w-3 h-3"/> {formatCurrency(paidAmount)} PAID</span>
                       ) : (
                         <span className="text-green-600 flex items-center gap-1"><CheckCircle className="w-3 h-3"/> PAID</span>
                       )}
-                      <span className="bg-muted px-1.5 py-0.5 rounded text-muted-foreground">{s.payment_method}</span>
+                      <span className={`px-1.5 py-0.5 rounded ${isPending ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-muted text-muted-foreground'}`}>
+                        {s.payment_method}
+                      </span>
                     </div>
+                    {debtAmount > 0 && !isDraw && (
+                      <p className="text-[11px] font-bold text-amber-600 dark:text-amber-400 mt-0.5">
+                        Owes: {formatCurrency(debtAmount)}
+                      </p>
+                    )}
                   </div>
                   <div className="flex flex-col gap-1.5 shrink-0">
-                    {isPartial && !isDraw && (
-                      <Button size="sm" onClick={() => setPaymentSale(s)} className="h-7 text-[10px] bg-orange-100 text-orange-700 hover:bg-orange-200 hover:text-orange-800" variant="secondary">Log Payment</Button>
+                    {hasDebt && (
+                      <Button size="sm" onClick={() => setPaymentSale(s)} className="h-7 text-[10px] font-bold bg-amber-500 hover:bg-amber-600 text-white shadow-xs" variant="default">
+                        Log Payment
+                      </Button>
                     )}
                     <Button size="sm" variant="outline" className="h-7 w-8 px-0" onClick={() => printReceipt(s)} title="Print Receipt"><Printer className="w-4 h-4" /></Button>
                     <Button size="sm" variant="outline" className="h-7 w-8 px-0 text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => { if (confirm('Delete this record?')) deleteMut.mutate(s.id); }} title="Delete Record"><Trash2 className="w-4 h-4" /></Button>

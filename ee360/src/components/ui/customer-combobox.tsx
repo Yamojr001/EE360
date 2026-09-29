@@ -50,8 +50,8 @@ export function CustomerCombobox({ value, onChange, sectorId, placeholder = "Sel
   const [phone, setPhone] = useState('');
 
   const { data: customers = [] } = useQuery<Customer[]>({
-    queryKey: ['customers', sectorId],
-    queryFn: () => api.get('/customers', { params: { sector_id: sectorId } }).then(r => r.data),
+    queryKey: ['customers'],
+    queryFn: () => api.get('/customers').then(r => r.data),
   });
 
   const createMut = useMutation({
@@ -95,15 +95,29 @@ export function CustomerCombobox({ value, onChange, sectorId, placeholder = "Sel
               onValueChange={setSearch} 
             />
             <CommandList>
-              <CommandEmpty className="p-2">
+              <CommandEmpty className="p-2 space-y-1">
                 {search.trim() ? (
-                  <Button 
-                    variant="ghost" 
-                    className="w-full justify-start text-primary" 
-                    onClick={() => { setOpen(false); setAddOpen(true); }}
-                  >
-                    <Plus className="mr-2 h-4 w-4" /> Add "{search}" as customer
-                  </Button>
+                  <div className="space-y-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="w-full justify-start text-primary text-xs" 
+                      onClick={() => { 
+                        onChange(search.trim()); 
+                        setOpen(false); 
+                      }}
+                    >
+                      <Plus className="mr-2 h-3.5 w-3.5" /> Use "{search.trim()}" (Auto-save)
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      className="w-full justify-start text-xs text-muted-foreground" 
+                      onClick={() => { setOpen(false); setAddOpen(true); }}
+                    >
+                      + Add with full contact info
+                    </Button>
+                  </div>
                 ) : (
                   <p className="text-sm text-center text-muted-foreground py-4">Type to search or add</p>
                 )}
@@ -118,25 +132,41 @@ export function CustomerCombobox({ value, onChange, sectorId, placeholder = "Sel
                       setOpen(false);
                     }}
                   >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        value === customer.name ? "opacity-100" : "opacity-0"
+                    <div className="flex items-center justify-between w-full">
+                      <div className="flex items-center">
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4 shrink-0",
+                            value === customer.name ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        <span className="truncate">{customer.name}</span>
+                      </div>
+                      {customer.balance !== undefined && customer.balance !== 0 && (
+                        <span className={cn(
+                          "text-[10px] font-bold px-1.5 py-0.5 rounded ml-2 shrink-0",
+                          customer.balance > 0 ? "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300" : "bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300"
+                        )}>
+                          {customer.balance > 0 ? `+₦${Number(customer.balance).toLocaleString()}` : `-₦${Math.abs(Number(customer.balance)).toLocaleString()}`}
+                        </span>
                       )}
-                    />
-                    {customer.name}
+                    </div>
                   </CommandItem>
                 ))}
               </CommandGroup>
             </CommandList>
             {search.trim() && !exactMatch && (
-              <div className="p-1 border-t">
+              <div className="p-1 border-t flex flex-col gap-1">
                 <Button 
                   variant="ghost" 
-                  className="w-full justify-start text-primary text-sm h-8" 
-                  onClick={() => { setOpen(false); setAddOpen(true); }}
+                  size="sm"
+                  className="w-full justify-start text-primary text-xs h-7" 
+                  onClick={() => { 
+                    onChange(search.trim()); 
+                    setOpen(false); 
+                  }}
                 >
-                  <Plus className="mr-2 h-3.5 w-3.5" /> Create new: {search}
+                  <Plus className="mr-2 h-3.5 w-3.5" /> Quick Use "{search.trim()}"
                 </Button>
               </div>
             )}

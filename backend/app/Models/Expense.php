@@ -14,7 +14,7 @@ class Expense extends Model
     use HasFactory;
 
     protected $fillable = [
-        'date', 'category', 'description', 'amount', 'vendor', 'notes',
+        'date', 'category', 'description', 'amount', 'vendor', 'sector_id', 'notes',
     ];
 
     protected $casts = [

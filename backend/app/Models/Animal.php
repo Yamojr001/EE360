@@ -15,7 +15,7 @@ class Animal extends Model
 
     protected $fillable = [
         'type', 'tag_id', 'breed', 'age_months', 'quantity',
-        'status', 'purchase_price', 'current_value', 'notes',
+        'status', 'purchase_price', 'current_value', 'sector_id', 'notes',
     ];
 
     protected $casts = [

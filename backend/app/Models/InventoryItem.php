@@ -17,7 +17,7 @@ class InventoryItem extends Model
 
     protected $fillable = [
         'name', 'category', 'quantity', 'unit', 'units_per_package',
-        'unit_cost', 'min_stock_level', 'supplier', 'notes',
+        'unit_cost', 'min_stock_level', 'supplier', 'sector_id', 'notes',
     ];
 
     protected $casts = [
